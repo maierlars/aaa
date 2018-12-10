@@ -125,14 +125,19 @@ class Control:
 
 class AgencyLogList(Control):
 
+    FILTER_NONE = 0
+    FILTER_GREP = 1
+    FILTER_REGEX = 2
+
     def __init__(self, app, rect):
         super().__init__(app, rect)
         self.app = app
         self.top = 0
         self.highlight = 0
-        self.filterStr = ""
+        self.filterStr = None
         # list contains all displayed log indexes
         self.list = None
+        self.filterType = AgencyLogList.FILTER_NONE
 
     def layout(self, rect):
         super().layout(rect)
@@ -146,7 +151,7 @@ class AgencyLogList(Control):
 
         maxPos = getListLen() - 1
 
-        maxTop = max(0, maxPos - self.rect.height)
+        maxTop = max(0, maxPos - self.rect.height + 1)
 
         if not self.highlight == None:
             if self.highlight > maxPos:
@@ -204,8 +209,7 @@ class AgencyLogList(Control):
             self.app.stdscr.clrtoeol()
 
     def filter(self, regexStr):
-        self.list = None
-        self.filterStr = regexStr
+        self.reset()
 
         if not regexStr:
             return
@@ -213,6 +217,7 @@ class AgencyLogList(Control):
         # try to compile the regex
         pattern = re.compile(regexStr)
 
+        self.filterType = AgencyLogList.FILTER_REGEX
         self.top = 0
         self.list = []
         for i, e in enumerate(self.app.log):
@@ -225,17 +230,21 @@ class AgencyLogList(Control):
                 self.list.append(i)
 
     def grep(self, string):
-        self.list = None
-        self.filterStr = string
-
+        self.reset()
         if not string:
             return
 
+        self.filterType = AgencyLogList.FILTER_GREP
         self.top = 0
         self.list = []
         for i, e in enumerate(self.app.log):
             if string in json.dumps(e):
                 self.list.append(i)
+
+    def reset(self):
+        self.list = None
+        self.filterStr = None
+        self.filterType = AgencyLogList.FILTER_NONE
 
     def input(self, c):
         if c == curses.KEY_UP:
@@ -249,13 +258,17 @@ class AgencyLogList(Control):
             self.highlight -= self.rect.height
             self.top -= self.rect.height
         elif c == ord('f'):
-            regexStr = self.app.userString(label = "Regular Search Expr", default = self.filterStr, prompt = "> ")
+            regexStr = self.app.userStringLine(label = "Regular Search Expr", default = self.filterStr, prompt = "> ")
             if not regexStr == None:
                 self.filter(regexStr)
         elif c == ord('g'):
-            string = self.app.userString(label = "Global Search Expr", default = self.filterStr, prompt = "> ")
+            string = self.app.userStringLine(label = "Global Search Expr", default = self.filterStr, prompt = "> ")
             if not string == None:
                 self.grep(string)
+        elif c == ord('R'):
+            yesNo = self.app.userStringLine(label = "Reset all filters", prompt = "[Y/n] ")
+            if yesNo == "Y":
+                self.reset()
 
     # Returns the index of the selected log entry.
     #   This value is always with respect to the app.log array.
@@ -334,7 +347,7 @@ class LineView(Control):
                 self.app.stdscr.addnstr(y, x, line, maxlen, attr)
             else:
                 self.app.stdscr.move(y, x)
-                self.app.stdscr.clrtoeol()
+            self.app.stdscr.clrtoeol()
 
             y += 1
             i += 1
@@ -410,7 +423,7 @@ class AgencyStoreView(LineView):
 
     def input(self, c):
         if c == ord('p'):
-            pathstr = self.app.userString(prompt = "Path: ", default=self.head, complete=self.completePath)
+            pathstr = self.app.userStringLine(prompt = "Path: ", default=self.head, complete=self.completePath)
             self.path = agency.AgencyStore.parsePath(pathstr)
         else:
             super().input(c)
@@ -499,7 +512,7 @@ class App:
         if c == curses.KEY_RESIZE:
             self.resize()
         elif c == ord(':'):
-            cmdline = self.userString(prompt = ":").split()
+            cmdline = self.userStringLine(prompt = ":").split()
 
             if len(cmdline) > 0:
                 self.execCmd(cmdline)
@@ -595,8 +608,8 @@ class App:
     # Complete is a callback function that is called with the already
     #   provided string and returns either an array of strings containing
     #   possible completions or a string containing the completed text
-    def userString(self, label = None, complete = None, default = "", prompt = "> "):
-        user = default
+    def userStringLine(self, label = None, complete = None, default = None, prompt = "> "):
+        user = default if not default == None else ""
         hints = []
 
         curses.curs_set(1)

@@ -23,4 +23,4 @@ When in `store` mode with focus on the view side, use `p` to modify the displaye
 of the agency. Use `TAB` to auto complete your input.
 
 When in the left hand side, use `f` to enter a regular expression to filter entries by requested paths.
-Use `g` to do a basic grep like search on the log entries.
+Use `g` to do a basic grep like search on the log entries. Reset filters via `R`.
