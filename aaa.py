@@ -219,7 +219,7 @@ class AgencyLogList(Control):
         for i, e in enumerate(self.app.log):
             match = False
             for path in e["request"]:
-                if pattern.match(path):
+                if not pattern.search(path) == None:
                     match = True
                     break
             if match:
