@@ -277,7 +277,10 @@ class LineView(Control):
             self.top -= 1
         elif c == curses.KEY_DOWN:
             self.top += 1
-
+        elif c == curses.KEY_NPAGE:
+            self.top += self.rect.height
+        elif c == curses.KEY_PPAGE:
+            self.top -= self.rect.height
 
     def head(self, headline):
         self.head = headline
