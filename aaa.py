@@ -330,11 +330,11 @@ class LineView(Control):
                 attr = curses.A_STANDOUT
 
             if i < len(self.lines):
-                line = self.lines[i].ljust(maxlen)
-                self.app.stdscr.addnstr(y, x, line, maxlen, attr)
+                line = self.lines[i]
+                self.app.printStyleLine(y, x, line, maxlen, attr)
             else:
                 self.app.stdscr.move(y, x)
-                self.app.stdscr.clrtoeol()
+            self.app.stdscr.clrtoeol()
 
             y += 1
             i += 1
@@ -372,8 +372,22 @@ class AgencyLogView(LineView):
             entry = self.app.log[self.idx]
             self.head = entry['_key']
             self.jsonLines(entry)
+            self.highlightLines()
 
         super().update()
+
+    def highlightLines(self):
+        def intersperse(lst, item):
+            result = [item] * (len(lst) * 2 - 1)
+            result[0::2] = lst
+            return result
+
+        filt = self.app.list.filterStr
+        if filt:
+            for i, line in enumerate(self.lines):
+                part = intersperse(line.split(filt), (curses.A_BOLD, filt))
+                self.lines[i] = part
+
 
     def set(self, idx):
         self.idx = idx
@@ -656,6 +670,21 @@ class App:
                     user += chr(c)
         finally:
             curses.curs_set(0)
+
+    def printStyleLine(self, y, x, line, maxlen, defaultAttr = 0):
+        if isinstance(line, str):
+            line = [line]
+
+        for p in line:
+            if isinstance(p, str):
+                p = (defaultAttr, p)
+            strlen = len(p[1])
+            self.stdscr.addnstr(y, x, p[1], maxlen, p[0])
+            maxlen -= strlen
+            if maxlen <= 0:
+                break
+            x += strlen
+
 
 
 class ColorPairs:
