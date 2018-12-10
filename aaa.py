@@ -130,7 +130,7 @@ class AgencyLogList(Control):
         self.app = app
         self.top = 0
         self.highlight = 0
-        self.filter = ""
+        self.filterStr = ""
         # list contains all displayed log indexes
         self.list = None
 
@@ -148,17 +148,18 @@ class AgencyLogList(Control):
 
         maxTop = max(0, maxPos - self.rect.height)
 
-        if self.highlight > maxPos:
-            self.highlight = maxPos
-        if self.highlight < 0:
-            self.highlight = 0
+        if not self.highlight == None:
+            if self.highlight > maxPos:
+                self.highlight = maxPos
+            if self.highlight < 0:
+                self.highlight = 0
 
-        if self.highlight < self.top:
-            self.top = self.highlight
+            if self.highlight < self.top:
+                self.top = self.highlight
 
-        bottom = self.top + self.rect.height - 1
-        if self.highlight >= bottom:
-            self.top = self.highlight - self.rect.height + 1
+            bottom = self.top + self.rect.height - 1
+            if self.highlight >= bottom:
+                self.top = self.highlight - self.rect.height + 1
 
         if self.top > maxTop:
             self.top = maxTop
@@ -192,7 +193,7 @@ class AgencyLogList(Control):
                 ent = self.app.log[idx]
 
                 text = " ".join(x for x in ent["request"])
-                msg = "{}/{}: [{!s}|{!s}] {!s}: {}".format(i, self.top, ent["timestamp"], ent["term"], ent["_id"], text).ljust(self.rect.width)
+                msg = "[{!s}|{!s}] {!s}: {}".format(ent["timestamp"], ent["term"], ent["_id"], text).ljust(self.rect.width)
 
                 attr = 0
                 if idx == self.getSelectedIndex():
@@ -201,6 +202,40 @@ class AgencyLogList(Control):
             else:
                 self.app.stdscr.move(y, x)
             self.app.stdscr.clrtoeol()
+
+    def filter(self, regexStr):
+        self.list = None
+        self.filterStr = regexStr
+
+        if not regexStr:
+            return
+
+        # try to compile the regex
+        pattern = re.compile(regexStr)
+
+        self.top = 0
+        self.list = []
+        for i, e in enumerate(self.app.log):
+            match = False
+            for path in e["request"]:
+                if pattern.match(path):
+                    match = True
+                    break
+            if match:
+                self.list.append(i)
+
+    def grep(self, string):
+        self.list = None
+        self.filterStr = string
+
+        if not string:
+            return
+
+        self.top = 0
+        self.list = []
+        for i, e in enumerate(self.app.log):
+            if string in json.dumps(e):
+                self.list.append(i)
 
     def input(self, c):
         if c == curses.KEY_UP:
@@ -214,28 +249,13 @@ class AgencyLogList(Control):
             self.highlight -= self.rect.height
             self.top -= self.rect.height
         elif c == ord('f'):
-            regexStr = self.app.userString(label = "Regular Search Expr", default = self.filter, prompt = "> ")
-            if regexStr == None:    # user aborted
-                return
-            self.list = None
-            self.filter = regexStr
-
-            if not regexStr:
-                return
-
-            # try to compile the regex
-            pattern = re.compile(regexStr)
-
-            self.top = 0
-            self.list = []
-            for i, e in enumerate(self.app.log):
-                match = False
-                for path in e["request"]:
-                    if pattern.match(path):
-                        match = True
-                        break
-                if match:
-                    self.list.append(i)
+            regexStr = self.app.userString(label = "Regular Search Expr", default = self.filterStr, prompt = "> ")
+            if not regexStr == None:
+                self.filter(regexStr)
+        elif c == ord('g'):
+            string = self.app.userString(label = "Global Search Expr", default = self.filterStr, prompt = "> ")
+            if not string == None:
+                self.grep(string)
 
     # Returns the index of the selected log entry.
     #   This value is always with respect to the app.log array.
@@ -455,6 +475,7 @@ class App:
         self.split = LayoutColumns(self, self.rect, [self.list, self.switch], [4,6])
 
         self.focus = self.list
+        self.debug = False
 
     def loadLogFromFile(self, filename):
         with open(filename) as f:
@@ -507,6 +528,8 @@ class App:
                 self.userInput()
             except Exception as err:
                 self.displayMsg("Error: {}".format(err), ColorFormat.CF_ERROR)
+                if self.debug:
+                    raise err
 
 
     def execCmd(self, argv):
@@ -515,6 +538,8 @@ class App:
 
         if cmd == "quit" or cmd == "q":
             self.stop = True
+        elif cmd == "debug":
+            self.debug = True
         elif cmd == "split":
             if len(argv) != 3:
                 raise ValueError("Split requires two integer arguments")
@@ -535,7 +560,7 @@ class App:
         elif cmd == "time":
             self.displayMsg("It is now {}".format(datetime.datetime.now().time()), 0)
         elif cmd == "help":
-            self.displayMsg("Available commands: quit time error help")
+            self.displayMsg("Nobody can help you now - except maybe README.md")
         elif cmd == "error":
             raise Exception("This is a long error message with \n line breaks")
         else:
