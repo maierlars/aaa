@@ -22,3 +22,4 @@ To change the view mode either use `F1/F2` or `:view <mode>`.
 When in `store` mode with focus on the view side, use `p` to modify the displayed path
 of the agency. Use `TAB` to auto complete your input.
 
+When in the left hand side, use `f` to enter a regular expression to filter entries by requested paths.

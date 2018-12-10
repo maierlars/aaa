@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys
 import json
@@ -51,6 +51,7 @@ class LayoutSwitch(Layout):
         self.subs[self.idx].input(c)
 
     def update(self):
+        super().update()
         self.subs[self.idx].update()
 
     def select(self, idx):
@@ -69,6 +70,7 @@ class LayoutColumns(Layout):
         self.layout(self.rect)
 
     def update(self):
+        super().update()
         for x in self.colums:
             x.update()
 
@@ -129,51 +131,75 @@ class AgencyLogList(Control):
         self.top = 0
         self.highlight = 0
         self.filter = ""
-        self.regex = None
-        self.filterChanged = False
-        self.list = []
+        # list contains all displayed log indexes
+        self.list = None
 
     def layout(self, rect):
         super().layout(rect)
 
     def update(self):
         # Update top
+        def getListLen():
+            if not self.list == None:
+                return len(self.list)
+            return len(self.app.log)
+
+        maxPos = getListLen() - 1
+
+        maxTop = max(0, maxPos - self.rect.height)
+
+        if self.highlight > maxPos:
+            self.highlight = maxPos
+        if self.highlight < 0:
+            self.highlight = 0
+
         if self.highlight < self.top:
             self.top = self.highlight
 
         bottom = self.top + self.rect.height - 1
-
         if self.highlight >= bottom:
             self.top = self.highlight - self.rect.height + 1
 
-        if self.top < 0:
-            self.top = 0
-
-        maxTop = len(self.app.log) - self.rect.height
         if self.top > maxTop:
             self.top = maxTop
+
+        if self.top < 0:
+            self.top = 0
 
         if self.rect.width == 0:
             return
 
         maxlen = self.rect.width
 
+        def getIndex(self, i):
+            idx = self.top + i
+            if not self.list == None:
+                if idx >= len(self.list):
+                    return None
+                idx = self.list[idx]
+
+            if idx >= len(self.app.log):
+                return None
+            return idx
+
         # Paint all lines from top upto height many
         for i in range(0, self.rect.height):
-            idx = self.top + i
-            if idx >= len(self.app.log):
-                break
+            idx = getIndex(self, i)
+
             y = self.rect.y + i
             x = self.rect.x
-            ent = self.app.log[idx]
+            if not idx == None:
+                ent = self.app.log[idx]
 
-            text = " ".join(x for x in ent["request"])
-            msg = "[{0!s}|{1!s}] {2!s}: {3}".format(ent["timestamp"], ent["term"], ent["_id"], text).ljust(self.rect.width)
+                text = " ".join(x for x in ent["request"])
+                msg = "{}/{}: [{!s}|{!s}] {!s}: {}".format(i, self.top, ent["timestamp"], ent["term"], ent["_id"], text).ljust(self.rect.width)
 
-            attr = 0
-            if idx == self.highlight:
-                attr |= curses.A_STANDOUT
-            self.app.stdscr.addnstr(y, x, msg, maxlen, attr)
+                attr = 0
+                if idx == self.getSelectedIndex():
+                    attr |= curses.A_STANDOUT
+                self.app.stdscr.addnstr(y, x, msg, maxlen, attr)
+            else:
+                self.app.stdscr.move(y, x)
             self.app.stdscr.clrtoeol()
 
     def input(self, c):
@@ -188,16 +214,38 @@ class AgencyLogList(Control):
             self.highlight -= self.rect.height
             self.top -= self.rect.height
         elif c == ord('f'):
-            regex = self.app.userString(label = "Regular Search Expr", default = self.filter, prompt = "> ")
-            # try to compile the regex
-            self.filter = regex
-            self.regex = re.compile(regex)
-            raise NotImplementedError("Filters are not yet implemented")
+            regexStr = self.app.userString(label = "Regular Search Expr", default = self.filter, prompt = "> ")
+            if regexStr == None:    # user aborted
+                return
+            self.list = None
+            self.filter = regexStr
 
-        if self.highlight < 0:
-            self.highlight = 0
-        elif self.highlight >= len(self.app.log):
-            self.highlight = len(self.app.log) - 1
+            if not regexStr:
+                return
+
+            # try to compile the regex
+            pattern = re.compile(regexStr)
+
+            self.top = 0
+            self.list = []
+            for i, e in enumerate(self.app.log):
+                match = False
+                for path in e["request"]:
+                    if pattern.match(path):
+                        match = True
+                        break
+                if match:
+                    self.list.append(i)
+
+    # Returns the index of the selected log entry.
+    #   This value is always with respect to the app.log array.
+    #   You do not need to worry about filtering
+    def getSelectedIndex(self):
+        if not self.list == None:
+            if self.highlight < len(self.list):
+                return self.list[self.highlight]
+            return None
+        return self.highlight
 
 class AgencyLogView(Control):
 
@@ -298,9 +346,9 @@ class AgencyLogView(LineView):
         self.head = None
 
     def update(self):
-        self.idx = self.app.list.highlight
+        self.idx = self.app.list.getSelectedIndex()
 
-        if self.idx < len(self.app.log):
+        if not self.idx == None and self.idx < len(self.app.log):
             entry = self.app.log[self.idx]
             self.head = entry['_key']
             self.jsonLines(entry)
@@ -322,7 +370,10 @@ class AgencyStoreView(LineView):
         super().layout(rect)
 
     def updateStore(self):
-        idx = self.app.list.highlight
+        idx = self.app.list.getSelectedIndex()
+        if idx == None:
+            return
+
         if self.lastIdx == idx:
             return
         self.lastIdx = idx
@@ -430,7 +481,7 @@ class App:
             cmdline = self.userString(prompt = ":").split()
 
             if len(cmdline) > 0:
-                self.exec(cmdline)
+                self.execCmd(cmdline)
         elif c == curses.KEY_RIGHT:
             self.focus = self.switch
         elif c == curses.KEY_LEFT:
@@ -458,7 +509,7 @@ class App:
                 self.displayMsg("Error: {}".format(err), ColorFormat.CF_ERROR)
 
 
-    def exec(self, argv):
+    def execCmd(self, argv):
 
         cmd = argv[0]
 
@@ -514,9 +565,6 @@ class App:
                 self.update()
                 self.input(c)
                 break
-
-
-
 
     # Allows the user to type a string. Returns non when escape was pressed.
     # Complete is a callback function that is called with the already
