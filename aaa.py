@@ -133,6 +133,7 @@ class AgencyLogList(Control):
         self.filterStr = ""
         # list contains all displayed log indexes
         self.list = None
+        self.filterHistory = []
 
     def layout(self, rect):
         super().layout(rect)
@@ -249,12 +250,16 @@ class AgencyLogList(Control):
             self.highlight -= self.rect.height
             self.top -= self.rect.height
         elif c == ord('f'):
-            regexStr = self.app.userString(label = "Regular Search Expr", default = self.filterStr, prompt = "> ")
+            regexStr = self.app.userString(label = "Regular Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
             if not regexStr == None:
+                if regexStr:
+                    self.filterHistory.append(regexStr)
                 self.filter(regexStr)
         elif c == ord('g'):
-            string = self.app.userString(label = "Global Search Expr", default = self.filterStr, prompt = "> ")
+            string = self.app.userString(label = "Global Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
             if not string == None:
+                if string:
+                    self.filterHistory.append(string)
                 self.grep(string)
 
     # Returns the index of the selected log entry.
@@ -609,9 +614,10 @@ class App:
     # Complete is a callback function that is called with the already
     #   provided string and returns either an array of strings containing
     #   possible completions or a string containing the completed text
-    def userString(self, label = None, complete = None, default = "", prompt = "> "):
+    def userString(self, label = None, complete = None, default = "", prompt = "> ", history = []):
         user = default
         hints = []
+        historyIdx = 0
 
         curses.curs_set(1)
         try:
@@ -657,6 +663,18 @@ class App:
                 elif c == ord('\n') or c == ord('\r'):
                     self.update()
                     return user
+                elif c == curses.KEY_UP:
+                    historyIdx = max(historyIdx - 1, -len(history))
+                    if not historyIdx == 0:
+                        user = history[historyIdx]
+                    else:
+                        user = ""
+                elif c == curses.KEY_DOWN:
+                    historyIdx = min(historyIdx + 1, 0)
+                    if not historyIdx == 0:
+                        user = history[historyIdx]
+                    else:
+                        user = ""
                 elif c == ord('\t'):
                     # tabulator, time for auto complete
                     if not complete == None:
