@@ -200,6 +200,8 @@ class AgencyLogList(Control):
                 if idx == self.getSelectedIndex():
                     attr |= curses.A_STANDOUT
                 self.app.stdscr.addnstr(y, x, msg, maxlen, attr)
+            elif i == 0:
+                self.app.stdscr.addnstr(y, x, "Nothing to display", maxlen, curses.A_BOLD | ColorFormat.CF_ERROR)
             else:
                 self.app.stdscr.move(y, x)
             self.app.stdscr.clrtoeol()
