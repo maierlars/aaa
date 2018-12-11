@@ -6,6 +6,7 @@ import curses, curses.ascii
 import textwrap
 import datetime
 import re
+from time import sleep
 
 import agency
 
@@ -143,7 +144,7 @@ class AgencyLogList(Control):
     def layout(self, rect):
         super().layout(rect)
 
-    def __getIndex(self, i):
+    def __getIndexRelative(self, i):
         idx = self.top + i
         if not self.list == None:
             if idx >= len(self.list):
@@ -153,6 +154,17 @@ class AgencyLogList(Control):
         if idx >= len(self.app.log):
             return None
         return idx
+
+    def __getIndex(self, i):
+        idx = i
+        if not self.list == None:
+            if idx >= len(self.list):
+                return None
+            idx = self.list[idx]
+        if idx >= len(self.app.log):
+            return None
+        return idx
+
 
     def __getListLen(self):
         if not self.list == None:
@@ -188,11 +200,9 @@ class AgencyLogList(Control):
 
         maxlen = self.rect.width
 
-
-
         # Paint all lines from top upto height many
         for i in range(0, self.rect.height):
-            idx = self.__getIndex(i)
+            idx = self.__getIndexRelative(i)
 
             y = self.rect.y + i
             x = self.rect.x
@@ -212,40 +222,47 @@ class AgencyLogList(Control):
                 self.app.stdscr.move(y, x)
             self.app.stdscr.clrtoeol()
 
-    def filter(self, regexStr):
+    def filter(self, predicate):
+        lastHighlighted = self.__getIndex(self.highlight)
+        self.list = []
+        if lastHighlighted == None:
+            lastHighlighted = 0
+
+        self.highlight = 0
+        for i, e in enumerate(self.app.log):
+            match = predicate(e)
+
+            if match:
+                if i <= lastHighlighted:
+                    self.highlight = len(self.list)
+                self.list.append(i)
+
+    def regexp(self, regexStr):
         self.reset()
 
         if not regexStr:
             return
 
         # try to compile the regex
-        pattern = re.compile(regexStr)
-
         self.filterStr = regexStr
+
+        pattern = re.compile(regexStr)
+        predicate = lambda e: any(not pattern.search(path) == None for path in e["request"])
+
         self.filterType = AgencyLogList.FILTER_REGEX
-        self.top = 0
-        self.list = []
-        for i, e in enumerate(self.app.log):
-            match = False
-            for path in e["request"]:
-                if not pattern.search(path) == None:
-                    match = True
-                    break
-            if match:
-                self.list.append(i)
+        self.filter(predicate)
 
     def grep(self, string):
         self.reset()
         if not string:
             return
 
+        predicate = lambda e: string in json.dumps(e)
+
         self.filterStr = string
         self.filterType = AgencyLogList.FILTER_GREP
-        self.top = 0
-        self.list = []
-        for i, e in enumerate(self.app.log):
-            if string in json.dumps(e):
-                self.list.append(i)
+        self.filter(predicate)
+
 
     def reset(self):
         self.list = None
@@ -272,7 +289,7 @@ class AgencyLogList(Control):
             if not regexStr == None:
                 if regexStr:
                     self.filterHistory.append(regexStr)
-                self.filter(regexStr)
+                self.regexp(regexStr)
         elif c == ord('g'):
             string = self.app.userStringLine(label = "Global Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
             if not string == None:
@@ -293,34 +310,6 @@ class AgencyLogList(Control):
                 return self.list[self.highlight]
             return None
         return self.highlight
-
-# class AgencyLogView(Control):
-
-#     def __init__(self, app, rect):
-#         super().__init__(app, rect)
-#         self.idx = None
-
-#     def update(self):
-#         if self.rect.width == 0:
-#             return
-
-#         # format in json
-#         if not self.idx == None:
-#             lines = json.dumps(self.app.log[self.idx], indent=4, separators=(',', ': ')).splitlines()
-#             x = self.rect.x
-
-#             for i in range(0, self.rect.height):
-#                 y = self.rect.y + i
-
-#                 if i < len(lines):
-#                     self.app.stdscr.addnstr(y, x, lines[i], self.rect.width)
-#                 else:
-#                     self.app.stdscr.move(y, x)
-#                     self.app.stdscr.clrtoeol()
-
-#     def select(self, idx):
-#         self.idx = idx
-
 
 class LineView(Control):
     def __init__(self, app, rect):
@@ -591,6 +580,10 @@ class App:
             self.stop = True
         elif cmd == "debug":
             self.debug = True
+        elif cmd == "progress":
+            for i in range(0, 500):
+                self.showProgress(i / 500, "{}/500".format(i), "Test Progress")
+                sleep(0.1)
         elif cmd == "split":
             if len(argv) != 3:
                 raise ValueError("Split requires two integer arguments")
@@ -737,7 +730,29 @@ class App:
                 break
             x += strlen
 
+    def showProgress(self, progress, msg, label = None):
+        # clamp progress into [0, 1]
+        progress = max(0.0, min(1.0, progress))
 
+        # If label is set and we have more than one line of space
+        # Display the label left aligned.
+        # Then display a progress bar, that contains msg string
+        # and is highlighted for the percent part
+        if self.rect.height == 0:
+            return
+
+        maxlen = self.rect.width - 1
+
+        if self.rect.height > 1 and not label == None:
+            self.stdscr.addnstr(self.rect.height - 2, 0, label.ljust(maxlen), maxlen, curses.A_STANDOUT)
+
+        donelen = int(maxlen * progress)
+        string = msg.ljust(maxlen)
+
+        self.stdscr.addnstr(self.rect.height - 1, 0, string, donelen, curses.A_STANDOUT)
+        self.stdscr.addnstr(self.rect.height - 1, donelen, string[donelen:], maxlen - donelen, 0)
+
+        self.stdscr.refresh()
 
 class ColorPairs:
     CP_RED_WHITE = 1
