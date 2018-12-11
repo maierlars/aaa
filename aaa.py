@@ -220,7 +220,7 @@ class AgencyLogList(Control):
         # try to compile the regex
         pattern = re.compile(regexStr)
 
-        self.filterStr = string
+        self.filterStr = regexStr
         self.filterType = AgencyLogList.FILTER_REGEX
         self.top = 0
         self.list = []
