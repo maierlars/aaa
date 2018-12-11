@@ -644,9 +644,36 @@ class App:
         hints = []
         historyIdx = 0
 
+        cursorIndex = len(user)
+        userDisplayIndex = 0
+
         curses.curs_set(1)
         try:
             while True:
+
+                # Validate userDisplayIndex and cursorIndex
+                #   Make sure we have at least one char at the end to place the cursor
+                #   after the last char of the user input.
+                #   The userDisplayIndex should be move such that the cursorIndex is visible
+                if cursorIndex < 0:
+                    cursorIndex = 0
+
+                if cursorIndex < userDisplayIndex:
+                    userDisplayIndex = cursorIndex
+
+                visibleLength = self.rect.width - len(prompt)
+                if visibleLength < 0:
+                    visibleLength = 0
+
+                if cursorIndex > len(user):
+                    cursorIndex = len(user)
+
+                if cursorIndex - userDisplayIndex > visibleLength:
+                    userDisplayIndex = cursorIndex - visibleLength
+
+                cursorPosY = len(prompt) + cursorIndex - userDisplayIndex
+                if cursorPosY >= self.rect.width:
+                    cursorPosY = None
 
                 height = 1
                 if not label == None:
@@ -657,7 +684,7 @@ class App:
                 else:
                     height += len(hints)
 
-                maxlen = self.rect.width - 1
+                maxlen = self.rect.width
                 y = self.rect.y + self.rect.height - height
                 x = self.rect.x
 
@@ -675,31 +702,47 @@ class App:
                     self.stdscr.addnstr(y, x, h.ljust(maxlen), maxlen, curses.A_STANDOUT)
                     y += 1
 
-                msg = (prompt + user[-maxlen+2:])
+                msg = (prompt + user[userDisplayIndex:])
                 self.stdscr.addnstr(y, x, msg, maxlen)
                 self.stdscr.clrtoeol()
+
+                if not cursorPosY == None:
+                    self.stdscr.move(y, self.rect.y + cursorPosY)
 
                 c = self.stdscr.getch()
                 if c == curses.KEY_RESIZE:
                     self.resize()
                     self.update()
-                elif c == curses.KEY_BACKSPACE or c == curses.KEY_LEFT or c == curses.KEY_DC or c == curses.ascii.DEL:
-                    user = user[:-1]
+                elif c == curses.KEY_DC or c == curses.ascii.DEL:
+                    if not cursorIndex == len(user):
+                        user = user[:cursorIndex] + user[cursorIndex+1:]
+                elif c == curses.KEY_BACKSPACE:
+                    if not cursorIndex == 0:
+                        user = user[:cursorIndex-1] + user[cursorIndex:]
+                        cursorIndex -= 1
                 elif c == ord('\n') or c == ord('\r'):
                     self.update()
                     return user
+                elif c == curses.KEY_LEFT:
+                    cursorIndex -= 1
+                elif c == curses.KEY_RIGHT:
+                    cursorIndex += 1
+                elif c == curses.KEY_HOME:
+                    cursorIndex = 0
+                elif c == curses.KEY_END:
+                    cursorIndex = len(user)
                 elif c == curses.KEY_UP:
                     historyIdx = max(historyIdx - 1, -len(history))
                     if not historyIdx == 0:
                         user = history[historyIdx]
+                        cursorIndex = len(user)
                     else:
                         user = ""
-                elif c == curses.KEY_HOME:
-                    user = ""
                 elif c == curses.KEY_DOWN:
                     historyIdx = min(historyIdx + 1, 0)
                     if not historyIdx == 0:
                         user = history[historyIdx]
+                        cursorIndex = len(user)
                     else:
                         user = ""
                 elif c == ord('\t'):
@@ -712,7 +755,8 @@ class App:
                         elif isinstance(hint, str):
                             user = hint
                 elif not curses.has_key(c):
-                    user += chr(c)
+                    user = user[:cursorIndex] + chr(c) + user[cursorIndex:]
+                    cursorIndex += 1
         finally:
             curses.curs_set(0)
 
