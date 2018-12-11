@@ -143,15 +143,25 @@ class AgencyLogList(Control):
     def layout(self, rect):
         super().layout(rect)
 
+    def __getIndex(self, i):
+        idx = self.top + i
+        if not self.list == None:
+            if idx >= len(self.list):
+                return None
+            idx = self.list[idx]
+
+        if idx >= len(self.app.log):
+            return None
+        return idx
+
+    def __getListLen(self):
+        if not self.list == None:
+            return len(self.list)
+        return len(self.app.log)
+
     def update(self):
         # Update top
-        def getListLen():
-            if not self.list == None:
-                return len(self.list)
-            return len(self.app.log)
-
-        maxPos = getListLen() - 1
-
+        maxPos = self.__getListLen() - 1
         maxTop = max(0, maxPos - self.rect.height + 1)
 
         if not self.highlight == None:
@@ -178,20 +188,11 @@ class AgencyLogList(Control):
 
         maxlen = self.rect.width
 
-        def getIndex(self, i):
-            idx = self.top + i
-            if not self.list == None:
-                if idx >= len(self.list):
-                    return None
-                idx = self.list[idx]
 
-            if idx >= len(self.app.log):
-                return None
-            return idx
 
         # Paint all lines from top upto height many
         for i in range(0, self.rect.height):
-            idx = getIndex(self, i)
+            idx = self.__getIndex(i)
 
             y = self.rect.y + i
             x = self.rect.x
@@ -252,12 +253,6 @@ class AgencyLogList(Control):
         self.filterType = AgencyLogList.FILTER_NONE
 
     def input(self, c):
-        def getListLen():
-            if not self.list == None:
-                return len(self.list)
-            return len(self.app.log)
-
-
         if c == curses.KEY_UP:
             self.highlight -= 1
         elif c == curses.KEY_DOWN:
@@ -269,7 +264,7 @@ class AgencyLogList(Control):
             self.highlight -= self.rect.height
             self.top -= self.rect.height
         elif c == curses.KEY_END:
-            self.highlight = getListLen() - 1
+            self.highlight = self.__getListLen() - 1
         elif c == curses.KEY_HOME:
             self.highlight = 0
         elif c == ord('f'):
@@ -439,6 +434,7 @@ class AgencyStoreView(LineView):
         self.store = None
         self.lastIdx = None
         self.path = []
+        self.pathHistory = []
 
     def layout(self, rect):
         super().layout(rect)
@@ -464,8 +460,9 @@ class AgencyStoreView(LineView):
 
     def input(self, c):
         if c == ord('p'):
-            pathstr = self.app.userStringLine(prompt = "Path: ", default=self.head, complete=self.completePath)
+            pathstr = self.app.userStringLine(prompt = "> ", label = "Agency Path:", default=self.head, complete=self.completePath, history = self.pathHistory)
             self.path = agency.AgencyStore.parsePath(pathstr)
+            self.pathHistory.append(pathstr)
         else:
             super().input(c)
 
@@ -704,6 +701,8 @@ class App:
                         user = history[historyIdx]
                     else:
                         user = ""
+                elif c == curses.KEY_HOME:
+                    user = ""
                 elif c == curses.KEY_DOWN:
                     historyIdx = min(historyIdx + 1, 0)
                     if not historyIdx == 0:
