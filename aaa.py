@@ -252,6 +252,12 @@ class AgencyLogList(Control):
         self.filterType = AgencyLogList.FILTER_NONE
 
     def input(self, c):
+        def getListLen():
+            if not self.list == None:
+                return len(self.list)
+            return len(self.app.log)
+
+
         if c == curses.KEY_UP:
             self.highlight -= 1
         elif c == curses.KEY_DOWN:
@@ -262,6 +268,10 @@ class AgencyLogList(Control):
         elif c == curses.KEY_PPAGE:
             self.highlight -= self.rect.height
             self.top -= self.rect.height
+        elif c == curses.KEY_END:
+            self.highlight = getListLen() - 1
+        elif c == curses.KEY_HOME:
+            self.highlight = 0
         elif c == ord('f'):
             regexStr = self.app.userStringLine(label = "Regular Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
             if not regexStr == None:
@@ -371,6 +381,11 @@ class LineView(Control):
             self.top += self.rect.height
         elif c == curses.KEY_PPAGE:
             self.top -= self.rect.height
+        elif c == curses.KEY_END:
+            self.top = len(self.lines) - 1
+        elif c == curses.KEY_HOME:
+            self.top = 0
+
 
     def head(self, headline):
         self.head = headline
