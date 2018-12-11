@@ -138,6 +138,7 @@ class AgencyLogList(Control):
         # list contains all displayed log indexes
         self.list = None
         self.filterType = AgencyLogList.FILTER_NONE
+        self.filterHistory = []
 
     def layout(self, rect):
         super().layout(rect)
@@ -204,6 +205,8 @@ class AgencyLogList(Control):
                 if idx == self.getSelectedIndex():
                     attr |= curses.A_STANDOUT
                 self.app.stdscr.addnstr(y, x, msg, maxlen, attr)
+            elif i == 0:
+                self.app.stdscr.addnstr(y, x, "Nothing to display", maxlen, curses.A_BOLD | ColorFormat.CF_ERROR)
             else:
                 self.app.stdscr.move(y, x)
             self.app.stdscr.clrtoeol()
@@ -223,7 +226,7 @@ class AgencyLogList(Control):
         for i, e in enumerate(self.app.log):
             match = False
             for path in e["request"]:
-                if pattern.match(path):
+                if not pattern.search(path) == None:
                     match = True
                     break
             if match:
@@ -258,12 +261,16 @@ class AgencyLogList(Control):
             self.highlight -= self.rect.height
             self.top -= self.rect.height
         elif c == ord('f'):
-            regexStr = self.app.userStringLine(label = "Regular Search Expr", default = self.filterStr, prompt = "> ")
+            regexStr = self.app.userStringLine(label = "Regular Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
             if not regexStr == None:
+                if regexStr:
+                    self.filterHistory.append(regexStr)
                 self.filter(regexStr)
         elif c == ord('g'):
-            string = self.app.userStringLine(label = "Global Search Expr", default = self.filterStr, prompt = "> ")
+            string = self.app.userStringLine(label = "Global Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
             if not string == None:
+                if string:
+                    self.filterHistory.append(string)
                 self.grep(string)
         elif c == ord('R'):
             yesNo = self.app.userStringLine(label = "Reset all filters", prompt = "[Y/n] ")
@@ -280,32 +287,32 @@ class AgencyLogList(Control):
             return None
         return self.highlight
 
-class AgencyLogView(Control):
+# class AgencyLogView(Control):
 
-    def __init__(self, app, rect):
-        super().__init__(app, rect)
-        self.idx = None
+#     def __init__(self, app, rect):
+#         super().__init__(app, rect)
+#         self.idx = None
 
-    def update(self):
-        if self.rect.width == 0:
-            return
+#     def update(self):
+#         if self.rect.width == 0:
+#             return
 
-        # format in json
-        if not self.idx == None:
-            lines = json.dumps(self.app.log[self.idx], indent=4, separators=(',', ': ')).splitlines()
-            x = self.rect.x
+#         # format in json
+#         if not self.idx == None:
+#             lines = json.dumps(self.app.log[self.idx], indent=4, separators=(',', ': ')).splitlines()
+#             x = self.rect.x
 
-            for i in range(0, self.rect.height):
-                y = self.rect.y + i
+#             for i in range(0, self.rect.height):
+#                 y = self.rect.y + i
 
-                if i < len(lines):
-                    self.app.stdscr.addnstr(y, x, lines[i], self.rect.width)
-                else:
-                    self.app.stdscr.move(y, x)
-                    self.app.stdscr.clrtoeol()
+#                 if i < len(lines):
+#                     self.app.stdscr.addnstr(y, x, lines[i], self.rect.width)
+#                 else:
+#                     self.app.stdscr.move(y, x)
+#                     self.app.stdscr.clrtoeol()
 
-    def select(self, idx):
-        self.idx = idx
+#     def select(self, idx):
+#         self.idx = idx
 
 
 class LineView(Control):
@@ -343,8 +350,8 @@ class LineView(Control):
                 attr = curses.A_STANDOUT
 
             if i < len(self.lines):
-                line = self.lines[i].ljust(maxlen)
-                self.app.stdscr.addnstr(y, x, line, maxlen, attr)
+                line = self.lines[i]
+                self.app.printStyleLine(y, x, line, maxlen, attr)
             else:
                 self.app.stdscr.move(y, x)
             self.app.stdscr.clrtoeol()
@@ -385,8 +392,21 @@ class AgencyLogView(LineView):
             entry = self.app.log[self.idx]
             self.head = entry['_key']
             self.jsonLines(entry)
+            self.highlightLines()
 
         super().update()
+
+    def highlightLines(self):
+        def intersperse(lst, item):
+            result = [item] * (len(lst) * 2 - 1)
+            result[0::2] = lst
+            return result
+
+        filt = self.app.list.filterStr
+        if filt:
+            for i, line in enumerate(self.lines):
+                part = intersperse(line.split(filt), (curses.A_BOLD, filt))
+                self.lines[i] = part
 
     def set(self, idx):
         self.idx = idx
@@ -608,9 +628,10 @@ class App:
     # Complete is a callback function that is called with the already
     #   provided string and returns either an array of strings containing
     #   possible completions or a string containing the completed text
-    def userStringLine(self, label = None, complete = None, default = None, prompt = "> "):
+    def userStringLine(self, label = None, complete = None, default = None, prompt = "> ", history = []):
         user = default if not default == None else ""
         hints = []
+        historyIdx = 0
 
         curses.curs_set(1)
         try:
@@ -656,6 +677,18 @@ class App:
                 elif c == ord('\n') or c == ord('\r'):
                     self.update()
                     return user
+                elif c == curses.KEY_UP:
+                    historyIdx = max(historyIdx - 1, -len(history))
+                    if not historyIdx == 0:
+                        user = history[historyIdx]
+                    else:
+                        user = ""
+                elif c == curses.KEY_DOWN:
+                    historyIdx = min(historyIdx + 1, 0)
+                    if not historyIdx == 0:
+                        user = history[historyIdx]
+                    else:
+                        user = ""
                 elif c == ord('\t'):
                     # tabulator, time for auto complete
                     if not complete == None:
@@ -669,6 +702,21 @@ class App:
                     user += chr(c)
         finally:
             curses.curs_set(0)
+
+    def printStyleLine(self, y, x, line, maxlen, defaultAttr = 0):
+        if isinstance(line, str):
+            line = [line]
+
+        for p in line:
+            if isinstance(p, str):
+                p = (defaultAttr, p)
+            strlen = len(p[1])
+            self.stdscr.addnstr(y, x, p[1], maxlen, p[0])
+            maxlen -= strlen
+            if maxlen <= 0:
+                break
+            x += strlen
+
 
 
 class ColorPairs:
