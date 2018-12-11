@@ -632,7 +632,6 @@ class App:
                 self.update()
             else:
                 self.update()
-                self.input(c)
                 break
 
     # Allows the user to type a string. Returns non when escape was pressed.
