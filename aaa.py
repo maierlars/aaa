@@ -220,6 +220,7 @@ class AgencyLogList(Control):
         # try to compile the regex
         pattern = re.compile(regexStr)
 
+        self.filterStr = string
         self.filterType = AgencyLogList.FILTER_REGEX
         self.top = 0
         self.list = []
@@ -237,6 +238,7 @@ class AgencyLogList(Control):
         if not string:
             return
 
+        self.filterStr = string
         self.filterType = AgencyLogList.FILTER_GREP
         self.top = 0
         self.list = []
@@ -402,7 +404,11 @@ class AgencyLogView(LineView):
             result[0::2] = lst
             return result
 
-        filt = self.app.list.filterStr
+        logList = self.app.list
+        if not logList.filterType == AgencyLogList.FILTER_GREP:
+            return
+
+        filt = logList.filterStr
         if filt:
             for i, line in enumerate(self.lines):
                 part = intersperse(line.split(filt), (curses.A_BOLD, filt))
