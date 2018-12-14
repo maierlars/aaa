@@ -10,6 +10,8 @@ from time import sleep
 import agency
 from controls import *
 
+ARANGO_LOG_ZERO = "00000000000000000000"
+
 
 class AgencyLogList(Control):
 
@@ -102,6 +104,10 @@ class AgencyLogList(Control):
                 attr = 0
                 if idx == self.getSelectedIndex():
                     attr |= curses.A_STANDOUT
+                if not self.app.snapshot == None:
+                    if ent["_key"] < self.app.snapshot["_key"]:
+                        attr |= curses.A_DIM
+
                 self.app.stdscr.addnstr(y, x, msg, maxlen, attr)
             elif i == 0:
                 self.app.stdscr.addnstr(y, x, "Nothing to display", maxlen, curses.A_BOLD | ColorFormat.CF_ERROR)
@@ -198,6 +204,16 @@ class AgencyLogList(Control):
             return None
         return self.highlight
 
+    def selectClosest(self, idx):
+        if not self.list == None:
+            for i in self.list:
+                if i <= idx:
+                    self.highlight = i
+                    self.top = i
+        else:
+            self.highlight = idx
+            self.top = idx
+
 class AgencyLogView(LineView):
     def __init__(self, app, rect):
         super().__init__(app, rect)
@@ -257,15 +273,44 @@ class AgencyStoreView(LineView):
         if self.lastIdx == idx:
             return
         self.lastIdx = idx
-        self.store = agency.AgencyStore()
 
-        for i in range(0, idx+1):
-            self.store.apply(self.app.log[i]["request"])
+        # if the id of the first log entry is ARANGO_LOG_ZERO,
+        # generate the agency from empty store
+        # otherwise check if the log entry is after (>=) the
+        log = self.app.log
+        if log == None or len(log) == 0:
+            return
+        snapshot = self.app.snapshot
+
+        self.store = None
+
+        if log[0]["_key"] == ARANGO_LOG_ZERO:
+            # just apply all log entries
+            self.store = agency.AgencyStore()
+            for i in range(0, idx+1):
+                self.store.apply(self.app.log[i]["request"])
+        elif snapshot == None:
+            self.head = None
+            self.lines = [(ColorFormat.CF_ERROR, "No snapshot available")]
+            return
+        elif log[idx]["_key"] < snapshot["_key"]:
+            self.head = None
+            self.lines = [[(ColorFormat.CF_ERROR, "Can not replicate agency state. Not covered by snapshot.")]]
+            return
+        else:
+            self.store = agency.AgencyStore(snapshot["readDB"][0])
+            for i in range(0, idx+1):
+                if log[idx]["_key"] >= snapshot["_key"]:
+                    self.store.apply(self.app.log[i]["request"])
+
+        self.jsonLines(self.store._ref(self.path))
+
+
+
 
     def update(self):
         self.head = "/" + "/".join(self.path)
         self.updateStore()
-        self.jsonLines(self.store._ref(self.path))
         super().update()
 
     def input(self, c):
@@ -273,6 +318,7 @@ class AgencyStoreView(LineView):
             pathstr = self.app.userStringLine(prompt = "> ", label = "Agency Path:", default=self.head, complete=self.completePath, history = self.pathHistory)
             self.path = agency.AgencyStore.parsePath(pathstr)
             self.pathHistory.append(pathstr)
+            self.lastIdx = None # trigger update
         else:
             super().input(c)
 
@@ -320,12 +366,8 @@ class AgencyStoreView(LineView):
 class ArangoAgencyAnalyserApp(App):
     def __init__(self, stdscr, argv):
         super().__init__(stdscr)
-        self.log = {}
-
-        if len(argv) == 2:
-            self.loadLogFromFile(argv[1])
-        else:
-            raise RuntimeError("Invalid number of arguments")
+        self.log = None
+        self.snapshot = None
 
         self.list = AgencyLogList(self, Rect.zero())
         self.view = AgencyStoreView(self, Rect.zero())
@@ -334,6 +376,34 @@ class ArangoAgencyAnalyserApp(App):
 
         self.split = LayoutColumns(self, self.rect, [self.list, self.switch], [4,6])
         self.focus = self.list
+
+        if len(argv) == 2:
+            self.loadLogFromFile(argv[1])
+        elif len(argv) == 3:
+            self.loadLogFromFile(argv[1])
+            self.loadSnapshotFromFile(argv[2], updateSelection = True)
+        else:
+            raise RuntimeError("Invalid number of arguments")
+
+
+    def loadLogFromFile(self, filename):
+        with open(filename) as f:
+            self.log = json.load(f)
+
+    def loadSnapshotFromFile(self, filename, updateSelection = False):
+        with open(filename) as f:
+            self.snapshot = json.load(f)
+
+            if updateSelection:
+                # update the highlighted entry to be the first available in
+                # snapshot. Assume log is already loaded.
+                idx = 0
+                for i, e in enumerate(self.log):
+                    if e["_key"] <= self.snapshot["_key"]:
+                        idx = i
+                    else:
+                        break
+                self.list.selectClosest(idx)
 
     def update(self):
         self.split.update()
@@ -346,10 +416,6 @@ class ArangoAgencyAnalyserApp(App):
             self.stop = True
         elif cmd == "debug":
             self.debug = True
-        elif cmd == "progress":
-            for i in range(0, 500):
-                self.showProgress(i / 500, "{}/500".format(i), "Test Progress")
-                sleep(0.1)
         elif cmd == "split":
             if len(argv) != 3:
                 raise ValueError("Split requires two integer arguments")
@@ -387,10 +453,6 @@ class ArangoAgencyAnalyserApp(App):
             self.switch.select(1)
         else:
             super().input(c)
-
-    def loadLogFromFile(self, filename):
-        with open(filename) as f:
-            self.log = json.load(f)
 
     def layout(self):
         super().layout()

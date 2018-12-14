@@ -4,8 +4,8 @@ import copy
 
 class AgencyStore:
 
-    def __init__(self):
-        self.store = {}
+    def __init__(self, store = {}):
+        self.store = copy.deepcopy(store)
 
     def __str__(self):
         return json.dumps(self.store)

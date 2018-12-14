@@ -13,8 +13,6 @@ class Rect:
     def zero():
         return Rect(0, 0, 0, 0)
 
-
-
 class Layout:
     def __init__(self, rect):
         self.rect = rect
@@ -379,6 +377,7 @@ class App:
                             hints = hint
                         elif isinstance(hint, str):
                             user = hint
+                            cursorIndex = len(user)
                 elif not curses.has_key(c):
                     user = user[:cursorIndex] + chr(c) + user[cursorIndex:]
                     cursorIndex += 1
