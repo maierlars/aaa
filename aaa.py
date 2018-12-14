@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import sys
 import json
@@ -326,6 +326,21 @@ class AgencyStoreView(LineView):
     def jsonLines(self, value):
         self.lines = json.dumps(value, indent=4, separators=(',', ': ')).splitlines()
 
+    def __common_prefix_idx(self, strings):
+        if len(strings) == 0:
+            return None
+
+        maxlen = min(len(s) for s in strings)
+
+        for i in range(0, maxlen):
+            c = strings[0][i]
+
+            if not all(s[i] == c for s in strings):
+                return i
+
+        return maxlen
+
+
     def completePath(self, pathstr):
         if self.store == None:
             return
@@ -335,30 +350,50 @@ class AgencyStoreView(LineView):
 
         path = agency.AgencyStore.parsePath(pathstr)
 
-        ref = self.store._ref(path)
-        if ref == None:
+        if pathstr[-1] == "/":
+            ref = self.store._ref(path)
+            if not ref == None and isinstance(ref, dict):
+                return list(ref.keys())
+        else:
             ref = self.store._ref(path[:-1])
             if not ref == None and isinstance(ref, dict):
                 word = path[-1]
                 # Now find all key that start with word
                 keys = [h for h in ref.keys() if h.startswith(word)]
 
-                if not len(keys) == 1:
-                    return list(keys)
+                if len(keys) > 1:
+
+                    # first complete to the common sub
+                    common = keys[0][:self.__common_prefix_idx(keys)]
+
+                    if path[-1] == common:
+                        return list(keys)
+
+                    return "/" + "/".join(path[:-1] + [common])
+
+                elif path[-1] == keys[0] and not pathstr[-1] == "/":
+                    ref = self.store._ref(path)
+                    if not ref == None and isinstance(ref, dict):
+                        return (pathstr + "/", ref.keys())
                 else:
                     return "/" + "/".join(path[:-1] + [keys[0]])
-        else:
-            if pathstr[-1] == '/':
-                if isinstance(ref, dict):
-                    keys = list(ref.keys())
 
-                    if not len(keys) == 1:
-                        return keys
-                    else:
-                        return "/" + "/".join(path + [keys[0]])
-            else:
-                if isinstance(ref, dict):
-                    return pathstr + '/'
+
+        #ref = self.store._ref(path)
+        #if ref == None:
+
+        # else:
+        #     if pathstr[-1] == '/':
+        #         if isinstance(ref, dict):
+        #             keys = list(ref.keys())
+
+        #             if not len(keys) == 1:
+        #                 return keys
+        #             else:
+        #                 return "/" + "/".join(path + [keys[0]])
+        #     else:
+        #         if isinstance(ref, dict):
+        #             return pathstr + '/'
         return None
 
 class ArangoAgencyAnalyserApp(App):

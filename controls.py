@@ -261,7 +261,9 @@ class App:
     # Allows the user to type a string. Returns non when escape was pressed.
     # Complete is a callback function that is called with the already
     #   provided string and returns either an array of strings containing
-    #   possible completions or a string containing the completed text
+    #   possible completions or a string containing the completed text.
+    #   Finally it can return a tuple, the first being the new string,
+    #   the second the auto complete list.
     def userStringLine(self, label = None, complete = None, default = None, prompt = "> ", history = []):
         user = default if not default == None else ""
         hints = []
@@ -377,6 +379,10 @@ class App:
                             hints = hint
                         elif isinstance(hint, str):
                             user = hint
+                            cursorIndex = len(user)
+                        elif isinstance(hint, tuple):
+                            user = hint[0]
+                            hints = hint[1]
                             cursorIndex = len(user)
                 elif not curses.has_key(c):
                     user = user[:cursorIndex] + chr(c) + user[cursorIndex:]
