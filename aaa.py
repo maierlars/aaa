@@ -291,7 +291,7 @@ class AgencyStoreView(LineView):
                 self.store.apply(self.app.log[i]["request"])
         elif snapshot == None:
             self.head = None
-            self.lines = [(ColorFormat.CF_ERROR, "No snapshot available")]
+            self.lines = [[(ColorFormat.CF_ERROR, "No snapshot available")]]
             return
         elif log[idx]["_key"] < snapshot["_key"]:
             self.head = None
@@ -299,13 +299,11 @@ class AgencyStoreView(LineView):
             return
         else:
             self.store = agency.AgencyStore(snapshot["readDB"][0])
-            for i in range(0, idx+1):
+            for i in range(self.app.firstValidLogIdx, idx+1):
                 if log[idx]["_key"] >= snapshot["_key"]:
                     self.store.apply(self.app.log[i]["request"])
 
         self.jsonLines(self.store._ref(self.path))
-
-
 
 
     def update(self):
@@ -368,6 +366,7 @@ class ArangoAgencyAnalyserApp(App):
         super().__init__(stdscr)
         self.log = None
         self.snapshot = None
+        self.firstValidLogIdx = None
 
         self.list = AgencyLogList(self, Rect.zero())
         self.view = AgencyStoreView(self, Rect.zero())
@@ -394,16 +393,17 @@ class ArangoAgencyAnalyserApp(App):
         with open(filename) as f:
             self.snapshot = json.load(f)
 
+            # update the highlighted entry to be the first available in
+            # snapshot. Assume log is already loaded.
+            self.firstValidLogIdx = None
+            for i, e in enumerate(self.log):
+                if e["_key"] <= self.snapshot["_key"]:
+                    self.firstValidLogIdx = i
+                else:
+                    break
+
             if updateSelection:
-                # update the highlighted entry to be the first available in
-                # snapshot. Assume log is already loaded.
-                idx = 0
-                for i, e in enumerate(self.log):
-                    if e["_key"] <= self.snapshot["_key"]:
-                        idx = i
-                    else:
-                        break
-                self.list.selectClosest(idx)
+                self.list.selectClosest(self.firstValidLogIdx)
 
     def update(self):
         self.split.update()
@@ -460,7 +460,6 @@ class ArangoAgencyAnalyserApp(App):
 
 class ColorPairs:
     CP_RED_WHITE = 1
-
 
 class ColorFormat:
     CF_ERROR = None
