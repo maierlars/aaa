@@ -6,7 +6,8 @@ Allows analysis of arangodbs agency logs.
 
 Given a JSON encoded agency log in a file, start with
 ```
-python aaa.py <file>
+python aaa.py --log <file> --snapshot <file> --snapshot <file>
+python aaa.py --endpoint https://my-agent:port/
 ```
 Close the program via `:q`.
 
