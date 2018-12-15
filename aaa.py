@@ -61,6 +61,9 @@ class AgencyLogList(Control):
             return len(self.list)
         return len(self.app.log)
 
+    def name(self):
+        return "AGENCY LOG"
+
     def update(self):
         # Update top
         maxPos = self.__getListLen() - 1

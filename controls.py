@@ -18,7 +18,11 @@ class Layout:
         self.rect = rect
 
     def update(self):
-        pass
+        raise NotImplementedError("Layout has not update forwarding!")
+
+
+    def name(self):
+        raise NotImplementedError("Layout has not name forwarding!")
 
     def layout(self, rect):
         self.rect = rect
@@ -39,8 +43,10 @@ class LayoutSwitch(Layout):
         self.subs[self.idx].input(c)
 
     def update(self):
-        super().update()
         self.subs[self.idx].update()
+
+    def name(self):
+        return self.subs[self.idx].name()
 
     def select(self, idx):
         if not idx in range(0, len(self.subs)):
@@ -57,14 +63,19 @@ class LayoutColumns(Layout):
         self.setRelations(rels)
         self.layout(self.rect)
 
+    def name(self):
+        return None
+
     def update(self):
-        super().update()
         for x in self.colums:
             x.update()
 
         for x in self.bars:
             for y in range(0, self.rect.height):
-                self.app.stdscr.addch(self.rect.y + y, x, curses.ACS_VLINE)
+                c = " "
+                if not x[1] == None and y < len(x[1]):
+                    c = x[1][y]
+                self.app.stdscr.addch(self.rect.y + y, x[0], c, curses.A_STANDOUT)
 
     def layout(self, rect):
         super().layout(rect)
@@ -75,6 +86,8 @@ class LayoutColumns(Layout):
         self.bars = []
 
         for i, col in enumerate(self.colums):
+            self.bars.append((offset, self.colums[i].name()))
+            offset += 1
             width = (avail * self.rels[i]) // total
 
             col.layout(Rect(
@@ -82,11 +95,7 @@ class LayoutColumns(Layout):
                 width, self.rect.height
             ))
             offset += width
-            self.bars.append(offset)
-            offset += 1
 
-        # remove last bar
-        self.bars.pop()
 
 
     def setRelations(self, rels):
@@ -108,6 +117,9 @@ class Control:
 
     def input(self, c):
         pass
+
+    def name(self):
+        return None
 
 
 class LineView(Control):
