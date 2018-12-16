@@ -2,10 +2,10 @@
 
 import sys
 import json
-import textwrap
 import datetime
 import re
 from time import sleep
+from jsonctl import JsonView, JsonColors
 
 import agency
 from controls import *
@@ -216,44 +216,22 @@ class AgencyLogList(Control):
             self.highlight = idx
             self.top = idx
 
-class AgencyLogView(LineView):
+class AgencyLogView(JsonView):
     def __init__(self, app, rect):
         super().__init__(app, rect)
         self.idx = None
         self.head = None
 
     def update(self):
-        self.idx = self.app.list.getSelectedIndex()
-
-        if not self.idx == None and self.idx < len(self.app.log):
-            entry = self.app.log[self.idx]
-            self.head = entry['_key']
-            self.jsonLines(entry)
-            self.highlightLines()
-
+        idx = self.app.list.getSelectedIndex()
+        if not idx == self.idx:
+            self.set(idx)
         super().update()
-
-    def highlightLines(self):
-        def intersperse(lst, item):
-            result = [item] * (len(lst) * 2 - 1)
-            result[0::2] = lst
-            return result
-
-        logList = self.app.list
-        if not logList.filterType == AgencyLogList.FILTER_GREP:
-            return
-
-        filt = logList.filterStr
-        if filt:
-            for i, line in enumerate(self.lines):
-                part = intersperse(line.split(filt), (curses.A_BOLD, filt))
-                self.lines[i] = part
-
-    def jsonLines(self, value):
-        self.lines = json.dumps(value, indent=4, separators=(',', ': ')).splitlines()
 
     def set(self, idx):
         self.idx = idx
+        entry = self.app.log[self.idx]
+        super().set(entry)
 
 
 class AgencyStoreView(LineView):
@@ -460,11 +438,6 @@ class ArangoAgencyAnalyserApp(App):
         super().layout()
         self.split.layout(self.rect)
 
-class ColorPairs:
-    CP_RED_WHITE = 1
-
-class ColorFormat:
-    CF_ERROR = None
 
 
 def main(stdscr, argv):
@@ -472,10 +445,11 @@ def main(stdscr, argv):
     curses.curs_set(0)
 
     # initialise some colors
-    curses.init_pair(ColorPairs.CP_RED_WHITE, curses.COLOR_RED, curses.COLOR_BLACK)
+    ColorPairs.init()
+    ColorFormat.init()
+    JsonColors.init()
 
     # Init color formats
-    ColorFormat.CF_ERROR = curses.A_BOLD | curses.color_pair(ColorPairs.CP_RED_WHITE);
 
     app = ArangoAgencyAnalyserApp(stdscr, argv)
     app.run()
