@@ -1,4 +1,6 @@
 import curses, curses.ascii
+import textwrap
+import datetime
 
 class Rect:
     def __init__(self, x, y, width, height):
@@ -227,7 +229,7 @@ class App:
                 self.update()
                 self.userInput()
             except Exception as err:
-                self.displayMsg("Error: {}".format(err), ColorFormat.CF_ERROR)
+                self.displayMsg("Error: {}".format(err), ColorFormat.ERROR)
                 if self.debug:
                     raise err
 
@@ -384,13 +386,22 @@ class App:
         finally:
             curses.curs_set(0)
 
-    def printStyleLine(self, y, x, line, maxlen, defaultAttr = 0):
+    def printStyleLine(self, y, x, line, maxlen, defaultAttr = 0, modifier = None, indent = 0):
         if isinstance(line, str):
             line = [line]
 
-        for p in line:
+        for i in range(0, indent):
+            if maxlen <= 0:
+                return
+            self.stdscr.delch(y, x)
+            x += 1
+            maxlen -= 1
+
+        for i, p in enumerate(line):
             if isinstance(p, str):
                 p = (defaultAttr, p)
+            if not modifier == None:
+                p = modifier(i, p)
             strlen = len(p[1])
             self.stdscr.addnstr(y, x, p[1], maxlen, p[0])
             maxlen -= strlen
@@ -421,3 +432,22 @@ class App:
         self.stdscr.addnstr(self.rect.height - 1, donelen, string[donelen:], maxlen - donelen, 0)
 
         self.stdscr.refresh()
+
+class ColorPairs:
+    RED_BLACK = 1
+    BLUE_BLACK = 2
+    GREEN_BLACK = 3
+    CYAN_BLACK = 4
+
+    def init():
+        curses.init_pair(ColorPairs.RED_BLACK, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(ColorPairs.BLUE_BLACK, curses.COLOR_BLUE, curses.COLOR_BLACK)
+        curses.init_pair(ColorPairs.GREEN_BLACK, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        curses.init_pair(ColorPairs.CYAN_BLACK, curses.COLOR_CYAN, curses.COLOR_BLACK)
+
+
+class ColorFormat:
+    ERROR = None
+
+    def init():
+        ColorFormat.ERROR = curses.A_BOLD | curses.color_pair(ColorPairs.RED_BLACK)
