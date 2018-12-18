@@ -232,7 +232,7 @@ class App:
                     raise err
 
     def execCmd(self, argv):
-        raise NotImplementedError("Unkown command: {}".format(argv[0]))
+        raise NotImplementedError("Unknown command: {}".format(argv[0]))
 
 
     def displayMsg(self, msg, attr = 0):

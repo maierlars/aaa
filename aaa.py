@@ -29,6 +29,7 @@ class AgencyLogList(Control):
         self.list = None
         self.filterType = AgencyLogList.FILTER_NONE
         self.filterHistory = []
+        self.formatString = "[{timestamp}|{term}] {_id} {urls}"
 
     def layout(self, rect):
         super().layout(rect)
@@ -89,7 +90,7 @@ class AgencyLogList(Control):
 
         maxlen = self.rect.width
 
-        # Paint all lines from top upto height many
+        # Paint all lines from top up to height many
         for i in range(0, self.rect.height):
             idx = self.__getIndexRelative(i)
 
@@ -99,7 +100,7 @@ class AgencyLogList(Control):
                 ent = self.app.log[idx]
 
                 text = " ".join(x for x in ent["request"])
-                msg = "[{!s}|{!s}] {!s}: {}".format(ent["timestamp"], ent["term"], ent["_id"], text).ljust(self.rect.width)
+                msg = self.formatString.format(**ent, urls=text).ljust(self.rect.width)
 
                 attr = 0
                 if idx == self.getSelectedIndex():
@@ -116,15 +117,16 @@ class AgencyLogList(Control):
             self.app.stdscr.clrtoeol()
 
     def filter(self, predicate):
+        # Make sure that the highlighted entry is the previously selected
+        # entry or the closest entry above that one.
         lastHighlighted = self.__getIndex(self.highlight)
-        self.list = []
         if lastHighlighted == None:
             lastHighlighted = 0
 
+        self.list = []
         self.highlight = 0
         for i, e in enumerate(self.app.log):
             match = predicate(e)
-
             if match:
                 if i <= lastHighlighted:
                     self.highlight = len(self.list)
