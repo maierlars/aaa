@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import sys
+import os
 import json
-import textwrap
 import datetime
 import re
 from time import sleep
@@ -30,6 +30,35 @@ class AgencyLogList(Control):
         self.filterType = AgencyLogList.FILTER_NONE
         self.filterHistory = []
         self.formatString = "[{timestamp}|{term}] {_id} {urls}"
+
+    def serialize(self):
+        return {
+            'top': self.top,
+            'highlight': self.highlight,
+            'filterStr': self.filterStr,
+            'filterType': self.filterType,
+            'filterHistory': self.filterHistory,
+            'formatString': self.formatString
+        }
+
+    def restore(self, state):
+        self.top = state['top']
+        self.highlight = state['highlight']
+        self.filterStr = state['filterStr']
+        self.filterType = state['filterType']
+        self.filterHistory = state['filterHistory']
+        self.formatString = state['formatString']
+        self.__rebuildFilterList()
+
+    def __rebuildFilterList(self):
+        if self.filterType == AgencyLogList.FILTER_NONE:
+            self.list = None
+        elif self.filterType == AgencyLogList.FILTER_GREP:
+            self.grep(self.filterStr)
+        elif self.filterType == AgencyLogList.FILTER_REGEX:
+            self.regexp(self.filterStr)
+        else:
+            raise NotImplementedError()
 
     def layout(self, rect):
         super().layout(rect)
@@ -222,6 +251,16 @@ class AgencyLogView(LineView):
         self.idx = None
         self.head = None
 
+    def serialize(self):
+        return {
+            'idx': self.idx,
+            'head': self.head
+        }
+
+    def restore(self, state):
+        self.idx = state['idx']
+        self.head = state['head']
+
     def update(self):
         self.idx = self.app.list.getSelectedIndex()
 
@@ -263,6 +302,17 @@ class AgencyStoreView(LineView):
         self.lastIdx = None
         self.path = []
         self.pathHistory = []
+
+    def serialize(self):
+        return {
+            'path': self.path,
+            'pathHistory': self.pathHistory
+        }
+
+    def restore(self, state):
+        self.path = state['path']
+        self.pathHistory = state['pathHistory']
+        self.lastIdx = None
 
     def layout(self, rect):
         super().layout(rect)
@@ -421,6 +471,13 @@ class ArangoAgencyAnalyserApp(App):
         else:
             raise RuntimeError("Invalid number of arguments")
 
+    def serialize(self):
+        return {
+            'split': self.split.serialize(),
+        }
+
+    def restore(self, state):
+        self.split.restore(state['split'])
 
     def loadLogFromFile(self, filename):
         with open(filename) as f:
@@ -517,6 +574,7 @@ def main(stdscr, argv):
 
 if __name__ == '__main__':
     try:
+        os.putenv("ESCDELAY", "0")  # Ugly hack to enabled escape key for direct use
         curses.wrapper(main, sys.argv)
     except Exception as e:
         raise e
