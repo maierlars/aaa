@@ -112,9 +112,11 @@ class LayoutColumns(Layout):
         for x in self.bars:
             for y in range(0, self.rect.height):
                 attr = 0
+                c = curses.ACS_VLINE
                 if y == 0:
                     attr = curses.A_UNDERLINE
-                self.app.stdscr.addch(self.rect.y + y, x, curses.ACS_VLINE, attr)
+                    c = " "
+                self.app.stdscr.addch(self.rect.y + y, x, c, attr)
 
 
     def layout(self, rect):
