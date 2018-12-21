@@ -27,6 +27,7 @@ Use `g` to do a basic grep like search on the log entries. Reset filters via `R`
 
 To dump the content of the JSON view into a file use `:dump filename`.
 
+You can switch the sides via `TAB`.
 
 # Save and Restore states
 

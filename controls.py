@@ -63,52 +63,74 @@ class LayoutSwitch(Layout):
         self.idx = idx
         self.update()
 
+    def title(self):
+        return self.subs[self.idx].title()
+
 class LayoutColumns(Layout):
-    def __init__(self, app, rect, colums, rels):
+    def __init__(self, app, rect, columns, rels):
         super().__init__(rect)
-        self.colums = colums
+        self.columns = columns
         self.bars = []
         self.app = app
+        self.focus = 0
         self.setRelations(rels)
         self.layout(self.rect)
 
     def serialize(self):
         return {
             'rels': self.rels,
-            'colums': list([c.serialize() for c in self.colums])
+            'columns': list([c.serialize() for c in self.columns])
         }
 
     def restore(self, state):
-        if not len(state['colums']) == len(self.colums):
+        if not len(state['columns']) == len(self.columns):
             raise ValueError("LayoutColumns has invalid restore state")
 
-        for i, c in enumerate(self.colums):
-            c.restore(state['colums'][i])
+        for i, c in enumerate(self.columns):
+            c.restore(state['columns'][i])
         self.setRelations(state['rels'])
+
+    def input(self, c):
+        self.columns[self.focus].input(c)
 
     def update(self):
         super().update()
-        for x in self.colums:
-            x.update()
 
+        if self.rect.height == 0:
+            return
+
+        # Paint head lines
+        for i, ctrl in enumerate(self.columns):
+            ctrl.update()
+            attr = curses.A_UNDERLINE
+            if i == self.focus:
+                attr |= curses.A_STANDOUT
+            maxlen =  ctrl.rect.width
+            self.app.stdscr.addnstr(0, ctrl.rect.x, ctrl.title().ljust(maxlen), maxlen, attr)
+
+        # Paint vertical bars
         for x in self.bars:
             for y in range(0, self.rect.height):
-                self.app.stdscr.addch(self.rect.y + y, x, curses.ACS_VLINE)
+                attr = 0
+                if y == 0:
+                    attr = curses.A_UNDERLINE
+                self.app.stdscr.addch(self.rect.y + y, x, curses.ACS_VLINE, attr)
+
 
     def layout(self, rect):
         super().layout(rect)
 
         total = sum(self.rels)
         offset = 0
-        avail = self.rect.width - len(self.colums) + 1
+        avail = self.rect.width - len(self.columns) + 1
         self.bars = []
 
-        for i, col in enumerate(self.colums):
+        for i, col in enumerate(self.columns):
             width = (avail * self.rels[i]) // total
 
             col.layout(Rect(
-                offset, 0,
-                width, self.rect.height
+                offset, 1,
+                width, self.rect.height - 1
             ))
             offset += width
             self.bars.append(offset)
@@ -119,9 +141,15 @@ class LayoutColumns(Layout):
 
 
     def setRelations(self, rels):
-        if len(rels) != len(self.colums):
+        if len(rels) != len(self.columns):
             raise ValueError("Invalid length of rels")
         self.rels = rels
+
+    def title(self):
+        return self.columns[self.focus].title()
+
+    def toggleFocus(self):
+        self.focus = (self.focus + 1) % len(self.columns)
 
 class Control:
 
@@ -143,6 +171,9 @@ class Control:
 
     def restore(self, state):
         raise NotImplementedError("Restore was not implemented by the Control")
+
+    def title(self):
+        raise NotImplementedError("Title was not implemented by the Control")
 
 
 class LineView(Control):

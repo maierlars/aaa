@@ -31,6 +31,9 @@ class AgencyLogList(Control):
         self.filterHistory = []
         self.formatString = "[{timestamp}|{term}] {_id} {urls}"
 
+    def title(self):
+        return "Agency Log"
+
     def serialize(self):
         return {
             'top': self.top,
@@ -251,6 +254,10 @@ class AgencyLogView(LineView):
         self.idx = None
         self.head = None
 
+    def title(self):
+        entry = self.app.log[self.idx]
+        return "Agency Log View {}".format(entry['_key'])
+
     def serialize(self):
         return {
             'idx': self.idx,
@@ -266,7 +273,7 @@ class AgencyLogView(LineView):
 
         if not self.idx == None and self.idx < len(self.app.log):
             entry = self.app.log[self.idx]
-            self.head = entry['_key']
+            self.head = None #entry['_key']
             self.jsonLines(entry)
             self.highlightLines()
 
@@ -302,6 +309,9 @@ class AgencyStoreView(LineView):
         self.lastIdx = None
         self.path = []
         self.pathHistory = []
+
+    def title(self):
+        return "Agency Store View"
 
     def serialize(self):
         return {
@@ -429,23 +439,6 @@ class AgencyStoreView(LineView):
                         return (pathstr + "/", ref.keys())
                 else:
                     return "/" + "/".join(path[:-1] + [keys[0]])
-
-
-        #ref = self.store._ref(path)
-        #if ref == None:
-
-        # else:
-        #     if pathstr[-1] == '/':
-        #         if isinstance(ref, dict):
-        #             keys = list(ref.keys())
-
-        #             if not len(keys) == 1:
-        #                 return keys
-        #             else:
-        #                 return "/" + "/".join(path + [keys[0]])
-        #     else:
-        #         if isinstance(ref, dict):
-        #             return pathstr + '/'
         return None
 
 class ArangoAgencyAnalyserApp(App):
@@ -461,7 +454,7 @@ class ArangoAgencyAnalyserApp(App):
         self.switch = LayoutSwitch(Rect.zero(), [self.logView, self.view])
 
         self.split = LayoutColumns(self, self.rect, [self.list, self.switch], [4,6])
-        self.focus = self.list
+        self.focus = self.split
 
         if len(argv) == 2:
             self.loadLogFromFile(argv[1])
@@ -551,10 +544,8 @@ class ArangoAgencyAnalyserApp(App):
             super().execCmd(argv)
 
     def input(self, c):
-        if c == curses.KEY_RIGHT:
-            self.focus = self.switch
-        elif c == curses.KEY_LEFT:
-            self.focus = self.list
+        if c == ord('\t'):
+            self.split.toggleFocus()
         elif c == curses.KEY_F1:
             self.switch.select(0)
         elif c == curses.KEY_F2:
