@@ -152,15 +152,15 @@ class JsonView(Control):
             lineData[-1].value([
                 (JsonColors.STRING, '"{}"'.format(value))
             ])
-        elif value == False:
+        elif value is False:
             lineData[-1].value([
                 (JsonColors.FALSE, "false")
             ])
-        elif value == True:
+        elif value is True:
             lineData[-1].value([
                 (JsonColors.TRUE, "true")
             ])
-        elif value == None:
+        elif value is None:
             lineData[-1].value([
                 (JsonColors.NULL, "null")
             ])
@@ -191,8 +191,6 @@ class JsonView(Control):
             idx -= 1
             if idx < 0:
                 return None
-
-
 
             line = self.lines[idx]
 
@@ -348,7 +346,7 @@ class JsonView(Control):
                 self.app.printStyleLine(self.rect.y + y, x, line + suffix, self.rect.width, modifier = modifier, indent = lineData.indent)
 
             else:
-                self.app.stdscr.move(y, x)
+                self.app.stdscr.move(self.rect.y + y, x)
             self.app.stdscr.clrtoeol()
             idx += 1
 
@@ -368,5 +366,8 @@ class JsonColors:
         JsonColors.STRING = curses.color_pair(ColorPairs.GREEN_BLACK)
         JsonColors.KEY = curses.color_pair(ColorPairs.BLUE_BLACK)
         JsonColors.NUMBER = curses.color_pair(ColorPairs.CYAN_BLACK)
+        JsonColors.TRUE = curses.A_BOLD
+        JsonColors.FALSE = curses.A_BOLD
+        JsonColors.NULL = curses.A_BOLD
 
 

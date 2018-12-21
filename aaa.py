@@ -1,6 +1,7 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import sys
+import os
 import json
 import datetime
 import re
@@ -30,6 +31,38 @@ class AgencyLogList(Control):
         self.filterType = AgencyLogList.FILTER_NONE
         self.filterHistory = []
         self.formatString = "[{timestamp}|{term}] {_id} {urls}"
+
+    def title(self):
+        return "Agency Log"
+
+    def serialize(self):
+        return {
+            'top': self.top,
+            'highlight': self.highlight,
+            'filterStr': self.filterStr,
+            'filterType': self.filterType,
+            'filterHistory': self.filterHistory,
+            'formatString': self.formatString
+        }
+
+    def restore(self, state):
+        self.top = state['top']
+        self.highlight = state['highlight']
+        self.filterStr = state['filterStr']
+        self.filterType = state['filterType']
+        self.filterHistory = state['filterHistory']
+        self.formatString = state['formatString']
+        self.__rebuildFilterList()
+
+    def __rebuildFilterList(self):
+        if self.filterType == AgencyLogList.FILTER_NONE:
+            self.list = None
+        elif self.filterType == AgencyLogList.FILTER_GREP:
+            self.grep(self.filterStr)
+        elif self.filterType == AgencyLogList.FILTER_REGEX:
+            self.regexp(self.filterStr)
+        else:
+            raise NotImplementedError()
 
     def layout(self, rect):
         super().layout(rect)
@@ -222,6 +255,20 @@ class AgencyLogView(JsonView):
         self.idx = None
         self.head = None
 
+    def title(self):
+        entry = self.app.log[self.idx]
+        return "Agency Log View {}".format(entry['_key'])
+
+    def serialize(self):
+        return {
+            'idx': self.idx,
+            'head': self.head
+        }
+
+    def restore(self, state):
+        self.idx = state['idx']
+        self.head = state['head']
+
     def update(self):
         idx = self.app.list.getSelectedIndex()
         if not idx == self.idx:
@@ -241,6 +288,20 @@ class AgencyStoreView(LineView):
         self.lastIdx = None
         self.path = []
         self.pathHistory = []
+
+    def title(self):
+        return "Agency Store View"
+
+    def serialize(self):
+        return {
+            'path': self.path,
+            'pathHistory': self.pathHistory
+        }
+
+    def restore(self, state):
+        self.path = state['path']
+        self.pathHistory = state['pathHistory']
+        self.lastIdx = None
 
     def layout(self, rect):
         super().layout(rect)
@@ -306,6 +367,21 @@ class AgencyStoreView(LineView):
     def jsonLines(self, value):
         self.lines = json.dumps(value, indent=4, separators=(',', ': ')).splitlines()
 
+    def __common_prefix_idx(self, strings):
+        if len(strings) == 0:
+            return None
+
+        maxlen = min(len(s) for s in strings)
+
+        for i in range(0, maxlen):
+            c = strings[0][i]
+
+            if not all(s[i] == c for s in strings):
+                return i
+
+        return maxlen
+
+
     def completePath(self, pathstr):
         if self.store == None:
             return
@@ -315,30 +391,33 @@ class AgencyStoreView(LineView):
 
         path = agency.AgencyStore.parsePath(pathstr)
 
-        ref = self.store._ref(path)
-        if ref == None:
+        if pathstr[-1] == "/":
+            ref = self.store._ref(path)
+            if not ref == None and isinstance(ref, dict):
+                return list(ref.keys())
+        else:
             ref = self.store._ref(path[:-1])
             if not ref == None and isinstance(ref, dict):
                 word = path[-1]
                 # Now find all key that start with word
                 keys = [h for h in ref.keys() if h.startswith(word)]
 
-                if not len(keys) == 1:
-                    return list(keys)
+                if len(keys) > 1:
+
+                    # first complete to the common sub
+                    common = keys[0][:self.__common_prefix_idx(keys)]
+
+                    if path[-1] == common:
+                        return list(keys)
+
+                    return "/" + "/".join(path[:-1] + [common])
+
+                elif path[-1] == keys[0] and not pathstr[-1] == "/":
+                    ref = self.store._ref(path)
+                    if not ref == None and isinstance(ref, dict):
+                        return (pathstr + "/", ref.keys())
                 else:
                     return "/" + "/".join(path[:-1] + [keys[0]])
-        else:
-            if pathstr[-1] == '/':
-                if isinstance(ref, dict):
-                    keys = list(ref.keys())
-
-                    if not len(keys) == 1:
-                        return keys
-                    else:
-                        return "/" + "/".join(path + [keys[0]])
-            else:
-                if isinstance(ref, dict):
-                    return pathstr + '/'
         return None
 
 class ArangoAgencyAnalyserApp(App):
@@ -354,7 +433,7 @@ class ArangoAgencyAnalyserApp(App):
         self.switch = LayoutSwitch(Rect.zero(), [self.logView, self.view])
 
         self.split = LayoutColumns(self, self.rect, [self.list, self.switch], [4,6])
-        self.focus = self.list
+        self.focus = self.split
 
         if len(argv) == 2:
             self.loadLogFromFile(argv[1])
@@ -364,6 +443,13 @@ class ArangoAgencyAnalyserApp(App):
         else:
             raise RuntimeError("Invalid number of arguments")
 
+    def serialize(self):
+        return {
+            'split': self.split.serialize(),
+        }
+
+    def restore(self, state):
+        self.split.restore(state['split'])
 
     def loadLogFromFile(self, filename):
         with open(filename) as f:
@@ -385,6 +471,16 @@ class ArangoAgencyAnalyserApp(App):
             if updateSelection:
                 self.list.selectClosest(self.firstValidLogIdx)
 
+    def dumpJSON(self, filename):
+        if self.switch.idx == 0:
+            entry = self.log[self.logView.idx]
+            with open(filename, "w") as f:
+                json.dump(entry, f)
+        elif self.switch.idx == 1:
+            store = self.view.store._ref(self.view.path)
+            with open(filename, "w") as f:
+                json.dump(store, f)
+
     def update(self):
         self.split.update()
         super().update()
@@ -396,6 +492,10 @@ class ArangoAgencyAnalyserApp(App):
             self.stop = True
         elif cmd == "debug":
             self.debug = True
+        elif cmd == "dump":
+            if len(argv) != 2:
+                raise ValueError("Dump requires one parameter")
+            self.dumpJSON(argv[1])
         elif cmd == "split":
             if len(argv) != 3:
                 raise ValueError("Split requires two integer arguments")
@@ -423,10 +523,8 @@ class ArangoAgencyAnalyserApp(App):
             super().execCmd(argv)
 
     def input(self, c):
-        if c == curses.KEY_RIGHT:
-            self.focus = self.switch
-        elif c == curses.KEY_LEFT:
-            self.focus = self.list
+        if c == ord('\t'):
+            self.split.toggleFocus()
         elif c == curses.KEY_F1:
             self.switch.select(0)
         elif c == curses.KEY_F2:
@@ -456,6 +554,7 @@ def main(stdscr, argv):
 
 if __name__ == '__main__':
     try:
+        os.putenv("ESCDELAY", "0")  # Ugly hack to enabled escape key for direct use
         curses.wrapper(main, sys.argv)
     except Exception as e:
         raise e
