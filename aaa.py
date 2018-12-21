@@ -499,6 +499,16 @@ class ArangoAgencyAnalyserApp(App):
             if updateSelection:
                 self.list.selectClosest(self.firstValidLogIdx)
 
+    def dumpJSON(self, filename):
+        if self.switch.idx == 0:
+            entry = self.log[self.logView.idx]
+            with open(filename, "w") as f:
+                json.dump(entry, f)
+        elif self.switch.idx == 1:
+            store = self.view.store._ref(self.view.path)
+            with open(filename, "w") as f:
+                json.dump(store, f)
+
     def update(self):
         self.split.update()
         super().update()
@@ -510,6 +520,10 @@ class ArangoAgencyAnalyserApp(App):
             self.stop = True
         elif cmd == "debug":
             self.debug = True
+        elif cmd == "dump":
+            if len(argv) != 2:
+                raise ValueError("Dump requires one parameter")
+            self.dumpJSON(argv[1])
         elif cmd == "split":
             if len(argv) != 3:
                 raise ValueError("Split requires two integer arguments")
