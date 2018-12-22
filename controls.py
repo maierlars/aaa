@@ -166,7 +166,7 @@ class Control:
         pass
 
     def input(self, c):
-        pass
+        return False
 
     def serialize(self):
         raise NotImplementedError("Serialize was not implemented by the Control")

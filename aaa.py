@@ -192,6 +192,8 @@ class AgencyLogList(Control):
 
 
     def reset(self):
+        # get the current index to keep the selected entry
+        self.highlight = self.getSelectedIndex()
         self.list = None
         self.filterStr = None
         self.filterType = AgencyLogList.FILTER_NONE
@@ -255,8 +257,8 @@ class AgencyLogView(LineView):
         self.head = None
 
     def title(self):
-        entry = self.app.log[self.idx]
-        return "Agency Log View {}".format(entry['_key'])
+        key = self.app.log[self.idx]['_key'] if not self.idx == None else ""
+        return "Agency Log View {}".format(key)
 
     def serialize(self):
         return {
