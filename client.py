@@ -1,4 +1,3 @@
-
 import json
 import sys, ssl
 from http.client import HTTPConnection, HTTPSConnection

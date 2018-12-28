@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 
 import agency
 from controls import *
-from net import *
+from client import *
 
 ARANGO_LOG_ZERO = "00000000000000000000"
 
@@ -656,9 +656,9 @@ if __name__ == '__main__':
             host = o.netloc
             jwt = args.add
 
-            if o.scheme == "http" or not o.scheme:
+            if o.scheme in ["http", "tcp", ""]:
                 conn = HTTPConnection(host)
-            elif o.scheme == "https":
+            elif o.scheme in ["https", "ssl"]:
                 options = dict()
                 if args.noverify:
                     options["context"] = ssl._create_unverified_context()
