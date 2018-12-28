@@ -3,9 +3,6 @@ import json
 import sys, ssl
 from http.client import HTTPConnection, HTTPSConnection
 
-host  = sys.argv[1]
-jwt   = sys.argv[2]
-
 class ArangoError(RuntimeError):
   pass
 
