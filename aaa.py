@@ -6,9 +6,12 @@ import json
 import datetime
 import re
 from time import sleep
+import argparse
+from urllib.parse import urlparse
 
 import agency
 from controls import *
+from client import *
 
 ARANGO_LOG_ZERO = "00000000000000000000"
 
@@ -444,7 +447,7 @@ class AgencyStoreView(LineView):
         return None
 
 class ArangoAgencyAnalyserApp(App):
-    def __init__(self, stdscr, argv):
+    def __init__(self, stdscr, provider):
         super().__init__(stdscr)
         self.log = None
         self.snapshot = None
@@ -458,13 +461,15 @@ class ArangoAgencyAnalyserApp(App):
         self.split = LayoutColumns(self, self.rect, [self.list, self.switch], [4,6])
         self.focus = self.split
 
-        if len(argv) == 2:
-            self.loadLogFromFile(argv[1])
-        elif len(argv) == 3:
-            self.loadLogFromFile(argv[1])
-            self.loadSnapshotFromFile(argv[2], updateSelection = True)
-        else:
-            raise RuntimeError("Invalid number of arguments")
+        self.provider = provider
+        self.refresh(updateSelection = True)
+        # if len(argv) == 2:
+        #     self.loadLogFromFile(argv[1])
+        # elif len(argv) == 3:
+        #     self.loadLogFromFile(argv[1])
+        #     self.loadSnapshotFromFile(argv[2], updateSelection = True)
+        # else:
+        #     raise RuntimeError("Invalid number of arguments")
 
     def serialize(self):
         return {
@@ -474,17 +479,15 @@ class ArangoAgencyAnalyserApp(App):
     def restore(self, state):
         self.split.restore(state['split'])
 
-    def loadLogFromFile(self, filename):
-        with open(filename) as f:
-            self.log = json.load(f)
+    def refresh(self, updateSelection = False):
+        self.provider.refresh()
+        self.log = self.provider.log()
+        self.snapshot = self.provider.snapshot()
+        self.firstValidLogIdx = None
 
-    def loadSnapshotFromFile(self, filename, updateSelection = False):
-        with open(filename) as f:
-            self.snapshot = json.load(f)
+        msg = "Loaded {count} log entries, ranging from\n{first[timestamp]} ({first[_key]}) to {last[timestamp]} ({last[_key]}).".format(count = len(self.log), first = self.log[0], last = self.log[-1])
 
-            # update the highlighted entry to be the first available in
-            # snapshot. Assume log is already loaded.
-            self.firstValidLogIdx = None
+        if not self.snapshot == None:
             for i, e in enumerate(self.log):
                 if e["_key"] <= self.snapshot["_key"]:
                     self.firstValidLogIdx = i
@@ -493,6 +496,10 @@ class ArangoAgencyAnalyserApp(App):
 
             if updateSelection:
                 self.list.selectClosest(self.firstValidLogIdx)
+
+            msg += "\nUsing snapshot {snapshot[_id]}.".format(snapshot = self.snapshot)
+
+        self.displayMsg(msg, curses.A_STANDOUT)
 
     def dumpJSON(self, filename):
         if self.switch.idx == 0:
@@ -559,6 +566,61 @@ class ArangoAgencyAnalyserApp(App):
         super().layout()
         self.split.layout(self.rect)
 
+
+class ArangoAgencyLogProvider:
+
+    def __init__(self, logfile, snapshotFile):
+        self.logfile = logfile
+        self.snapshotFile = snapshotFile
+        self.refresh()
+
+    def log(self):
+        raise NotImplementedError
+
+    def snapshot(self):
+        raise NotImplementedError
+
+    def refresh(self):
+        raise NotImplementedError
+
+class ArangoAgencyLogFileProvider:
+
+    def __init__(self, logfile, snapshotFile):
+        self.logfile = logfile
+        self.snapshotFile = snapshotFile
+        self.refresh()
+
+    def log(self):
+        return self._log
+
+    def snapshot(self):
+        return self._snapshot
+
+    def refresh(self):
+        with open(self.logfile) as f:
+            self._log = json.load(f)
+        if self.snapshotFile:
+            with open(self.snapshotFile) as f:
+                self._snapshot = json.load(f)
+
+
+class ArangoAgencyLogEndpointProvider:
+
+    def __init__(self, client):
+        self.client = client
+        self.refresh()
+
+    def log(self):
+        return self._log
+
+    def snapshot(self):
+        return self._snapshot
+
+    def refresh(self):
+        self._log = list(self.client.query("for l in log return l"))
+        snapshots = self.client.query("for s in compact filter s._key >= @first sort s._key limit 1 return s", first = self._log[0]["_key"])
+        self._snapshot = next(iter(snapshots), None)
+
 class ColorPairs:
     CP_RED_WHITE = 1
 
@@ -566,7 +628,7 @@ class ColorFormat:
     CF_ERROR = None
 
 
-def main(stdscr, argv):
+def main(stdscr, provider):
     stdscr.clear()
     curses.curs_set(0)
 
@@ -576,12 +638,41 @@ def main(stdscr, argv):
     # Init color formats
     ColorFormat.CF_ERROR = curses.A_BOLD | curses.color_pair(ColorPairs.CP_RED_WHITE);
 
-    app = ArangoAgencyAnalyserApp(stdscr, argv)
+
+    app = ArangoAgencyAnalyserApp(stdscr, provider)
     app.run()
 
 if __name__ == '__main__':
     try:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("log", help="log file or endpoint", type=str)
+        parser.add_argument('add', nargs='?', type=str, help="optional, snapshot file or jwt")
+        parser.add_argument("-k", "--noverify", help="don't verify certs", action="store_true")
+        args = parser.parse_args()
+
+        o = urlparse(args.log)
+
+        if not o.netloc:
+            provider = ArangoAgencyLogFileProvider(o.path, args.add)
+        else:
+            host = o.netloc
+            jwt = args.add
+
+            if o.scheme in ["http", "tcp", ""]:
+                conn = HTTPConnection(host)
+            elif o.scheme in ["https", "ssl"]:
+                options = dict()
+                if args.noverify:
+                    options["context"] = ssl._create_unverified_context()
+
+                conn = HTTPSConnection(host, **options)
+            else:
+                raise Exception("Unknown scheme: {}".format(o.scheme))
+
+            client = ArangoClient(conn, jwt)
+            provider = ArangoAgencyLogEndpointProvider(client)
+
         os.putenv("ESCDELAY", "0")  # Ugly hack to enabled escape key for direct use
-        curses.wrapper(main, sys.argv)
+        curses.wrapper(main, provider)
     except Exception as e:
         raise e
