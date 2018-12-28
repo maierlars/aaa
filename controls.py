@@ -402,7 +402,7 @@ class App:
             maxlen = self.rect.width
 
             # display line by line, wrap long lines
-            lines = [ wrap for line in msg.splitlines() for wrap in textwrap.wrap(line) ]
+            lines = [ wrap for line in msg.splitlines() for wrap in textwrap.wrap(line, maxlen) ]
             top = self.rect.y + self.rect.height - len(lines)
 
             # display lines

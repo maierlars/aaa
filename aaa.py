@@ -483,6 +483,8 @@ class ArangoAgencyAnalyserApp(App):
         self.snapshot = self.provider.snapshot()
         self.firstValidLogIdx = None
 
+        msg = "Loaded {count} log entries, ranging from\n{first[timestamp]} ({first[_key]}) to {last[timestamp]} ({last[_key]}).".format(count = len(self.log), first = self.log[0], last = self.log[-1])
+
         if not self.snapshot == None:
             for i, e in enumerate(self.log):
                 if e["_key"] <= self.snapshot["_key"]:
@@ -492,6 +494,10 @@ class ArangoAgencyAnalyserApp(App):
 
             if updateSelection:
                 self.list.selectClosest(self.firstValidLogIdx)
+
+            msg += "\nUsing snapshot {snapshot[_id]}.".format(snapshot = self.snapshot)
+
+        self.displayMsg(msg, curses.A_STANDOUT)
 
     def dumpJSON(self, filename):
         if self.switch.idx == 0:
