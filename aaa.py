@@ -147,7 +147,7 @@ class AgencyLogList(Control):
 
                 self.app.stdscr.addnstr(y, x, msg, maxlen, attr)
             elif i == 0:
-                self.app.stdscr.addnstr(y, x, "Nothing to display", maxlen, curses.A_BOLD | ColorFormat.CF_ERROR)
+                self.app.stdscr.addnstr(y, x, "Nothing to display", maxlen, curses.A_BOLD | ColorFormat.ERROR)
             else:
                 self.app.stdscr.move(y, x)
             self.app.stdscr.clrtoeol()
@@ -337,11 +337,11 @@ class AgencyStoreView(JsonView):
                 self.store.apply(self.app.log[i]["request"])
         elif snapshot == None:
             self.head = None
-            self.lines = [[(ColorFormat.CF_ERROR, "No snapshot available")]]
+            self.lines = [[(ColorFormat.ERROR, "No snapshot available")]]
             return
         elif log[idx]["_key"] < snapshot["_key"]:
             self.head = None
-            self.lines = [[(ColorFormat.CF_ERROR, "Can not replicate agency state. Not covered by snapshot.")]]
+            self.lines = [[(ColorFormat.ERROR, "Can not replicate agency state. Not covered by snapshot.")]]
             return
         else:
             self.store = agency.AgencyStore(snapshot["readDB"][0])
@@ -574,6 +574,8 @@ class ArangoAgencyLogFileProvider:
         if self.snapshotFile:
             with open(self.snapshotFile) as f:
                 self._snapshot = json.load(f)
+        else:
+            self._snapshot = None
 
 
 class ArangoAgencyLogEndpointProvider:
