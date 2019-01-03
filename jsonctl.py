@@ -53,12 +53,12 @@ class JsonView(Control):
 
         def key(self, string):
             assert self.keyRange == None
-            self.keyRange = (len(self.line), len(string))
+            self.keyRange = (len(self.line), len(self.line) + len(string))
             self.line += string
 
         def value(self, string):
             assert self.valueRange == None
-            self.valueRange = (len(self.line), len(string))
+            self.valueRange = (len(self.line), len(self.line) + len(string))
             self.line += string
 
         def lineRange(self, lineRange, valueType):
@@ -149,9 +149,12 @@ class JsonView(Control):
 
     def parsePrimitiveValue(value, lineData, indent, path):
         if isinstance(value, str):
-            lineData[-1].value([
-                (JsonColors.STRING, '"{}"'.format(value))
+            line = lineData[-1]
+            line.add([(JsonColors.STRING, '"')])
+            line.value([
+                (JsonColors.STRING, value)
             ])
+            line.add([(JsonColors.STRING, '"')])
         elif value is False:
             lineData[-1].value([
                 (JsonColors.FALSE, "false")

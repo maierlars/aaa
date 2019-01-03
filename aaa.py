@@ -281,7 +281,7 @@ class AgencyLogView(JsonView):
         super().set(entry)
 
 
-class AgencyStoreView(LineView):
+class AgencyStoreView(JsonView):
     def __init__(self, app, rect):
         super().__init__(app, rect)
         self.store = None
@@ -344,7 +344,7 @@ class AgencyStoreView(LineView):
                 if log[idx]["_key"] >= snapshot["_key"]:
                     self.store.apply(self.app.log[i]["request"])
 
-        self.jsonLines(self.store._ref(self.path))
+        self.set(self.store._ref(self.path))
 
 
     def update(self):
@@ -360,12 +360,6 @@ class AgencyStoreView(LineView):
             self.lastIdx = None # trigger update
         else:
             super().input(c)
-
-    def set(self, store):
-        self.store = store
-
-    def jsonLines(self, value):
-        self.lines = json.dumps(value, indent=4, separators=(',', ': ')).splitlines()
 
     def __common_prefix_idx(self, strings):
         if len(strings) == 0:
