@@ -602,6 +602,8 @@ class ArangoAgencyLogFileProvider:
         if self.snapshotFile:
             with open(self.snapshotFile) as f:
                 self._snapshot = json.load(f)
+        else:
+            self._snapshot = None
 
 
 class ArangoAgencyLogEndpointProvider:
