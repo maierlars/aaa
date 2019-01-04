@@ -619,7 +619,9 @@ class ArangoAgencyLogEndpointProvider:
         return self._snapshot
 
     def refresh(self):
+        print("Querying for log")
         self._log = list(self.client.query("for l in log return l"))
+        print("Querying for snapshot")
         snapshots = self.client.query("for s in compact filter s._key >= @first sort s._key limit 1 return s", first = self._log[0]["_key"])
         self._snapshot = next(iter(snapshots), None)
 
@@ -662,12 +664,16 @@ if __name__ == '__main__':
 
             if o.scheme in ["http", "tcp", ""]:
                 conn = HTTPConnection(host)
+                print("Connecting to {}".format(host))
+                conn.connect()
             elif o.scheme in ["https", "ssl"]:
                 options = dict()
                 if args.noverify:
                     options["context"] = ssl._create_unverified_context()
 
                 conn = HTTPSConnection(host, **options)
+                print("Connecting to {}".format(host))
+                conn.connect()
             else:
                 raise Exception("Unknown scheme: {}".format(o.scheme))
 
