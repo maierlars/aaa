@@ -341,37 +341,13 @@ class AgencyStoreView(LineView):
             return
         self.lastIdx = idx
 
-        # if the id of the first log entry is ARANGO_LOG_ZERO,
-        # generate the agency from empty store
-        # otherwise check if the log entry is after (>=) the
-        log = self.app.log
-        if log == None or len(log) == 0:
-            return
-        snapshot = self.app.snapshot
+        try:
+            self.store = self.app.getStoreAtIndex(idx)
+            self.jsonLines(self.store._ref(self.path))
 
-        self.store = None
-
-        if log[0]["_key"] == ARANGO_LOG_ZERO:
-            # just apply all log entries
-            self.store = agency.AgencyStore()
-            for i in range(0, idx+1):
-                self.store.apply(self.app.log[i]["request"])
-        elif snapshot == None:
+        except Exception as e:
             self.head = None
-            self.lines = [[(ColorFormat.CF_ERROR, "No snapshot available")]]
-            return
-        elif log[idx]["_key"] < snapshot["_key"]:
-            self.head = None
-            self.lines = [[(ColorFormat.CF_ERROR, "Can not replicate agency state. Not covered by snapshot.")]]
-            return
-        else:
-            self.store = agency.AgencyStore(snapshot["readDB"][0])
-            for i in range(self.app.firstValidLogIdx, idx+1):
-                if log[idx]["_key"] >= snapshot["_key"]:
-                    self.store.apply(self.app.log[i]["request"])
-
-        self.jsonLines(self.store._ref(self.path))
-
+            self.lines = [[(ColorFormat.CF_ERROR, "Error generating store: {}".format(str(e)))]]
 
     def update(self):
         self.head = "/" + "/".join(self.path)
@@ -501,6 +477,32 @@ class ArangoAgencyAnalyserApp(App):
 
         self.displayMsg(msg, curses.A_STANDOUT)
 
+    def getStoreAtIndex(self, idx):
+        # if the id of the first log entry is ARANGO_LOG_ZERO,
+        # generate the agency from empty store
+        # otherwise check if the log entry is after (>=) the
+        log = self.log
+        if log == None or len(log) == 0:
+            return dict()
+        snapshot = self.snapshot
+
+        if log[0]["_key"] == ARANGO_LOG_ZERO:
+            # just apply all log entries
+            store = agency.AgencyStore()
+            for i in range(0, idx+1):
+                store.apply(log[i]["request"])
+            return store
+        elif snapshot == None:
+            raise RuntimeError("No snapshot available")
+        elif log[idx]["_key"] < snapshot["_key"]:
+            raise RuntimeError("Index not covered by snapshots")
+        else:
+            store = agency.AgencyStore(snapshot["readDB"][0])
+            for i in range(self.firstValidLogIdx, idx+1):
+                if log[idx]["_key"] >= snapshot["_key"]:
+                    store.apply(log[i]["request"])
+            return store
+
     def dumpJSON(self, filename):
         if self.switch.idx == 0:
             entry = self.log[self.logView.idx]
@@ -522,6 +524,10 @@ class ArangoAgencyAnalyserApp(App):
             self.stop = True
         elif cmd == "debug":
             self.debug = True
+        elif cmd == "whois":
+            if len(argv) != 2:
+                raise ValueError("whois expects one parameter")
+            self.whois(argv[1])
         elif cmd == "dump":
             if len(argv) != 2:
                 raise ValueError("Dump requires one parameter")
@@ -551,6 +557,31 @@ class ArangoAgencyAnalyserApp(App):
             raise Exception("This is a long error message with \n line breaks")
         else:
             super().execCmd(argv)
+
+    def whois(self, string):
+        storeObj = self.getStoreAtIndex(self.list.getSelectedIndex())
+        store = storeObj.store
+        try:
+            servers = store["arango"]["Current"]["ServersRegistered"]
+            mapUniqueShort = store["arango"]["Target"]["MapUniqueToShortID"]
+
+            if not string in servers:
+                raise Exception("Server {} not found".format(string))
+            server = servers[string]
+
+            msg = "Server: {}\n".format(string)
+
+            if string in mapUniqueShort:
+                msg += "Short: {}\n".format(mapUniqueShort[string]["ShortName"])
+
+            msg += "Endpoint: {}\n".format(server["endpoint"])
+            if "advertisedEndpoint" in server:
+                msg += "Adv. Endpoint: {}\n".format(server["advertisedEndpoint"])
+
+            self.displayMsg(msg, curses.A_STANDOUT)
+
+        except KeyError as e:
+            raise Exception("Agency incomplete: {}".format(str(e)))
 
     def input(self, c):
         if c == ord('\t'):

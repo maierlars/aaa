@@ -42,3 +42,7 @@ again name is optional and if empty a prompt with autocomplete will open.
 
 You can use `0-9` keys as shortcuts to restore state `"0"-"9"`. To save the state
 use `ALT + "x"`.
+
+# Whois
+
+Use `:whois <server>` to translate a long server name to short name and endpoint.
