@@ -428,6 +428,9 @@ class AgencyStoreView(LineView):
                 # Now find all key that start with word
                 keys = [h for h in ref.keys() if h.startswith(word)]
 
+                if len(keys) == 0:
+                    return None
+
                 if len(keys) > 1:
 
                     # first complete to the common sub
