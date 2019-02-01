@@ -623,7 +623,7 @@ class ArangoAgencyLogEndpointProvider:
 
     def refresh(self):
         print("Querying for log")
-        self._log = list(self.client.query("for l in log return l"))
+        self._log = list(self.client.query("for l in log sort l._key return l"))
         print("Querying for snapshot")
         snapshots = self.client.query("for s in compact filter s._key >= @first sort s._key limit 1 return s", first = self._log[0]["_key"])
         self._snapshot = next(iter(snapshots), None)
