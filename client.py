@@ -1,4 +1,4 @@
-import json
+import json, codecs
 import sys, ssl
 from http.client import HTTPConnection, HTTPSConnection
 
@@ -41,7 +41,8 @@ class ArangoClient:
 
     self.connection.request(method, url, json.dumps(body), header)
     with self.connection.getresponse() as httpresp:
-      return json.load(httpresp)
+      reader = codecs.getreader("utf-8")
+      return json.load(reader(httpresp))
 
   def query(self, string, **binds):
     body = { "query": string, "bindVars": binds }
