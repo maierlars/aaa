@@ -197,6 +197,8 @@ class AgencyLogList(Control):
     def reset(self):
         # get the current index to keep the selected entry
         self.highlight = self.getSelectedIndex()
+        if self.highlight == None:
+            self.highlight = 0
         self.list = None
         self.filterStr = None
         self.filterType = AgencyLogList.FILTER_NONE
@@ -601,7 +603,19 @@ class ArangoAgencyLogFileProvider:
 
     def refresh(self):
         with open(self.logfile) as f:
-            self._log = json.load(f)
+            data = json.load(f)
+            if isinstance(data, dict):
+                if "result" in data:
+                    data = data["result"]
+                else:
+                    raise Exception("Data object does not have result property")
+
+            if not isinstance(data, list):
+                raise Exception("Expected log to be a list")
+
+            self._log = data
+            self._log.sort(key = lambda x : x["_key"])
+
         if self.snapshotFile:
             with open(self.snapshotFile) as f:
                 self._snapshot = json.load(f)
