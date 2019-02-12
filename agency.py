@@ -100,9 +100,9 @@ class AgencyStore:
                     delta = value['new'] if 'new' in value else 1
                     self.add(path, - delta)
                 elif op == "push":
-                    self.push(path, value)
+                    self.push(path, value['new'])
                 elif op == "pop":
-                    self.pop(path, value)
+                    self.pop(path, value['new'])
                 elif op == "shift":
                     self.shift(path, value)
                 elif op == "prepend":
