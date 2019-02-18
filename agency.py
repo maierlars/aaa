@@ -50,6 +50,11 @@ class AgencyStore:
         if isinstance(ref, list):
             ref.pop(0)
 
+    def erase(self, path, value):
+        ref = self._ref(path)
+        if isinstance(ref, list):
+            ref.remove(value)
+
     def prepend(self, path, value):
         ref = self._ref(path[:-1])
         if isinstance(ref, dict):
@@ -91,7 +96,7 @@ class AgencyStore:
 
                 if op == "set":
                     self.set(path, value['new'])
-                elif op == "delete":
+                elif op == "delete" :
                     self.delete(path)
                 elif op == "increment":
                     delta = value['new'] if 'new' in value else 1
@@ -103,6 +108,8 @@ class AgencyStore:
                     self.push(path, value['new'])
                 elif op == "pop":
                     self.pop(path, value['new'])
+                elif op == "erase":
+                    self.erase(path, value['val'])
                 elif op == "shift":
                     self.shift(path, value)
                 elif op == "prepend":
