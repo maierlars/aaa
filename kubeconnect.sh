@@ -19,7 +19,12 @@ if [ -z "$DEPLOYMENTNAME" ] ; then
   exit 0
 fi
 
-JWTSECRET=$(kubectl get secret -o json $DEPLOYMENTNAME-jwt | jq -r .data.token | base64 -d -w0)
+DEPLOYMENTRES=$(kubectl get arango -o json $DEPLOYMENTNAME)
+JWTSECRETNAME=$(echo $DEPLOYMENTRES | jq -r .spec.auth.jwtSecretName)
+TLSCA=$(echo $DEPLOYMENTRES | jq -r .spec.tls.caSecretName)
+
+
+JWTSECRET=$(kubectl get secret -o json $JWTSECRETNAME | jq -r .data.token | base64 -d -w0)
 
 if [ ! $? -eq 0 ] ; then
   echo "Failed to get jwt-secret"
@@ -34,10 +39,19 @@ if [ ! $? -eq 0 ] ; then
   exit 0
 fi
 
+SCHEME=https
+AAAPARAMS=-k
+
+if [ "$TLSCA" = "None" ] ; then
+  echo Using http, no encryption.
+  SCHEME=http
+  AAAPARAMS=
+fi
+
 # create pod port-forwarding
 kubectl port-forward $AGENTPOD 9898:8529 &
 PFPID=$!
 sleep 2
-python3 aaa.py http://localhost:9898/ $JWT
+python3 aaa.py $AAAPARAMS $SCHEME://localhost:9898/ $JWT
 
 kill -9 $PFPID
