@@ -7,24 +7,49 @@ if [ -z "$KUBECONFIG" ] ; then
   exit 0
 fi
 
-
-# check if DEPLOYMENTNAME is set, override it by parameter 1
-if [ -n "$1" ] ; then
-  DEPLOYMENTNAME=$1
+if [ -z "$DEPLOYMENTNAMESPACE" ] ; then
+  DEPLOYMENTNAMESPACE=default
 fi
 
-if [ -z "$DEPLOYMENTNAME" ] ; then
-  echo "DEPLOYMENTNAME not set"
-  echo "Use $0 <deploymentname>"
+
+DEPLOYMENTNAME=
+
+while [ "$1" != "" ]; do
+  case $1 in
+    -n )  shift
+          DEPLOYMENTNAMESPACE=$1
+          ;;
+    * )
+        if [ -n "$DEPLOYMENTNAME" ] ; then
+          echo "Use $0 <deploymentname> [-n <namespace>]"
+          exit 1
+        fi
+        DEPLOYMENTNAME=$1
+  esac
+  shift
+done
+
+
+if [ -z "$DEPLOYMENTNAMESPACE" ] ; then
+  echo "invalid namespace"
   exit 0
 fi
 
-DEPLOYMENTRES=$(kubectl get arango -o json $DEPLOYMENTNAME)
+echo Using namespace $DEPLOYMENTNAMESPACE
+
+if [ -z "$DEPLOYMENTNAME" ] ; then
+  echo "DEPLOYMENTNAME not set"
+  exit 0
+fi
+
+echo Using deployment $DEPLOYMENTNAME
+
+DEPLOYMENTRES=$(kubectl get arango -o json -n $DEPLOYMENTNAMESPACE $DEPLOYMENTNAME)
 JWTSECRETNAME=$(echo $DEPLOYMENTRES | jq -r .spec.auth.jwtSecretName)
 TLSCA=$(echo $DEPLOYMENTRES | jq -r .spec.tls.caSecretName)
 
 
-JWTSECRET=$(kubectl get secret -o json $JWTSECRETNAME | jq -r .data.token | base64 -d -w0)
+JWTSECRET=$(kubectl get secret -o json -n $DEPLOYMENTNAMESPACE $JWTSECRETNAME | jq -r .data.token | base64 -d -w0)
 
 if [ ! $? -eq 0 ] ; then
   echo "Failed to get jwt-secret"
@@ -32,7 +57,7 @@ if [ ! $? -eq 0 ] ; then
 fi
 
 JWT=$(jwtgen -a HS256 -s "$JWTSECRET" -c server_id=hans -c iss=arangodb)
-AGENTPOD=$(kubectl get pods -o json -l role=agent -l arango_deployment=$DEPLOYMENTNAME | jq -r .items[0].metadata.name)
+AGENTPOD=$(kubectl get pods -o json -n $DEPLOYMENTNAMESPACE -l role=agent -l arango_deployment=$DEPLOYMENTNAME | jq -r .items[0].metadata.name)
 
 if [ ! $? -eq 0 ] ; then
   echo "Failed to get agency-pod"
