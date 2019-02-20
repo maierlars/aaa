@@ -232,7 +232,7 @@ class AgencyLogList(Control):
                 self.grep(string)
         elif c == ord('R'):
             yesNo = self.app.userStringLine(label = "Reset all filters", prompt = "[Y/n] ")
-            if yesNo == "Y":
+            if yesNo == "Y" or yesNo == "y":
                 self.reset()
 
     # Returns the index of the selected log entry.
@@ -516,6 +516,12 @@ class ArangoAgencyAnalyserApp(App):
             with open(filename, "w") as f:
                 json.dump(store, f)
 
+    def dumpAll(self, logfile, snapshotfile):
+        with open(logfile, "w") as f:
+            json.dump(self.log, f)
+        with open(snapshotfile, "w") as f:
+            json.dump(self.snapshot, f)
+
     def update(self):
         self.split.update()
         super().update()
@@ -548,6 +554,17 @@ class ArangoAgencyAnalyserApp(App):
                 self.switch.select(1)
             else:
                 raise ValueError("Unkown view: {}".format(argv[1]))
+        elif cmd == "dump-all":
+            if len(argv) != 2:
+                raise ValueError("dump-all requires one parameter")
+            dumpLogFile = argv[1] + ".log.json"
+            dumpSnapshotFile = argv[1] + ".snapshot.json"
+            if os.path.isfile(dumpLogFile) or os.path.isfile(dumpSnapshotFile):
+                yesNo = self.app.userStringLine(label = "Some file already exist. Continue?", prompt = "[Y/n] ")
+                if not (yesNo == "Y" or yesNo == "y"):
+                    return
+            self.dumpAll(dumpLogFile, dumpSnapshotFile)
+
         elif cmd == "time":
             self.displayMsg("It is now {}".format(datetime.datetime.now().time()), 0)
         elif cmd == "help":

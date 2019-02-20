@@ -53,7 +53,8 @@ class AgencyStore:
     def erase(self, path, value):
         ref = self._ref(path)
         if isinstance(ref, list):
-            ref.remove(value)
+            if value in ref:
+                ref.remove(value)
 
     def prepend(self, path, value):
         ref = self._ref(path[:-1])
@@ -120,10 +121,14 @@ class AgencyStore:
 
     def _ref(self, path):
         result = self.store
-        for x in path:
-            if not isinstance(result, dict) or not x in result:
-                return None
-            result = result[x]
+        try:
+            for x in path:
+                if isinstance(result, list):
+                    result = result[int(x)]
+                else:
+                    result = result[x]
+        except:
+            return None
         return result
 
     def get(self, path):
