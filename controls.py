@@ -262,7 +262,7 @@ class App:
         self.stop = False
         self.states = dict()
 
-        self.debug = True
+        self.debug = False
         self.focus = None
         self.layoutWindow()
 

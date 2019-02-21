@@ -13,11 +13,15 @@ fi
 
 
 DEPLOYMENTNAME=
+DUMPPREFIX=
 
 while [ "$1" != "" ]; do
   case $1 in
     -n )  shift
           DEPLOYMENTNAMESPACE=$1
+          ;;
+    --dump ) shift
+          DUMPPREFIX=$1
           ;;
     * )
         if [ -n "$DEPLOYMENTNAME" ] ; then
@@ -77,6 +81,45 @@ fi
 kubectl port-forward $AGENTPOD 9898:8529 &
 PFPID=$!
 sleep 2
-python3 aaa.py $AAAPARAMS $SCHEME://localhost:9898/ $JWT
+
+if [ -n "$DUMPPREFIX" ] ; then
+  echo Generating dump files
+  curl -s $AAAPARAMS $SCHEME://localhost:9898/_api/agency/read -d'[["/"]]' -H"Authorization: bearer $JWT" > $DUMPPREFIX.state.json
+
+  CURSOR=$(curl -k $VERBOSE -s -H "Authorization: Bearer $JWT"  -X POST $AAAPARAMS $SCHEME://localhost:9898/_api/cursor -d'{"query":"for l in log sort l._key return l", "batchSize": 100}')
+  CURSORID=$(jq -r ".id" <<< "$CURSOR")
+  HASERROR=$(jq -r ".error" <<< "$CURSOR")
+  if [ "$HASERROR" == "true" ]; then
+    echo Error POST cursor: $(jq -r ".errorMessage" <<< "$CURSOR")
+    exit
+  fi
+
+  echo -n  "[" > $DUMPPREFIX.log.json
+
+  while :
+  do
+    HASERROR=$(jq -r ".error" <<< "$CURSOR")
+    if [ "$HASERROR" == "true" ]; then
+      echo Error: $(jq -r ".errorMessage" <<< "$CURSOR")
+    else
+      echo $CURSOR | jq -r -c ".result"| tail --bytes=+2 | head --bytes=-2 >> $DUMPPREFIX.log.json
+    fi
+
+    HASMORE=$(jq -r ".hasMore" <<< $CURSOR)
+    if [ "$HASMORE" == "false" ]; then
+      break
+    fi
+
+    echo "," >> $DUMPPREFIX.log.json
+
+    CURSOR=$(curl -k $VERBOSE -s -H "Authorization: Bearer $JWT" -X PUT $AAAPARAMS $SCHEME://localhost:9898/_api/cursor/$CURSORID)
+  done
+
+  echo -n "]" >> $DUMPPREFIX.log.json
+
+else
+  python3 aaa.py $AAAPARAMS $SCHEME://localhost:9898/ $JWT
+fi
+
 
 kill -9 $PFPID

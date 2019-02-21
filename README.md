@@ -17,7 +17,7 @@ The right side contains different views of information. Currently supported mode
 - `log`: display the selected log entry
 - `store`: display the state of the agency at the selected moment (reconstructed from log entries)
 
-In both modes one can scroll the text using `UP/DOWN` keys. Focus can be switched using `LEFT/RIGHT`.
+In both modes one can scroll the text using `UP/DOWN` keys. Focus can be switched using `TAB`.
 To change the view mode either use `F1/F2` or `:view <mode>`.
 
 When in `store` mode with focus on the view side, use `p` to modify the displayed path
@@ -27,8 +27,6 @@ When in the left hand side, use `f` to enter a regular expression to filter entr
 Use `g` to do a basic grep like search on the log entries. Reset filters via `R`.
 
 To dump the content of the JSON view into a file use `:dump filename`.
-
-You can switch the sides via `TAB`.
 
 # Save and Restore states
 
