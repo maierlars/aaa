@@ -1,5 +1,6 @@
 import curses, curses.ascii
 import textwrap
+import json
 
 class Rect:
     def __init__(self, x, y, width, height):
@@ -181,10 +182,13 @@ class Control:
 class LineView(Control):
     def __init__(self, app, rect):
         super().__init__(app, rect)
+        self.json = None
         self.lines = []
         self.top = 0
         self.head = None
         self.highlight = None
+        self.findStr = None
+        self.findList = []
 
     def serialize(self):
         return {
@@ -203,6 +207,8 @@ class LineView(Control):
             return
 
         maxtop = len(self.lines) - self.rect.height + 1
+        if self.head != None:
+            maxtop += 1
         if self.top > maxtop:
             self.top = maxtop
         if self.top < 0:
@@ -234,6 +240,33 @@ class LineView(Control):
             y += 1
             i += 1
 
+    def find(self, string):
+        if not string:
+            self.reset()
+        else:
+            self.findStr = string
+            self.jsonLines(self.json)
+            self.next()
+
+    def reset(self):
+        self.findStr = None
+        self.jsonLines(self.json)
+
+    def next(self):
+        line = self.top
+        for j in self.findList:
+            if j > line:
+                line = j
+                break
+        self.top = line
+
+    def prev(self):
+        line = self.top
+        for j in reversed(self.findList):
+            if j < line:
+                line = j
+                break
+        self.top = line
 
     def input(self, c):
         if c == curses.KEY_UP:
@@ -248,7 +281,35 @@ class LineView(Control):
             self.top = len(self.lines) - 1
         elif c == curses.KEY_HOME:
             self.top = 0
+        elif c == ord('f'):
+            findStr = self.app.userStringLine(label = "Find", default = self.findStr, prompt = "> ")
+            if not findStr == None:
+                self.find(findStr)
+        elif c == ord('n'):
+            self.next()
+        elif c == ord('N'):
+            self.prev()
 
+
+    def highlightLines(self):
+        def intersperse(lst, item):
+            result = [item] * (len(lst) * 2 - 1)
+            result[0::2] = lst
+            return result
+
+        if not self.findStr == None:
+            self.findList = []
+            for i, line in enumerate(self.lines):
+                split = line.split(self.findStr)
+                if len(split) > 1:
+                    self.findList.append(i)
+                    part = intersperse(split, (curses.A_STANDOUT, self.findStr))
+                    self.lines[i] = part
+
+    def jsonLines(self, value):
+        self.json = value
+        self.lines = json.dumps(value, indent=4, separators=(',', ': ')).splitlines()
+        self.highlightLines()
 
     def head(self, headline):
         self.head = headline

@@ -259,6 +259,7 @@ class AgencyLogView(LineView):
     def __init__(self, app, rect):
         super().__init__(app, rect)
         self.idx = None
+        self.lastIdx = None
         self.head = None
 
     def title(self):
@@ -278,32 +279,20 @@ class AgencyLogView(LineView):
     def update(self):
         self.idx = self.app.list.getSelectedIndex()
 
-        if not self.idx == None and self.idx < len(self.app.log):
-            entry = self.app.log[self.idx]
-            self.head = None #entry['_key']
-            self.jsonLines(entry)
-            self.highlightLines()
+        if not self.idx == self.lastIdx :
+            if not self.idx == None and self.idx < len(self.app.log):
+                entry = self.app.log[self.idx]
+                self.head = None #entry['_key']
 
+                loglist = self.app.list
+                if loglist.filterType == AgencyLogList.FILTER_GREP:
+                    self.findStr = loglist.filterStr
+                else:
+                    self.findStr = None
+                self.jsonLines(entry)
+
+        self.lastIdx = self.idx
         super().update()
-
-    def highlightLines(self):
-        def intersperse(lst, item):
-            result = [item] * (len(lst) * 2 - 1)
-            result[0::2] = lst
-            return result
-
-        logList = self.app.list
-        if not logList.filterType == AgencyLogList.FILTER_GREP:
-            return
-
-        filt = logList.filterStr
-        if filt:
-            for i, line in enumerate(self.lines):
-                part = intersperse(line.split(filt), (curses.A_BOLD, filt))
-                self.lines[i] = part
-
-    def jsonLines(self, value):
-        self.lines = json.dumps(value, indent=4, separators=(',', ': ')).splitlines()
 
     def set(self, idx):
         self.idx = idx
@@ -391,9 +380,6 @@ class AgencyStoreView(LineView):
 
     def set(self, store):
         self.store = store
-
-    def jsonLines(self, value):
-        self.lines = json.dumps(value, indent=4, separators=(',', ': ')).splitlines()
 
     def __common_prefix_idx(self, strings):
         if len(strings) == 0:
