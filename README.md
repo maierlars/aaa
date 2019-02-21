@@ -1,4 +1,4 @@
-### Arango Agency Analyzer
+# Arango Agency Analyzer
 
 Allows analysis of arangodbs agency logs.
 
@@ -28,7 +28,7 @@ Use `g` to do a basic grep like search on the log entries. Reset filters via `R`
 
 To dump the content of the JSON view into a file use `:dump filename`.
 
-# Save and Restore states
+### Save and Restore states
 
 You can save and restore states of the analyizer. To store a state use:
 `:(s|save|store) [name]`
