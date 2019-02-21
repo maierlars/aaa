@@ -194,13 +194,15 @@ class LineView(Control):
         return {
             'top': self.top,
             'head': self.head,
-            'highlight': self.highlight
+            'highlight': self.highlight,
+            'findStr': self.findStr,
         }
 
     def restore(self, state):
         self.top = state['top']
         self.head = state['head']
         self.highlight = state['highlight']
+        self.findStr = state['findStr']
 
     def update(self):
         if self.rect.width == 0 or self.rect.height == 0:
