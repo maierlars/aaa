@@ -330,7 +330,6 @@ class AgencyStoreView(LineView):
 
         if self.lastIdx == idx:
             return
-        self.lastIdx = idx
 
         # if the id of the first log entry is ARANGO_LOG_ZERO,
         # generate the agency from empty store
@@ -339,8 +338,6 @@ class AgencyStoreView(LineView):
         if log == None or len(log) == 0:
             return
         snapshot = self.app.snapshot
-
-        self.store = None
 
         if log[0]["_key"] == ARANGO_LOG_ZERO:
             # just apply all log entries
@@ -356,11 +353,16 @@ class AgencyStoreView(LineView):
             self.lines = [[(ColorFormat.CF_ERROR, "Can not replicate agency state. Not covered by snapshot.")]]
             return
         else:
-            self.store = agency.AgencyStore(snapshot["readDB"][0])
-            for i in range(self.app.firstValidLogIdx, idx+1):
+            startidx = self.lastIdx
+            if self.lastIdx == None or self.store == None or idx < self.lastIdx:
+                startidx = self.app.firstValidLogIdx
+                self.store = agency.AgencyStore(snapshot["readDB"][0])
+
+            for i in range(startidx, idx+1):
                 if log[idx]["_key"] >= snapshot["_key"]:
                     self.store.apply(self.app.log[i]["request"])
 
+        self.lastIdx = idx
         self.jsonLines(self.store._ref(self.path))
 
 
