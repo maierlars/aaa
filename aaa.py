@@ -280,7 +280,9 @@ class AgencyLogView(LineView):
         self.idx = self.app.list.getSelectedIndex()
 
         if not self.idx == self.lastIdx :
-            if not self.idx == None and self.idx < len(self.app.log):
+            if self.idx == None:
+                self.jsonLines(None)
+            elif not self.idx == None and self.idx < len(self.app.log):
                 entry = self.app.log[self.idx]
                 self.head = None #entry['_key']
 
