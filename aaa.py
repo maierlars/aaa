@@ -629,6 +629,36 @@ class ArangoAgencyLogFileProvider:
         else:
             self._snapshot = None
 
+class ArangoAgencyDumpEndpointProvider:
+
+    def __init__(self, logfile, snapshotFile):
+        self.logfile = logfile
+        self.snapshotFile = snapshotFile
+        self.refresh()
+
+    def log(self):
+        return self._log
+
+    def snapshot(self):
+        return None
+
+    def refresh(self):
+        def convert(log):
+            key = str(log["index"]).zfill(20)
+            return {
+                "_key": key,
+                "_id": "log/" + key,
+                "request": log["query"],
+                "term": log["term"],
+                "timestamp": "XXXX-XX-XX"
+            }
+
+        with open(self.logfile) as f:
+            data = json.load(f)
+
+            self._log = [convert(x) for x in data]
+            self._log.sort(key = lambda x : x["_key"])
+
 
 class ArangoAgencyLogEndpointProvider:
 
@@ -676,12 +706,18 @@ if __name__ == '__main__':
         parser.add_argument("log", help="log file or endpoint", type=str)
         parser.add_argument('add', nargs='?', type=str, help="optional, snapshot file or jwt")
         parser.add_argument("-k", "--noverify", help="don't verify certs", action="store_true")
+        parser.add_argument("-f", "--format", help="format of input data", choices=["direct", "agency-dump"])
         args = parser.parse_args()
 
         o = urlparse(args.log)
 
         if not o.netloc:
-            provider = ArangoAgencyLogFileProvider(o.path, args.add)
+            if args.format in [None, "direct"]:
+                provider = ArangoAgencyLogFileProvider(o.path, args.add)
+            elif args.format == "agency-dump":
+                provider = ArangoAgencyDumpEndpointProvider(o.path, args.add)
+            else:
+                raise Exception("Unknown format: {}".format(args.format))
         else:
             host = o.netloc
             jwt = args.add
