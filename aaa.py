@@ -32,7 +32,7 @@ class AgencyLogList(Control):
         self.list = None
         self.filterType = AgencyLogList.FILTER_NONE
         self.filterHistory = []
-        self.formatString = "[{timestamp}|{term}] {_id} {urls}"
+        self.formatString = "[{timestamp}|{term}] {_key} {urls}"
 
     def title(self):
         return "Agency Log"
@@ -609,56 +609,37 @@ class ArangoAgencyLogFileProvider:
         return self._snapshot
 
     def refresh(self):
+        log = None
+        snapshot = None
+
         with open(self.logfile) as f:
-            data = json.load(f)
-            if isinstance(data, dict):
-                if "result" in data:
-                    data = data["result"]
+            print("Loading log from `{}`".format(self.logfile))
+            log = json.load(f)
+            if isinstance(log, dict):
+                if "result" in log:
+                    print("Interpreting object as query result, using `result` attribute")
+                    log = log["result"]
+                elif "log" in log:
+                    print("Interpreting object as agency-dump result, using `log` and `compaction` attribute")
+                    snapshot = log.get("compaction")
+                    log = log.get("log")
                 else:
-                    raise Exception("Data object does not have result property")
+                    raise Exception("Log file: can not interpret object")
 
-            if not isinstance(data, list):
+            if not isinstance(log, list):
                 raise Exception("Expected log to be a list")
-
-            self._log = data
-            self._log.sort(key = lambda x : x["_key"])
+            log.sort(key = lambda x : x["_key"])
 
         if self.snapshotFile:
-            with open(self.snapshotFile) as f:
-                self._snapshot = json.load(f)
-        else:
-            self._snapshot = None
+            if snapshot == None:
+                with open(self.snapshotFile) as f:
+                    print("Loading snapshot from `{}`".format(self.snapshotFile))
+                    snapshot = json.load(f)
+            else:
+                print("Ignoring snapshot file")
 
-class ArangoAgencyDumpEndpointProvider:
-
-    def __init__(self, logfile, snapshotFile):
-        self.logfile = logfile
-        self.snapshotFile = snapshotFile
-        self.refresh()
-
-    def log(self):
-        return self._log
-
-    def snapshot(self):
-        return None
-
-    def refresh(self):
-        def convert(log):
-            key = str(log["index"]).zfill(20)
-            return {
-                "_key": key,
-                "_id": "log/" + key,
-                "request": log["query"],
-                "term": log["term"],
-                "timestamp": "XXXX-XX-XX"
-            }
-
-        with open(self.logfile) as f:
-            data = json.load(f)
-
-            self._log = [convert(x) for x in data]
-            self._log.sort(key = lambda x : x["_key"])
-
+        self._log = log
+        self._snapshot = snapshot
 
 class ArangoAgencyLogEndpointProvider:
 
@@ -673,11 +654,21 @@ class ArangoAgencyLogEndpointProvider:
         return self._snapshot
 
     def refresh(self):
-        print("Querying for log")
-        self._log = list(self.client.query("for l in log sort l._key return l"))
-        print("Querying for snapshot")
-        snapshots = self.client.query("for s in compact filter s._key >= @first sort s._key limit 1 return s", first = self._log[0]["_key"])
-        self._snapshot = next(iter(snapshots), None)
+        role = self.client.serverRole()
+        print("Server has role {}".format(role))
+        self._dump = 0
+
+        if role == "COORDINATOR":
+            print("Receiving agency dump")
+            self._dump = self.client.agencyDump()
+            self._log = dump.get("log")
+            self._snapshot = dump.get("compaction")
+        elif role == "AGENT":
+            print("Querying for log")
+            self._log = list(self.client.query("for l in log sort l._key return l"))
+            print("Querying for snapshot")
+            snapshots = self.client.query("for s in compact filter s._key >= @first sort s._key limit 1 return s", first = self._log[0]["_key"])
+            self._snapshot = next(iter(snapshots), None)
 
 class ColorPairs:
     CP_RED_WHITE = 1
@@ -706,18 +697,12 @@ if __name__ == '__main__':
         parser.add_argument("log", help="log file or endpoint", type=str)
         parser.add_argument('add', nargs='?', type=str, help="optional, snapshot file or jwt")
         parser.add_argument("-k", "--noverify", help="don't verify certs", action="store_true")
-        parser.add_argument("-f", "--format", help="format of input data", choices=["direct", "agency-dump"])
         args = parser.parse_args()
 
         o = urlparse(args.log)
 
         if not o.netloc:
-            if args.format in [None, "direct"]:
-                provider = ArangoAgencyLogFileProvider(o.path, args.add)
-            elif args.format == "agency-dump":
-                provider = ArangoAgencyDumpEndpointProvider(o.path, args.add)
-            else:
-                raise Exception("Unknown format: {}".format(args.format))
+            provider = ArangoAgencyLogFileProvider(o.path, args.add)
         else:
             host = o.netloc
             jwt = args.add

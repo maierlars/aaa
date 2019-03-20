@@ -1,0 +1,5485 @@
+{
+  "index": 163,
+  "term": 1,
+  "agency": {
+    ".agency": {
+      "size": 3,
+      "id": "AGNT-71160a72-788c-4d7f-b8f9-51d52dd4886b",
+      "timeoutMult": 1,
+      "term": 1,
+      "active": [
+        "AGNT-d5c93b92-8a10-4bcf-9c54-e7138095fb62",
+        "AGNT-53e30b64-c367-4e5b-b894-e600ab83d273",
+        "AGNT-71160a72-788c-4d7f-b8f9-51d52dd4886b"
+      ],
+      "pool": {
+        "AGNT-53e30b64-c367-4e5b-b894-e600ab83d273": "tcp://[::1]:4001",
+        "AGNT-71160a72-788c-4d7f-b8f9-51d52dd4886b": "tcp://[::1]:4002",
+        "AGNT-d5c93b92-8a10-4bcf-9c54-e7138095fb62": "tcp://[::1]:4003"
+      }
+    },
+    "arango": {
+      "Current": {
+        "Singles": {},
+        "Databases": {
+          "_system": {
+            "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3": {
+              "name": "_system",
+              "error": false,
+              "id": "1",
+              "errorNum": 0,
+              "errorMessage": ""
+            },
+            "PRMR-91adf3dc-14ed-4c65-bb31-31fd22bca6ff": {
+              "name": "_system",
+              "error": false,
+              "id": "1",
+              "errorNum": 0,
+              "errorMessage": ""
+            },
+            "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": {
+              "name": "_system",
+              "error": false,
+              "id": "1",
+              "errorNum": 0,
+              "errorMessage": ""
+            }
+          }
+        },
+        "ShardsCopied": {},
+        "DBServers": {
+          "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3": "none",
+          "PRMR-91adf3dc-14ed-4c65-bb31-31fd22bca6ff": "none",
+          "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": "none"
+        },
+        "Collections": {
+          "_system": {
+            "10015": {
+              "s10016": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10017": {
+              "s10018": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10025": {
+              "s10026": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  },
+                  {
+                    "deduplicate": true,
+                    "fields": [
+                      "mount"
+                    ],
+                    "id": "10027",
+                    "sparse": true,
+                    "type": "hash",
+                    "unique": true
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10019": {
+              "s10020": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10031": {
+              "s10032": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  },
+                  {
+                    "deduplicate": true,
+                    "fields": [
+                      "time"
+                    ],
+                    "id": "10033",
+                    "sparse": false,
+                    "type": "skiplist",
+                    "unique": false
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10006": {
+              "s10007": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10008": {
+              "s10009": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10028": {
+              "s10029": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10037": {
+              "s10038": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  },
+                  {
+                    "deduplicate": true,
+                    "fields": [
+                      "time"
+                    ],
+                    "id": "10039",
+                    "sparse": false,
+                    "type": "skiplist",
+                    "unique": false
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10003": {
+              "s10004": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  },
+                  {
+                    "deduplicate": true,
+                    "fields": [
+                      "user"
+                    ],
+                    "id": "10005",
+                    "sparse": true,
+                    "type": "hash",
+                    "unique": true
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10021": {
+              "s10022": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  },
+                  {
+                    "deduplicate": true,
+                    "fields": [
+                      "queue",
+                      "status",
+                      "delayUntil"
+                    ],
+                    "id": "10023",
+                    "sparse": true,
+                    "type": "skiplist",
+                    "unique": true
+                  },
+                  {
+                    "deduplicate": true,
+                    "fields": [
+                      "status",
+                      "queue",
+                      "delayUntil"
+                    ],
+                    "id": "10024",
+                    "sparse": true,
+                    "type": "skiplist",
+                    "unique": true
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10034": {
+              "s10035": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  },
+                  {
+                    "deduplicate": true,
+                    "fields": [
+                      "time"
+                    ],
+                    "id": "10036",
+                    "sparse": false,
+                    "type": "skiplist",
+                    "unique": false
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10001": {
+              "s10002": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            },
+            "10010": {
+              "s10011": {
+                "indexes": [
+                  {
+                    "fields": [
+                      "_key"
+                    ],
+                    "id": "0",
+                    "sparse": false,
+                    "type": "primary",
+                    "unique": true
+                  }
+                ],
+                "error": false,
+                "servers": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ],
+                "errorNum": 0,
+                "errorMessage": ""
+              }
+            }
+          }
+        },
+        "Foxxmaster": "CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc",
+        "FoxxmasterQueueupdate": false,
+        "Coordinators": {
+          "CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc": "none"
+        },
+        "Version": 55,
+        "AsyncReplication": {},
+        "NewServers": {},
+        "Lock": "UNLOCKED",
+        "ServersRegistered": {
+          "PRMR-91adf3dc-14ed-4c65-bb31-31fd22bca6ff": {
+            "engine": "rocksdb",
+            "version": 30404,
+            "versionString": "3.4.4",
+            "endpoint": "tcp://[::1]:8630",
+            "host": "d47cee4dfa98b22f2236e519594ab452",
+            "advertisedEndpoint": ""
+          },
+          "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": {
+            "engine": "rocksdb",
+            "version": 30404,
+            "versionString": "3.4.4",
+            "endpoint": "tcp://[::1]:8631",
+            "host": "d47cee4dfa98b22f2236e519594ab452",
+            "advertisedEndpoint": ""
+          },
+          "Version": 1,
+          "CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc": {
+            "engine": "rocksdb",
+            "version": 30404,
+            "versionString": "3.4.4",
+            "endpoint": "tcp://[::1]:8530",
+            "host": "d47cee4dfa98b22f2236e519594ab452",
+            "advertisedEndpoint": ""
+          },
+          "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3": {
+            "engine": "rocksdb",
+            "version": 30404,
+            "versionString": "3.4.4",
+            "endpoint": "tcp://[::1]:8629",
+            "host": "d47cee4dfa98b22f2236e519594ab452",
+            "advertisedEndpoint": ""
+          }
+        }
+      },
+      "Cluster": "fe91f3dd-0ff9-4b4b-a69e-8d5fad88d035",
+      "SystemCollectionsCreated": true,
+      "InitDone": true,
+      "Target": {
+        "NumberOfDBServers": null,
+        "Pending": {},
+        "Lock": "UNLOCKED",
+        "Finished": {
+          "3": {
+            "database": "_system",
+            "timeCreated": "2019-03-20T15:06:49Z",
+            "jobId": "3",
+            "timeFinished": "2019-03-20T15:06:53Z",
+            "reason": "job no longer necessary, have enough replicas",
+            "collection": "10001",
+            "creator": "supervision",
+            "shard": "s10002",
+            "type": "addFollower"
+          }
+        },
+        "LatestDBServerId": 3,
+        "MapLocalToID": {},
+        "Failed": {},
+        "FailedServers": {},
+        "MapUniqueToShortID": {
+          "CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc": {
+            "ShortName": "Coordinator0001",
+            "TransactionID": 1
+          },
+          "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3": {
+            "ShortName": "DBServer0001",
+            "TransactionID": 1
+          },
+          "PRMR-91adf3dc-14ed-4c65-bb31-31fd22bca6ff": {
+            "ShortName": "DBServer0002",
+            "TransactionID": 2
+          },
+          "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": {
+            "ShortName": "DBServer0003",
+            "TransactionID": 3
+          }
+        },
+        "CleanedServers": [],
+        "ToDo": {},
+        "NumberOfCoordinators": null,
+        "Version": 1,
+        "LatestCoordinatorId": 1
+      },
+      "Sync": {
+        "HeartbeatIntervalMs": 1000,
+        "LatestID": 4010001,
+        "Problems": {},
+        "ServerStates": {},
+        "UserVersion": 1
+      },
+      "Plan": {
+        "DBServers": {
+          "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3": "none",
+          "PRMR-91adf3dc-14ed-4c65-bb31-31fd22bca6ff": "none",
+          "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": "none"
+        },
+        "Collections": {
+          "_system": {
+            "10015": {
+              "name": "_aqlfunctions",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10015",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10016": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            },
+            "10017": {
+              "name": "_frontend",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10017",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10018": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            },
+            "10025": {
+              "name": "_apps",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10025",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                },
+                {
+                  "deduplicate": true,
+                  "fields": [
+                    "mount"
+                  ],
+                  "id": "10027",
+                  "sparse": true,
+                  "type": "hash",
+                  "unique": true
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10026": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            },
+            "10019": {
+              "name": "_queues",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10019",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10020": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            },
+            "10031": {
+              "name": "_statisticsRaw",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10031",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                },
+                {
+                  "deduplicate": true,
+                  "fields": [
+                    "time"
+                  ],
+                  "id": "10033",
+                  "sparse": false,
+                  "type": "skiplist",
+                  "unique": false
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10032": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            },
+            "10006": {
+              "name": "_modules",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10006",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10007": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            },
+            "10008": {
+              "name": "_iresearch_analyzers",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10008",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10009": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            },
+            "10028": {
+              "name": "_appbundles",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10028",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10029": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            },
+            "10037": {
+              "name": "_statistics15",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10037",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                },
+                {
+                  "deduplicate": true,
+                  "fields": [
+                    "time"
+                  ],
+                  "id": "10039",
+                  "sparse": false,
+                  "type": "skiplist",
+                  "unique": false
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10038": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            },
+            "10003": {
+              "name": "_users",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10003",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                },
+                {
+                  "deduplicate": true,
+                  "fields": [
+                    "user"
+                  ],
+                  "id": "10005",
+                  "sparse": true,
+                  "type": "hash",
+                  "unique": true
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10004": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            },
+            "10021": {
+              "name": "_jobs",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10021",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                },
+                {
+                  "deduplicate": true,
+                  "fields": [
+                    "queue",
+                    "status",
+                    "delayUntil"
+                  ],
+                  "id": "10023",
+                  "sparse": true,
+                  "type": "skiplist",
+                  "unique": true
+                },
+                {
+                  "deduplicate": true,
+                  "fields": [
+                    "status",
+                    "queue",
+                    "delayUntil"
+                  ],
+                  "id": "10024",
+                  "sparse": true,
+                  "type": "skiplist",
+                  "unique": true
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10022": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            },
+            "10034": {
+              "name": "_statistics",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10034",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                },
+                {
+                  "deduplicate": true,
+                  "fields": [
+                    "time"
+                  ],
+                  "id": "10036",
+                  "sparse": false,
+                  "type": "skiplist",
+                  "unique": false
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10035": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            },
+            "10001": {
+              "name": "_graphs",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10001",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "shardKeys": [
+                "_key"
+              ],
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "waitForSync": false,
+              "deleted": false,
+              "type": 2,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                }
+              ],
+              "cacheEnabled": false,
+              "replicationFactor": 2,
+              "status": 3,
+              "shards": {
+                "s10002": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              }
+            },
+            "10010": {
+              "name": "_routing",
+              "keyOptions": {
+                "allowUserKeys": true,
+                "type": "traditional"
+              },
+              "id": "10010",
+              "isSystem": true,
+              "isSmart": false,
+              "numberOfShards": 1,
+              "indexes": [
+                {
+                  "id": "0",
+                  "type": "primary",
+                  "fields": [
+                    "_key"
+                  ],
+                  "unique": true,
+                  "sparse": false
+                }
+              ],
+              "cacheEnabled": false,
+              "statusString": "loaded",
+              "shardingStrategy": "hash",
+              "type": 2,
+              "status": 3,
+              "replicationFactor": 2,
+              "shards": {
+                "s10011": [
+                  "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                  "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+                ]
+              },
+              "deleted": false,
+              "waitForSync": false,
+              "shardKeys": [
+                "_key"
+              ],
+              "distributeShardsLike": "10001"
+            }
+          }
+        },
+        "Coordinators": {
+          "CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc": "none"
+        },
+        "Databases": {
+          "_system": {
+            "id": "1",
+            "name": "_system"
+          }
+        },
+        "AsyncReplication": {},
+        "Views": {
+          "_system": {}
+        },
+        "Version": 33,
+        "Singles": {},
+        "Lock": "UNLOCKED"
+      },
+      "Agency": {
+        "Definition": 1
+      },
+      "Supervision": {
+        "DBServers": {},
+        "Shards": {},
+        "Health": {
+          "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3": {
+            "LastAckedTime": "2019-03-20T15:06:52Z",
+            "Endpoint": "tcp://[::1]:8629",
+            "SyncTime": "2019-03-20T15:06:52Z",
+            "Version": "3.4.4",
+            "Host": "d47cee4dfa98b22f2236e519594ab452",
+            "Timestamp": "2019-03-20T15:06:52Z",
+            "Status": "GOOD",
+            "SyncStatus": "SERVING",
+            "Engine": "rocksdb",
+            "ShortName": "DBServer0001"
+          },
+          "PRMR-91adf3dc-14ed-4c65-bb31-31fd22bca6ff": {
+            "LastAckedTime": "2019-03-20T15:06:52Z",
+            "Endpoint": "tcp://[::1]:8630",
+            "SyncTime": "2019-03-20T15:06:51Z",
+            "Version": "3.4.4",
+            "Host": "d47cee4dfa98b22f2236e519594ab452",
+            "Timestamp": "2019-03-20T15:06:52Z",
+            "Status": "GOOD",
+            "SyncStatus": "SERVING",
+            "Engine": "rocksdb",
+            "ShortName": "DBServer0002"
+          },
+          "CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc": {
+            "LastAckedTime": "2019-03-20T15:06:52Z",
+            "Endpoint": "tcp://[::1]:8530",
+            "SyncTime": "2019-03-20T15:06:52Z",
+            "Version": "3.4.4",
+            "Host": "d47cee4dfa98b22f2236e519594ab452",
+            "Timestamp": "2019-03-20T15:06:52Z",
+            "Status": "GOOD",
+            "SyncStatus": "SERVING",
+            "Engine": "rocksdb",
+            "ShortName": "Coordinator0001"
+          },
+          "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": {
+            "Endpoint": "tcp://[::1]:8631",
+            "LastAckedTime": "2019-03-20T15:06:52Z",
+            "SyncTime": "2019-03-20T15:06:52Z",
+            "Version": "3.4.4",
+            "Engine": "rocksdb",
+            "ShortName": "DBServer0003",
+            "Timestamp": "2019-03-20T15:06:53Z",
+            "Status": "GOOD",
+            "SyncStatus": "SERVING",
+            "Host": "d47cee4dfa98b22f2236e519594ab452"
+          }
+        },
+        "State": {
+          "Mode": "Normal",
+          "Timestamp": "2019-03-20T15:06:47Z"
+        }
+      },
+      "Bootstrap": "CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc: done"
+    }
+  },
+  "log": [
+    {
+      "_key": "00000000000000000000",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh4Fm---",
+      "term": 0,
+      "request": {},
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:44 CET"
+    },
+    {
+      "_key": "00000000000000000001",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh5va---",
+      "term": 1,
+      "request": {
+        ".agency": {
+          "op": "set",
+          "new": {
+            "term": 1,
+            "id": "AGNT-71160a72-788c-4d7f-b8f9-51d52dd4886b",
+            "active": [
+              "AGNT-d5c93b92-8a10-4bcf-9c54-e7138095fb62",
+              "AGNT-53e30b64-c367-4e5b-b894-e600ab83d273",
+              "AGNT-71160a72-788c-4d7f-b8f9-51d52dd4886b"
+            ],
+            "pool": {
+              "AGNT-d5c93b92-8a10-4bcf-9c54-e7138095fb62": "tcp://[::1]:4003",
+              "AGNT-53e30b64-c367-4e5b-b894-e600ab83d273": "tcp://[::1]:4001",
+              "AGNT-71160a72-788c-4d7f-b8f9-51d52dd4886b": "tcp://[::1]:4002"
+            },
+            "size": 3,
+            "timeoutMult": 1
+          }
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:45 CET"
+    },
+    {
+      "_key": "00000000000000000002",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh6Wq---",
+      "term": 1,
+      "request": {
+        "arango/InitDone": {
+          "op": "set",
+          "new": false,
+          "ttl": 60
+        }
+      },
+      "clientId": "5a1c0219-6d4c-4da7-9932-8af9294d1c16",
+      "timestamp": "2019-03-20 16:06:46 CET"
+    },
+    {
+      "_key": "00000000000000000003",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh6W2---",
+      "term": 1,
+      "request": {
+        "arango/": {
+          "op": "set",
+          "new": {
+            "Cluster": "fe91f3dd-0ff9-4b4b-a69e-8d5fad88d035",
+            "Agency": {
+              "Definition": 1
+            },
+            "Current": {
+              "AsyncReplication": {},
+              "Collections": {
+                "_system": {}
+              },
+              "Version": 1,
+              "ShardsCopied": {},
+              "NewServers": {},
+              "Coordinators": {},
+              "Lock": "UNLOCKED",
+              "DBServers": {},
+              "Singles": {},
+              "ServersRegistered": {
+                "Version": 1
+              },
+              "Databases": {}
+            },
+            "InitDone": true,
+            "Plan": {
+              "AsyncReplication": {},
+              "Coordinators": {},
+              "Databases": {
+                "_system": {
+                  "name": "_system",
+                  "id": "1"
+                }
+              },
+              "Lock": "UNLOCKED",
+              "DBServers": {},
+              "Singles": {},
+              "Version": 1,
+              "Collections": {
+                "_system": {}
+              },
+              "Views": {
+                "_system": {}
+              }
+            },
+            "Sync": {
+              "LatestID": 1,
+              "Problems": {},
+              "UserVersion": 1,
+              "ServerStates": {},
+              "HeartbeatIntervalMs": 1000
+            },
+            "Supervision": {
+              "Health": {},
+              "Shards": {},
+              "DBServers": {}
+            },
+            "Target": {
+              "NumberOfCoordinators": null,
+              "NumberOfDBServers": null,
+              "CleanedServers": [],
+              "FailedServers": {},
+              "Lock": "UNLOCKED",
+              "MapLocalToID": {},
+              "Failed": {},
+              "Finished": {},
+              "Pending": {},
+              "ToDo": {},
+              "Version": 1
+            }
+          }
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:46 CET"
+    },
+    {
+      "_key": "00000000000000000004",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh6fe---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Coordinators/CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc": {
+          "op": "set",
+          "new": "none"
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "2b2bc162-a10b-4800-a84f-abc438568e83",
+      "timestamp": "2019-03-20 16:06:46 CET"
+    },
+    {
+      "_key": "00000000000000000005",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh6fe--B",
+      "term": 1,
+      "request": {
+        "arango/Plan/DBServers/PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3": {
+          "op": "set",
+          "new": "none"
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "a2846bf2-e584-465a-85f1-d7da63266eb8",
+      "timestamp": "2019-03-20 16:06:46 CET"
+    },
+    {
+      "_key": "00000000000000000006",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh6h2---",
+      "term": 1,
+      "request": {
+        "arango/Current/Coordinators/CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc": {
+          "op": "set",
+          "new": "none"
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "ec9ed3ea-1609-4193-a89c-61cdba59fa6c",
+      "timestamp": "2019-03-20 16:06:46 CET"
+    },
+    {
+      "_key": "00000000000000000007",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh6h2--B",
+      "term": 1,
+      "request": {
+        "arango/Current/DBServers/PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3": {
+          "op": "set",
+          "new": "none"
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "55bc0c2f-098a-44fd-9ea7-13abf1690395",
+      "timestamp": "2019-03-20 16:06:46 CET"
+    },
+    {
+      "_key": "00000000000000000008",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh6iC---",
+      "term": 1,
+      "request": {
+        "arango/Target/LatestCoordinatorId": {
+          "op": "increment"
+        },
+        "arango/Target/MapUniqueToShortID/CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc": {
+          "op": "set",
+          "new": {
+            "TransactionID": 1,
+            "ShortName": "Coordinator0001"
+          }
+        }
+      },
+      "clientId": "89e932f6-9e43-4bfe-bf73-334433b15a3a",
+      "timestamp": "2019-03-20 16:06:46 CET"
+    },
+    {
+      "_key": "00000000000000000009",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh6iC--B",
+      "term": 1,
+      "request": {
+        "arango/Target/LatestDBServerId": {
+          "op": "increment"
+        },
+        "arango/Target/MapUniqueToShortID/PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3": {
+          "op": "set",
+          "new": {
+            "TransactionID": 1,
+            "ShortName": "DBServer0001"
+          }
+        }
+      },
+      "clientId": "f77e4fb9-bf4a-43e1-acbb-ad3287d567cb",
+      "timestamp": "2019-03-20 16:06:46 CET"
+    },
+    {
+      "_key": "00000000000000000010",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh6iO---",
+      "term": 1,
+      "request": {
+        "arango/Current/ServersRegistered/CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc": {
+          "op": "set",
+          "new": {
+            "endpoint": "tcp://[::1]:8530",
+            "advertisedEndpoint": "",
+            "host": "d47cee4dfa98b22f2236e519594ab452",
+            "version": 30404,
+            "versionString": "3.4.4",
+            "engine": "rocksdb"
+          }
+        }
+      },
+      "clientId": "5301dcc8-2167-4335-b403-0b8394a103b6",
+      "timestamp": "2019-03-20 16:06:46 CET"
+    },
+    {
+      "_key": "00000000000000000011",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh6iS---",
+      "term": 1,
+      "request": {
+        "arango/Current/ServersRegistered/PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3": {
+          "op": "set",
+          "new": {
+            "endpoint": "tcp://[::1]:8629",
+            "advertisedEndpoint": "",
+            "host": "d47cee4dfa98b22f2236e519594ab452",
+            "version": 30404,
+            "versionString": "3.4.4",
+            "engine": "rocksdb"
+          }
+        }
+      },
+      "clientId": "325d5124-9bda-4178-8a5b-3d409ba42bf2",
+      "timestamp": "2019-03-20 16:06:46 CET"
+    },
+    {
+      "_key": "00000000000000000012",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh7BK---",
+      "term": 1,
+      "request": {
+        "/arango/Sync/LatestID": {
+          "op": "increment",
+          "step": 10000
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:47 CET"
+    },
+    {
+      "_key": "00000000000000000013",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh7BO--A",
+      "term": 1,
+      "request": {
+        "/arango/Supervision/State": {
+          "Mode": "Normal",
+          "Timestamp": "2019-03-20T15:06:47Z"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:47 CET"
+    },
+    {
+      "_key": "00000000000000000014",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh7aK---",
+      "term": 1,
+      "request": {
+        "arango/Plan/DBServers/PRMR-91adf3dc-14ed-4c65-bb31-31fd22bca6ff": {
+          "op": "set",
+          "new": "none"
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "115dc7f9-5c6c-4d5e-8344-eedd8386a869",
+      "timestamp": "2019-03-20 16:06:47 CET"
+    },
+    {
+      "_key": "00000000000000000015",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh7aK--B",
+      "term": 1,
+      "request": {
+        "arango/Plan/DBServers/PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": {
+          "op": "set",
+          "new": "none"
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "25a5ca8b-3155-4d5e-90b0-a117daba6750",
+      "timestamp": "2019-03-20 16:06:47 CET"
+    },
+    {
+      "_key": "00000000000000000016",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh7aW---",
+      "term": 1,
+      "request": {
+        "arango/Current/DBServers/PRMR-91adf3dc-14ed-4c65-bb31-31fd22bca6ff": {
+          "op": "set",
+          "new": "none"
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "036b4a2a-c713-45c7-bee1-ef562f63b85e",
+      "timestamp": "2019-03-20 16:06:47 CET"
+    },
+    {
+      "_key": "00000000000000000017",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh7aW--C",
+      "term": 1,
+      "request": {
+        "arango/Current/DBServers/PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": {
+          "op": "set",
+          "new": "none"
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "edc6bf37-c035-47ad-92ea-7a7b1ccaff84",
+      "timestamp": "2019-03-20 16:06:47 CET"
+    },
+    {
+      "_key": "00000000000000000018",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh7ai---",
+      "term": 1,
+      "request": {
+        "arango/Target/LatestDBServerId": {
+          "op": "increment"
+        },
+        "arango/Target/MapUniqueToShortID/PRMR-91adf3dc-14ed-4c65-bb31-31fd22bca6ff": {
+          "op": "set",
+          "new": {
+            "TransactionID": 2,
+            "ShortName": "DBServer0002"
+          }
+        }
+      },
+      "clientId": "14a1fba4-8b8a-469a-b299-152d917ab3d7",
+      "timestamp": "2019-03-20 16:06:47 CET"
+    },
+    {
+      "_key": "00000000000000000019",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh7au---",
+      "term": 1,
+      "request": {
+        "arango/Current/ServersRegistered/PRMR-91adf3dc-14ed-4c65-bb31-31fd22bca6ff": {
+          "op": "set",
+          "new": {
+            "endpoint": "tcp://[::1]:8630",
+            "advertisedEndpoint": "",
+            "host": "d47cee4dfa98b22f2236e519594ab452",
+            "version": 30404,
+            "versionString": "3.4.4",
+            "engine": "rocksdb"
+          }
+        }
+      },
+      "clientId": "77cf874c-79d2-4f44-b7b0-1b9eb67ab5ba",
+      "timestamp": "2019-03-20 16:06:47 CET"
+    },
+    {
+      "_key": "00000000000000000020",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh79G---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "62ff7b5c-54e6-429b-a33b-9a751ab7245d",
+      "timestamp": "2019-03-20 16:06:48 CET"
+    },
+    {
+      "_key": "00000000000000000021",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh79i---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "8cc769ff-6508-412e-ac33-a84537ef5c6f",
+      "timestamp": "2019-03-20 16:06:48 CET"
+    },
+    {
+      "_key": "00000000000000000022",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh8ZK---",
+      "term": 1,
+      "request": {
+        "arango/Target/LatestDBServerId": {
+          "op": "increment"
+        },
+        "arango/Target/MapUniqueToShortID/PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": {
+          "op": "set",
+          "new": {
+            "TransactionID": 3,
+            "ShortName": "DBServer0003"
+          }
+        }
+      },
+      "clientId": "2e3b6668-8b3a-43e4-98d8-422561ce50a6",
+      "timestamp": "2019-03-20 16:06:48 CET"
+    },
+    {
+      "_key": "00000000000000000023",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh8ZS---",
+      "term": 1,
+      "request": {
+        "arango/Current/ServersRegistered/PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": {
+          "op": "set",
+          "new": {
+            "endpoint": "tcp://[::1]:8631",
+            "advertisedEndpoint": "",
+            "host": "d47cee4dfa98b22f2236e519594ab452",
+            "version": 30404,
+            "versionString": "3.4.4",
+            "engine": "rocksdb"
+          }
+        }
+      },
+      "clientId": "684d9290-e220-4a67-916b-24685ca36e02",
+      "timestamp": "2019-03-20 16:06:48 CET"
+    },
+    {
+      "_key": "00000000000000000024",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh8l6---",
+      "term": 1,
+      "request": {
+        "arango/Bootstrap": {
+          "op": "set",
+          "new": "CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc",
+          "ttl": 300
+        }
+      },
+      "clientId": "50150d7a-3e67-4ad6-be0e-222d0783865e",
+      "timestamp": "2019-03-20 16:06:48 CET"
+    },
+    {
+      "_key": "00000000000000000025",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh8mG---",
+      "term": 1,
+      "request": {
+        "arango/Sync/LatestID": {
+          "op": "set",
+          "new": 1010001
+        }
+      },
+      "clientId": "03294fe3-04b0-4259-a7b6-12c18da119c0",
+      "timestamp": "2019-03-20 16:06:48 CET"
+    },
+    {
+      "_key": "00000000000000000026",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh8mW---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10001": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/2861551841"
+        }
+      },
+      "clientId": "0cc1f7a7-5e4f-40ab-bba1-6050e0a17d60",
+      "timestamp": "2019-03-20 16:06:48 CET"
+    },
+    {
+      "_key": "00000000000000000027",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh8me---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10001": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "id": "10001",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_graphs",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10002": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "dca1f71d-4b20-481c-ab44-44fedab4bad7",
+      "timestamp": "2019-03-20 16:06:48 CET"
+    },
+    {
+      "_key": "00000000000000000028",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh87m---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "0494a694-86fc-47df-9bd9-eb3276c873c1",
+      "timestamp": "2019-03-20 16:06:49 CET"
+    },
+    {
+      "_key": "00000000000000000029",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh9-O---",
+      "term": 1,
+      "request": {
+        "/arango/Target/ToDo/3": {
+          "creator": "supervision",
+          "type": "addFollower",
+          "database": "_system",
+          "collection": "10001",
+          "shard": "s10002",
+          "jobId": "3",
+          "timeCreated": "2019-03-20T15:06:49Z"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:49 CET"
+    },
+    {
+      "_key": "00000000000000000030",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh90K---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "8fc3900b-6a7c-442c-9931-54ce39807847",
+      "timestamp": "2019-03-20 16:06:50 CET"
+    },
+    {
+      "_key": "00000000000000000031",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh90a---",
+      "term": 1,
+      "request": {
+        "arango/Sync/LatestID": {
+          "op": "set",
+          "new": 2010001
+        }
+      },
+      "clientId": "1d540980-f032-4450-8a92-4266e12e3d77",
+      "timestamp": "2019-03-20 16:06:50 CET"
+    },
+    {
+      "_key": "00000000000000000032",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh956---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Version": {
+          "op": "observe",
+          "url": "http://[::1]:8629/_api/agency/agency-callbacks/2254045015"
+        }
+      },
+      "clientId": "79a9d254-a048-435b-9ebd-5430c02618b9",
+      "timestamp": "2019-03-20 16:06:50 CET"
+    },
+    {
+      "_key": "00000000000000000033",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh96----",
+      "term": 1,
+      "request": {
+        "arango/Current/Databases/_system/PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorNum": 0,
+            "errorMessage": "",
+            "id": "1",
+            "name": "_system"
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "81257df1-164f-4ba4-bae8-a24f7ee31d18",
+      "timestamp": "2019-03-20 16:06:50 CET"
+    },
+    {
+      "_key": "00000000000000000034",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh96G---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "observe",
+          "url": "http://[::1]:8629/_api/agency/agency-callbacks/384219523"
+        }
+      },
+      "clientId": "b831fdde-32f5-45c0-8669-c03359ee3e92",
+      "timestamp": "2019-03-20 16:06:50 CET"
+    },
+    {
+      "_key": "00000000000000000035",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsh96G--C",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "aeb23aab-dd86-423c-9c26-1783b2d4243b",
+      "timestamp": "2019-03-20 16:06:50 CET"
+    },
+    {
+      "_key": "00000000000000000036",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi-4q---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "c6fa8daa-5a83-4aec-abb9-bbcf1af7d9b0",
+      "timestamp": "2019-03-20 16:06:51 CET"
+    },
+    {
+      "_key": "00000000000000000037",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_Gi---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "8bd3aa6c-f582-4388-8ff3-a6ea18bfc137",
+      "timestamp": "2019-03-20 16:06:51 CET"
+    },
+    {
+      "_key": "00000000000000000038",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_Gy---",
+      "term": 1,
+      "request": {
+        "arango/Sync/LatestID": {
+          "op": "set",
+          "new": 3010001
+        }
+      },
+      "clientId": "1307c734-6220-47ef-aaea-5ab343361106",
+      "timestamp": "2019-03-20 16:06:51 CET"
+    },
+    {
+      "_key": "00000000000000000039",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_MS---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Version": {
+          "op": "observe",
+          "url": "http://[::1]:8630/_api/agency/agency-callbacks/2222497155"
+        }
+      },
+      "clientId": "b724865d-a7d9-455b-9288-815f11b071bc",
+      "timestamp": "2019-03-20 16:06:51 CET"
+    },
+    {
+      "_key": "00000000000000000040",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_Ma---",
+      "term": 1,
+      "request": {
+        "arango/Current/Databases/_system/PRMR-91adf3dc-14ed-4c65-bb31-31fd22bca6ff": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorNum": 0,
+            "errorMessage": "",
+            "id": "1",
+            "name": "_system"
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "c16227d9-1763-4a87-8039-cfba77020203",
+      "timestamp": "2019-03-20 16:06:51 CET"
+    },
+    {
+      "_key": "00000000000000000041",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_Me---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "observe",
+          "url": "http://[::1]:8630/_api/agency/agency-callbacks/649277882"
+        }
+      },
+      "clientId": "ba4cd690-91eb-4c6f-8f75-10367ff56fc5",
+      "timestamp": "2019-03-20 16:06:51 CET"
+    },
+    {
+      "_key": "00000000000000000042",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_0S---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "7348b4a6-f47b-4623-a00f-ddd1db044318",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000043",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_0i---",
+      "term": 1,
+      "request": {
+        "arango/Sync/LatestID": {
+          "op": "set",
+          "new": 4010001
+        }
+      },
+      "clientId": "c8902313-2f2d-46f0-8941-438518fbd95f",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000044",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_3K---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "b39f9bc5-a86b-4ac6-950a-56e9fc8eefc3",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000045",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_5y---",
+      "term": 1,
+      "request": {
+        "/arango/Supervision/Health/PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3": {
+          "ShortName": "DBServer0001",
+          "Endpoint": "tcp://[::1]:8629",
+          "Host": "d47cee4dfa98b22f2236e519594ab452",
+          "SyncStatus": "SERVING",
+          "Status": "GOOD",
+          "Version": "3.4.4",
+          "Engine": "rocksdb",
+          "Timestamp": "2019-03-20T15:06:52Z",
+          "SyncTime": "2019-03-20T15:06:52Z",
+          "LastAckedTime": "2019-03-20T15:06:52Z"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000046",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_56---",
+      "term": 1,
+      "request": {
+        "/arango/Supervision/Health/PRMR-91adf3dc-14ed-4c65-bb31-31fd22bca6ff": {
+          "ShortName": "DBServer0002",
+          "Endpoint": "tcp://[::1]:8630",
+          "Host": "d47cee4dfa98b22f2236e519594ab452",
+          "SyncStatus": "SERVING",
+          "Status": "GOOD",
+          "Version": "3.4.4",
+          "Engine": "rocksdb",
+          "Timestamp": "2019-03-20T15:06:52Z",
+          "SyncTime": "2019-03-20T15:06:51Z",
+          "LastAckedTime": "2019-03-20T15:06:52Z"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000047",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_6C---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Version": {
+          "op": "observe",
+          "url": "http://[::1]:8631/_api/agency/agency-callbacks/2719348037"
+        }
+      },
+      "clientId": "c90a0397-9187-4855-9c7d-72b24197c5e2",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000048",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_6C--C",
+      "term": 1,
+      "request": {
+        "/arango/Supervision/Health/PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": {
+          "ShortName": "DBServer0003",
+          "Endpoint": "tcp://[::1]:8631",
+          "Host": "d47cee4dfa98b22f2236e519594ab452",
+          "SyncStatus": "STARTUP",
+          "Status": "GOOD",
+          "Version": "3.4.4",
+          "Engine": "rocksdb",
+          "Timestamp": "2019-03-20T15:06:52Z",
+          "SyncTime": "2019-03-20T15:06:52Z",
+          "LastAckedTime": "2019-03-20T15:06:52Z"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000049",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_6G--A",
+      "term": 1,
+      "request": {
+        "arango/Current/Databases/_system/PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorNum": 0,
+            "errorMessage": "",
+            "id": "1",
+            "name": "_system"
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "4e6c1270-3809-4138-a19e-fb9fd7fc8814",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000050",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_6K--A",
+      "term": 1,
+      "request": {
+        "/arango/Supervision/Health/CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc": {
+          "ShortName": "Coordinator0001",
+          "Endpoint": "tcp://[::1]:8530",
+          "Host": "d47cee4dfa98b22f2236e519594ab452",
+          "SyncStatus": "SERVING",
+          "Status": "GOOD",
+          "Version": "3.4.4",
+          "Engine": "rocksdb",
+          "Timestamp": "2019-03-20T15:06:52Z",
+          "SyncTime": "2019-03-20T15:06:52Z",
+          "LastAckedTime": "2019-03-20T15:06:52Z"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000051",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_6O--_",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "observe",
+          "url": "http://[::1]:8631/_api/agency/agency-callbacks/418794631"
+        }
+      },
+      "clientId": "59b7eb92-4e7e-4c3a-9244-6bd604d7d210",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000052",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsi_6a---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10001/s10002": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "48b6e7ac-d59a-43d2-8866-fa575cc5bcf2",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000053",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA-G---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10001/s10002": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000054",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA-W---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10001": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/2861551841"
+        }
+      },
+      "clientId": "84f9de57-5123-44f6-8dad-4d82e7bc95c2",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000055",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA-y---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10003": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/167042317"
+        }
+      },
+      "clientId": "c3714e8e-53d2-4f20-9a36-57f24e123644",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000056",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA_----",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10003": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10003",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_users",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10004": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "37ed6cbb-5771-48c5-97a5-521f7717720b",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000057",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA_a---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10003/s10004": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "a7e7d542-9de8-4225-824c-9e9206089f36",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000058",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA_y---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10003/s10004": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000059",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAAC---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10003": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/167042317"
+        }
+      },
+      "clientId": "47c6cfbf-f9ed-4116-9d1e-1233ac17bdb0",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000060",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAAW---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10003": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/3829317172"
+        }
+      },
+      "clientId": "738b5063-f9f0-4896-90f7-0cfca23a19a0",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000061",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAAi---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10003/indexes": {
+          "op": "push",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "user"
+            ],
+            "sparse": true,
+            "type": "hash",
+            "unique": true,
+            "isBuilding": true,
+            "id": "10005"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "aceb848b-3f3e-4e78-a286-1d6d6cedb040",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000062",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAIO---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10003/s10004": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              },
+              {
+                "deduplicate": true,
+                "fields": [
+                  "user"
+                ],
+                "id": "10005",
+                "sparse": true,
+                "type": "hash",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "ddddd042-1bc9-4547-9a43-b93d6d9214d8",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000063",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAIe---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10003/indexes": {
+          "op": "replace",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "user"
+            ],
+            "id": "10005",
+            "sparse": true,
+            "type": "hash",
+            "unique": true
+          },
+          "val": {
+            "deduplicate": true,
+            "fields": [
+              "user"
+            ],
+            "sparse": true,
+            "type": "hash",
+            "unique": true,
+            "isBuilding": true,
+            "id": "10005"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "a6fc65cd-3873-43a1-8da3-76180c3411a8",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000064",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAIu---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10003": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/3829317172"
+        }
+      },
+      "clientId": "83ea33cc-9433-4a52-b228-b8e7d5fc1023",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000065",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAJK---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10006": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1213919365"
+        }
+      },
+      "clientId": "0c07cfc0-1bfd-4a8a-a796-8ccb3158f124",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000066",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAJW---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10006": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10006",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_modules",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10007": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "78eafb06-2077-4ba1-baad-e527b005d513",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000067",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAJu---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10006/s10007": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "53a123eb-090a-4aaa-a22c-b3b82af1e3dc",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000068",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAKG---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10006/s10007": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000069",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAKW---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10006": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1213919365"
+        }
+      },
+      "clientId": "8f7836ee-79df-4381-b146-dcfa1e640268",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000070",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAKy---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10008": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/2096284507"
+        }
+      },
+      "clientId": "0c9fd013-8e79-46e4-8abe-252dc61e3855",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000071",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAL----",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10008": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10008",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_iresearch_analyzers",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10009": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "3b5a7a1c-8b34-4099-ad21-00bb1ba39b43",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000072",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiALa---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10008/s10009": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "23700841-c9d0-455d-a591-11e269a4ff1e",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000073",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiALy---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10008/s10009": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000074",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAMK---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10008": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/2096284507"
+        }
+      },
+      "clientId": "afb9bdde-204b-43e3-9cfc-4140405855f3",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000075",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAMm---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10010": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1980908331"
+        }
+      },
+      "clientId": "bd474437-9f09-40a6-8181-ba176556355c",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000076",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAMy---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10010": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10010",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_routing",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10011": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "e122ac0a-d59a-4fb4-88cf-af3ca3334829",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000077",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiANO---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10010/s10011": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "ff918363-01f6-4490-afb5-b63a9e2988e5",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000078",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiANq---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10010/s10011": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000079",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAO----",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10010": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1980908331"
+        }
+      },
+      "clientId": "a0ac49c3-282a-4c55-9a0a-f04827b65441",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000080",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAf2---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10015": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/3227166112"
+        }
+      },
+      "clientId": "4696badf-7fd1-4a9f-a71b-4c91523823d3",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000081",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAgC---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10015": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10015",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_aqlfunctions",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10016": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "343a3162-b6f6-4089-bbe4-7e0a34eb7b17",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000082",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAgm---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10015/s10016": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "81e00ed5-3f89-4dc4-abcd-0794e857f3cf",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000083",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAg6---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10015/s10016": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000084",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAhG---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10015": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/3227166112"
+        }
+      },
+      "clientId": "03ea486f-320b-4639-9267-6bf2c679ade0",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000085",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAhi---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10017": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1507824881"
+        }
+      },
+      "clientId": "1422deec-5075-41f0-97e6-55023e69c814",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000086",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAhu---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10017": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10017",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_frontend",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10018": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "fa0c0d49-56e5-443f-a1ed-7343c047aaa6",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000087",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAiG---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10017/s10018": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "f24235d3-9b37-4521-ae62-c5bc59edf061",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000088",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAie---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10017/s10018": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000089",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAiu---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10017": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1507824881"
+        }
+      },
+      "clientId": "4d537877-934f-4dd1-a249-ded6ea6f8fab",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000090",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAjO---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10019": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/3215038619"
+        }
+      },
+      "clientId": "75f65c64-6b3d-4d4f-823d-94f32107922c",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000091",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAja---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10019": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10019",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_queues",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10020": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "60e15a89-3fac-47ce-bba4-bad30c2392cb",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000092",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAj6---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10019/s10020": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "a7d19d0e-2345-4ea6-b3e1-cb1b49a680a5",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000093",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAlG---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10019/s10020": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000094",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAlW---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10019": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/3215038619"
+        }
+      },
+      "clientId": "2dc3eaaa-537d-4756-882e-e942ced8ff34",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000095",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAl6---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10021": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/893144293"
+        }
+      },
+      "clientId": "385a3d3e-f768-462b-bd8a-fe16e97dd1f3",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000096",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAmG---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10021": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10021",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_jobs",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10022": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "023e3d52-4df0-4123-9689-d220e89ee5fc",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000097",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAmq---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10021/s10022": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "2f0332d6-e1c5-41a3-9490-d6c18f5775a3",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000098",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAnC---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10021/s10022": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000099",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAnO---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10021": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/893144293"
+        }
+      },
+      "clientId": "b79ad255-017b-4950-a1b7-022e3ea2a5a8",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000100",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAnm---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10021": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1982169632"
+        }
+      },
+      "clientId": "827c0a50-96fb-4a9f-a2a8-4defef77a23d",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000101",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAny---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10021/indexes": {
+          "op": "push",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "queue",
+              "status",
+              "delayUntil"
+            ],
+            "sparse": true,
+            "type": "skiplist",
+            "unique": true,
+            "isBuilding": true,
+            "id": "10023"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "5a07df0c-a3ea-49a2-92eb-61ab1f6e63da",
+      "timestamp": "2019-03-20 16:06:52 CET"
+    },
+    {
+      "_key": "00000000000000000102",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAvC---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10021/s10022": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              },
+              {
+                "deduplicate": true,
+                "fields": [
+                  "queue",
+                  "status",
+                  "delayUntil"
+                ],
+                "id": "10023",
+                "sparse": true,
+                "type": "skiplist",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "75b1faf2-3e10-4221-93d7-269f595e3115",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000103",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAvS---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10021/indexes": {
+          "op": "replace",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "queue",
+              "status",
+              "delayUntil"
+            ],
+            "id": "10023",
+            "sparse": true,
+            "type": "skiplist",
+            "unique": true
+          },
+          "val": {
+            "deduplicate": true,
+            "fields": [
+              "queue",
+              "status",
+              "delayUntil"
+            ],
+            "sparse": true,
+            "type": "skiplist",
+            "unique": true,
+            "isBuilding": true,
+            "id": "10023"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "8f42ec5a-dd6d-4384-90e8-b759272d9d63",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000104",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAvi---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10021": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1982169632"
+        }
+      },
+      "clientId": "27c967e6-7933-4a1e-ae0f-09eaf968708d",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000105",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAv2---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10021": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/3462441621"
+        }
+      },
+      "clientId": "fb269a23-c4cc-4a34-a601-86eeea564864",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000106",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAwC---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10021/indexes": {
+          "op": "push",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "status",
+              "queue",
+              "delayUntil"
+            ],
+            "sparse": true,
+            "type": "skiplist",
+            "unique": true,
+            "isBuilding": true,
+            "id": "10024"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "6df7ca87-3ad5-4abe-a03e-d2242044d8b0",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000107",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAzi---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10021/s10022": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              },
+              {
+                "deduplicate": true,
+                "fields": [
+                  "queue",
+                  "status",
+                  "delayUntil"
+                ],
+                "id": "10023",
+                "sparse": true,
+                "type": "skiplist",
+                "unique": true
+              },
+              {
+                "deduplicate": true,
+                "fields": [
+                  "status",
+                  "queue",
+                  "delayUntil"
+                ],
+                "id": "10024",
+                "sparse": true,
+                "type": "skiplist",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "54c10258-284c-41cb-8acd-bd4a094a3e05",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000108",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiAzy---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10021/indexes": {
+          "op": "replace",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "status",
+              "queue",
+              "delayUntil"
+            ],
+            "id": "10024",
+            "sparse": true,
+            "type": "skiplist",
+            "unique": true
+          },
+          "val": {
+            "deduplicate": true,
+            "fields": [
+              "status",
+              "queue",
+              "delayUntil"
+            ],
+            "sparse": true,
+            "type": "skiplist",
+            "unique": true,
+            "isBuilding": true,
+            "id": "10024"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "8b1dfb78-e1fb-4b9e-a9e0-5be93b1f0282",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000109",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA0G---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10021": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/3462441621"
+        }
+      },
+      "clientId": "8d170044-daee-4bf9-b3db-5f65f6400a70",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000110",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA0m---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10025": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1760235038"
+        }
+      },
+      "clientId": "c0b31dc9-e45c-4d71-9b83-b1ecee844320",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000111",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA0y---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10025": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10025",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_apps",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10026": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "19de62d9-6408-43e5-8632-c9c98c7e38d2",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000112",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA1W---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10025/s10026": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "657d22b5-d080-4f5f-b2e6-2c5e732c97a2",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000113",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA1q---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "cd913c0c-3312-48a1-b053-a9e5490b950d",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000114",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA1y---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10025/s10026": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000115",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA2C---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10025": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1760235038"
+        }
+      },
+      "clientId": "0d2ae0ff-7374-4982-a019-1b7ddf1926e2",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000116",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA2a---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10025": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/608115402"
+        }
+      },
+      "clientId": "a43f3faf-2369-4917-acb6-8b4bf0cdf6af",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000117",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA2m---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10025/indexes": {
+          "op": "push",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "mount"
+            ],
+            "sparse": true,
+            "type": "hash",
+            "unique": true,
+            "isBuilding": true,
+            "id": "10027"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "b1bcc15a-af84-4c2c-becd-939a59f09be1",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000118",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA4W---",
+      "term": 1,
+      "request": {
+        "/arango/Supervision/Health/PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e": {
+          "ShortName": "DBServer0003",
+          "Endpoint": "tcp://[::1]:8631",
+          "Host": "d47cee4dfa98b22f2236e519594ab452",
+          "SyncStatus": "SERVING",
+          "Status": "GOOD",
+          "Version": "3.4.4",
+          "Engine": "rocksdb",
+          "Timestamp": "2019-03-20T15:06:53Z",
+          "SyncTime": "2019-03-20T15:06:52Z",
+          "LastAckedTime": "2019-03-20T15:06:52Z"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000119",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiA4m---",
+      "term": 1,
+      "request": {
+        "/arango/Target/Finished/3": {
+          "timeFinished": "2019-03-20T15:06:53Z",
+          "collection": "10001",
+          "creator": "supervision",
+          "database": "_system",
+          "jobId": "3",
+          "shard": "s10002",
+          "timeCreated": "2019-03-20T15:06:49Z",
+          "type": "addFollower",
+          "reason": "job no longer necessary, have enough replicas"
+        },
+        "/arango/Target/Pending/3": {
+          "op": "delete"
+        },
+        "/arango/Target/ToDo/3": {
+          "op": "delete"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000120",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBAm---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10025/s10026": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              },
+              {
+                "deduplicate": true,
+                "fields": [
+                  "mount"
+                ],
+                "id": "10027",
+                "sparse": true,
+                "type": "hash",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "ca5e93ae-7b5b-4524-8607-7d5d4aef95b6",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000121",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBA6---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10025/indexes": {
+          "op": "replace",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "mount"
+            ],
+            "id": "10027",
+            "sparse": true,
+            "type": "hash",
+            "unique": true
+          },
+          "val": {
+            "deduplicate": true,
+            "fields": [
+              "mount"
+            ],
+            "sparse": true,
+            "type": "hash",
+            "unique": true,
+            "isBuilding": true,
+            "id": "10027"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "7efd6973-91b8-4484-8033-7b905dbf4c62",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000122",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBBO---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10025": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/608115402"
+        }
+      },
+      "clientId": "c13da277-11e5-4c01-965b-9f7e2bc2aa65",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000123",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBBu---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10028": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/21556526"
+        }
+      },
+      "clientId": "689a7cdf-a076-49a0-bb14-0aec4753006f",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000124",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBB6---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10028": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10028",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_appbundles",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10029": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "4b26b30a-7daf-417a-adde-aafb170512d0",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000125",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBCi---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10028/s10029": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "7eea8772-c1ef-4320-b646-4ad18e019511",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000126",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBD----",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10028/s10029": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000127",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBDO---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10028": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/21556526"
+        }
+      },
+      "clientId": "e7fb87f1-56cb-4629-a462-3ac62a3054ac",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000128",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBDe---",
+      "term": 1,
+      "request": {
+        "arango/Current/Foxxmaster": {
+          "op": "set",
+          "new": "CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc"
+        }
+      },
+      "clientId": "90ae677a-475e-40dc-8676-1c07caa811ec",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000129",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBDq---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "b8bde22a-f1b2-4bf2-94f2-297d025f7a7b",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000130",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBES---",
+      "term": 1,
+      "request": {
+        "arango/Bootstrap": {
+          "op": "set",
+          "new": "CRDN-ef5ee4c3-d890-4c0a-aaf9-f80ba87adbfc: done"
+        }
+      },
+      "clientId": "af79e0ef-3544-480c-b0b8-48af9793b562",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000131",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBKy---",
+      "term": 1,
+      "request": {
+        "arango/SystemCollectionsCreated": {
+          "op": "set",
+          "new": true
+        }
+      },
+      "clientId": "2cf8a7e5-0603-46a0-8bbb-35cb1fd5ffd6",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000132",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBMK---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10031": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1918376755"
+        }
+      },
+      "clientId": "d4662bbc-59ec-4c68-9513-bcc408d48d9b",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000133",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBMW---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10031": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10031",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_statisticsRaw",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10032": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "07e79fb2-6046-4302-848c-61f425e94132",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000134",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBM6---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10031/s10032": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "932a48e9-a70b-4e47-b27a-8ad813cf81a1",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000135",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBNW---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10031/s10032": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000136",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBPu---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10031": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1918376755"
+        }
+      },
+      "clientId": "75607f0b-278a-4dd7-bd63-82c698e1361a",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000137",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBQG---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10031": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/2871231858"
+        }
+      },
+      "clientId": "3c3a37a7-aee6-4bec-a8bc-125407efd396",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000138",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBQS---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10031/indexes": {
+          "op": "push",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "time"
+            ],
+            "sparse": false,
+            "type": "skiplist",
+            "unique": false,
+            "isBuilding": true,
+            "id": "10033"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "f085f1cf-c1fc-4b39-a3c1-0ac931e2f220",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000139",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBWy---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10031/s10032": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              },
+              {
+                "deduplicate": true,
+                "fields": [
+                  "time"
+                ],
+                "id": "10033",
+                "sparse": false,
+                "type": "skiplist",
+                "unique": false
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "2f381cfe-8068-4953-ba9e-f0cea2fbe698",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000140",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBX----",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10031/indexes": {
+          "op": "replace",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "time"
+            ],
+            "id": "10033",
+            "sparse": false,
+            "type": "skiplist",
+            "unique": false
+          },
+          "val": {
+            "deduplicate": true,
+            "fields": [
+              "time"
+            ],
+            "sparse": false,
+            "type": "skiplist",
+            "unique": false,
+            "isBuilding": true,
+            "id": "10033"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "e9c55632-7e6f-4845-8a95-b6612ff272b4",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000141",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBXO---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10031": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/2871231858"
+        }
+      },
+      "clientId": "9564a15b-0216-4cbc-8e00-b23d46256d4c",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000142",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBXq---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10034": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/991002260"
+        }
+      },
+      "clientId": "1b00e881-8284-4814-a6d2-84f9983c1cfc",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000143",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBX2---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10034": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10034",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_statistics",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10035": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "496d3a32-7cb9-47b6-9cd6-31937775870e",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000144",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBYa---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10034/s10035": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "cbf4a940-05c2-4125-9878-7dd3371ecf6a",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000145",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBYm---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10034": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/991002260"
+        }
+      },
+      "clientId": "b66adac4-bf2f-4d25-a618-b95e44431170",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000146",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBYy---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10034/s10035": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000147",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBZ----",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10034": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/61142532"
+        }
+      },
+      "clientId": "cb703c37-2ae1-4e76-871c-e09f3bd4b4f3",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000148",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBZG---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10034/indexes": {
+          "op": "push",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "time"
+            ],
+            "sparse": false,
+            "type": "skiplist",
+            "unique": false,
+            "isBuilding": true,
+            "id": "10036"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "750be6de-ac65-4d74-8216-813d5f1e9fc6",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000149",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBiC---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10034/s10035": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              },
+              {
+                "deduplicate": true,
+                "fields": [
+                  "time"
+                ],
+                "id": "10036",
+                "sparse": false,
+                "type": "skiplist",
+                "unique": false
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "eaa8c1c8-3feb-47a2-8cf0-1dc53b2fb209",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000150",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBiW---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10034/indexes": {
+          "op": "replace",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "time"
+            ],
+            "id": "10036",
+            "sparse": false,
+            "type": "skiplist",
+            "unique": false
+          },
+          "val": {
+            "deduplicate": true,
+            "fields": [
+              "time"
+            ],
+            "sparse": false,
+            "type": "skiplist",
+            "unique": false,
+            "isBuilding": true,
+            "id": "10036"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "2cae6cda-6bd6-4a04-9b5d-28445ef491f6",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000151",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBiq---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10034": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/61142532"
+        }
+      },
+      "clientId": "c71e7ca1-db8a-47f8-a9e6-e8f316816910",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000152",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBjK---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10037": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/3129904266"
+        }
+      },
+      "clientId": "f8474a29-9526-44ce-a7ed-38930ddc8448",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000153",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBjW---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10037": {
+          "op": "set",
+          "new": {
+            "cacheEnabled": false,
+            "deleted": false,
+            "distributeShardsLike": "10001",
+            "id": "10037",
+            "indexes": [
+              {
+                "id": "0",
+                "type": "primary",
+                "fields": [
+                  "_key"
+                ],
+                "unique": true,
+                "sparse": false
+              }
+            ],
+            "isSmart": false,
+            "isSystem": true,
+            "keyOptions": {
+              "allowUserKeys": true,
+              "type": "traditional"
+            },
+            "name": "_statistics15",
+            "numberOfShards": 1,
+            "replicationFactor": 2,
+            "shardKeys": [
+              "_key"
+            ],
+            "shardingStrategy": "hash",
+            "shards": {
+              "s10038": [
+                "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+                "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+              ]
+            },
+            "status": 3,
+            "statusString": "loaded",
+            "type": 2,
+            "waitForSync": false
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "0799b8bf-a2cb-49ee-81c8-9ece74ba17d3",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000154",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBk----",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10037/s10038": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "f7fbe810-f712-4af2-ac46-0b0852f31500",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000155",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBkO---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10037": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/3129904266"
+        }
+      },
+      "clientId": "7f8650bc-4c22-49b3-9ade-cb02e280915b",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000156",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBka---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10037/s10038": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000157",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBkm---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10037": {
+          "op": "observe",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1749962251"
+        }
+      },
+      "clientId": "20c01f4d-16a1-4e2d-9765-c3a7f56aad97",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000158",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBky---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10037/indexes": {
+          "op": "push",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "time"
+            ],
+            "sparse": false,
+            "type": "skiplist",
+            "unique": false,
+            "isBuilding": true,
+            "id": "10039"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "4db5bee0-af2c-4a12-8df3-694891035d47",
+      "timestamp": "2019-03-20 16:06:53 CET"
+    },
+    {
+      "_key": "00000000000000000159",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBtC---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10037/s10038": {
+          "op": "set",
+          "new": {
+            "error": false,
+            "errorMessage": "",
+            "errorNum": 0,
+            "indexes": [
+              {
+                "fields": [
+                  "_key"
+                ],
+                "id": "0",
+                "sparse": false,
+                "type": "primary",
+                "unique": true
+              },
+              {
+                "deduplicate": true,
+                "fields": [
+                  "time"
+                ],
+                "id": "10039",
+                "sparse": false,
+                "type": "skiplist",
+                "unique": false
+              }
+            ],
+            "servers": [
+              "PRMR-947e1fd9-4a32-4a5a-be9d-b5be3b8b157e",
+              "PRMR-b5f2ae3b-5b07-45cf-8780-3eb9ec0527e3"
+            ]
+          }
+        },
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "eee1b276-2cbe-4e17-a5f5-ead6236c7578",
+      "timestamp": "2019-03-20 16:06:54 CET"
+    },
+    {
+      "_key": "00000000000000000160",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBtS---",
+      "term": 1,
+      "request": {
+        "arango/Plan/Collections/_system/10037/indexes": {
+          "op": "replace",
+          "new": {
+            "deduplicate": true,
+            "fields": [
+              "time"
+            ],
+            "id": "10039",
+            "sparse": false,
+            "type": "skiplist",
+            "unique": false
+          },
+          "val": {
+            "deduplicate": true,
+            "fields": [
+              "time"
+            ],
+            "sparse": false,
+            "type": "skiplist",
+            "unique": false,
+            "isBuilding": true,
+            "id": "10039"
+          }
+        },
+        "arango/Plan/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "edd7f62d-eccc-419f-9b01-85fb63ace33b",
+      "timestamp": "2019-03-20 16:06:54 CET"
+    },
+    {
+      "_key": "00000000000000000161",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiBtm---",
+      "term": 1,
+      "request": {
+        "arango/Current/Collections/_system/10037": {
+          "op": "unobserve",
+          "url": "http://[::1]:8530/_api/agency/agency-callbacks/1749962251"
+        }
+      },
+      "clientId": "68d950ce-6535-4ceb-8e5a-ccf5fc53ab5b",
+      "timestamp": "2019-03-20 16:06:54 CET"
+    },
+    {
+      "_key": "00000000000000000162",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiCQa---",
+      "term": 1,
+      "request": {
+        "arango/Current/FoxxmasterQueueupdate": {
+          "op": "set",
+          "new": false
+        }
+      },
+      "clientId": "f1dbb736-223c-4744-be6e-a44c94c4a4ee",
+      "timestamp": "2019-03-20 16:06:54 CET"
+    },
+    {
+      "_key": "00000000000000000163",
+      "_id": "hello from CustomTypeHandler",
+      "_rev": "_YXsiCQm---",
+      "term": 1,
+      "request": {
+        "arango/Current/Version": {
+          "op": "increment"
+        }
+      },
+      "clientId": "ea42b73e-bfe1-4c31-a525-5b84ea383dea",
+      "timestamp": "2019-03-20 16:06:54 CET"
+    }
+  ]
+}

@@ -62,6 +62,7 @@ fi
 
 JWT=$(jwtgen -a HS256 -s "$JWTSECRET" -c server_id=hans -c iss=arangodb)
 AGENTPOD=$(kubectl get pods -o json -n $DEPLOYMENTNAMESPACE -l role=agent,arango_deployment=$DEPLOYMENTNAME | jq -r .items[0].metadata.name)
+echo JWT: $JWT
 
 if [ ! $? -eq 0 ] ; then
   echo "Failed to get agency-pod"
@@ -77,59 +78,14 @@ if [ "$TLSCA" = "None" ] ; then
   AAAPARAMS=
 fi
 
+if [ "$DUMPPREFIX" != "" ] ; then
+  AAAPARAMS=$AAAPARAMS --dump=$DUMPPREFIX
+
 # create pod port-forwarding
 kubectl port-forward -n $DEPLOYMENTNAMESPACE $AGENTPOD 9898:8529 &
 PFPID=$!
 sleep 2
 
-if [ -n "$DUMPPREFIX" ] ; then
-  echo Generating dump files
-  curl -s $AAAPARAMS $SCHEME://localhost:9898/_api/agency/read -d'[["/"]]' -H"Authorization: bearer $JWT" > $DUMPPREFIX.state.json
-
-  CURSOR=$(curl -k $VERBOSE -s -H "Authorization: Bearer $JWT"  -X POST $AAAPARAMS $SCHEME://localhost:9898/_api/cursor -d'{"query":"for l in log sort l._key return l", "batchSize": 100}')
-  CURSORID=$(jq -r ".id" <<< "$CURSOR")
-  HASERROR=$(jq -r ".error" <<< "$CURSOR")
-  if [ "$HASERROR" == "true" ]; then
-    echo Error POST cursor: $(jq -r ".errorMessage" <<< "$CURSOR")
-    exit
-  fi
-
-  echo -n  "[" > $DUMPPREFIX.log.json
-
-  while :
-  do
-    HASERROR=$(jq -r ".error" <<< "$CURSOR")
-    if [ "$HASERROR" == "true" ]; then
-      echo Error: $(jq -r ".errorMessage" <<< "$CURSOR")
-    else
-      echo $CURSOR | jq -r -c ".result"| tail --bytes=+2 | head --bytes=-2 >> $DUMPPREFIX.log.json
-    fi
-
-    HASMORE=$(jq -r ".hasMore" <<< $CURSOR)
-    if [ "$HASMORE" == "false" ]; then
-      break
-    fi
-
-    echo "," >> $DUMPPREFIX.log.json
-
-    CURSOR=$(curl -k $VERBOSE -s -H "Authorization: Bearer $JWT" -X PUT $AAAPARAMS $SCHEME://localhost:9898/_api/cursor/$CURSORID)
-  done
-
-  echo -n "]" >> $DUMPPREFIX.log.json
-
-  CURSOR=$(curl -k $VERBOSE -s -H "Authorization: Bearer $JWT"  -X POST $AAAPARAMS $SCHEME://localhost:9898/_api/cursor -d'{"query":"let first = (for l in log sort l._key limit 1 return l._key) for s in compact filter s._key >= first[0] sort s._key limit 1 return s", "batchSize": 100}')
-  CURSORID=$(jq -r ".id" <<< "$CURSOR")
-  HASERROR=$(jq -r ".error" <<< "$CURSOR")
-  if [ "$HASERROR" == "true" ]; then
-    echo Error POST cursor: $(jq -r ".errorMessage" <<< "$CURSOR")
-    exit
-  fi
-
-  echo $CURSOR | jq -r -c ".result"| tail --bytes=+2 | head --bytes=-2 >> $DUMPPREFIX.snap.json
-
-else
-  python3 aaa.py $AAAPARAMS $SCHEME://localhost:9898/ $JWT
-fi
-
+python3 aaa.py $AAAPARAMS $SCHEME://localhost:9898/ $JWT
 
 kill -9 $PFPID

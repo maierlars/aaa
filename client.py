@@ -51,6 +51,16 @@ class ArangoClient:
     ArangoClient.checkArangoError(response)
     return self.QueryCursor(self, response)
 
+  def serverRole(self):
+    response = self.request("GET", "/_admin/server/role")
+    ArangoClient.checkArangoError(response)
+    return response["role"]
+
+  def agencyDump(self):
+    response = self.request("GET", "/_api/cluster/agency-dump")
+    # No error checking here
+    return response
+
   def raiseArangoError(response):
     raise ArangoError("{errorMessage} ({errorNum})".format(**response))
 
