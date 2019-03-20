@@ -656,11 +656,10 @@ class ArangoAgencyLogEndpointProvider:
     def refresh(self):
         role = self.client.serverRole()
         print("Server has role {}".format(role))
-        self._dump = 0
 
         if role == "COORDINATOR":
             print("Receiving agency dump")
-            self._dump = self.client.agencyDump()
+            dump = self.client.agencyDump()
             self._log = dump.get("log")
             self._snapshot = dump.get("compaction")
         elif role == "AGENT":
