@@ -660,6 +660,8 @@ class ArangoAgencyLogEndpointProvider:
         if role == "COORDINATOR":
             print("Receiving agency dump")
             dump = self.client.agencyDump()
+            if not isinstance(dump, dict):
+                raise Exception("Expected object in agency-dump")
             self._log = dump.get("log")
             self._snapshot = dump.get("compaction")
         elif role == "AGENT":

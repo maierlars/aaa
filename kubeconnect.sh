@@ -1,6 +1,9 @@
 #!/bin/bash
 set -o pipefail
 
+ME=$(realpath $0)
+SCRIPTDIR=$(dirname $ME)
+
 # check if KUBECONFIG is set
 if [ -z "$KUBECONFIG" ] ; then
   echo "KUBECONFIG not set"
@@ -14,18 +17,21 @@ fi
 
 DEPLOYMENTNAME=
 DUMPPREFIX=
+USEEA=0
 
 while [ "$1" != "" ]; do
   case $1 in
     -n )  shift
           DEPLOYMENTNAMESPACE=$1
           ;;
+    -ea ) USEEA=1
+          ;;
     --dump ) shift
           DUMPPREFIX=$1
           ;;
     * )
         if [ -n "$DEPLOYMENTNAME" ] ; then
-          echo "Use $0 <deploymentname> [-n <namespace>]"
+          echo "Use $0 <deploymentname> [-n <namespace>] [-ea]"
           exit 1
         fi
         DEPLOYMENTNAME=$1
@@ -52,6 +58,10 @@ DEPLOYMENTRES=$(kubectl get arango -o json -n $DEPLOYMENTNAMESPACE $DEPLOYMENTNA
 JWTSECRETNAME=$(echo $DEPLOYMENTRES | jq -r .spec.auth.jwtSecretName)
 TLSCA=$(echo $DEPLOYMENTRES | jq -r .spec.tls.caSecretName)
 
+EASERVICE=null
+if [ "$USEEA" != "0" ] ; then
+  EASERVICE=$(kubectl get service -o json -n $DEPLOYMENTNAMESPACE $DEPLOYMENTNAME-ea | jq -r .status.loadBalancer.ingress[0].ip)
+fi
 
 JWTSECRET=$(kubectl get secret -o json -n $DEPLOYMENTNAMESPACE $JWTSECRETNAME | jq -r .data.token | base64 -d -w0)
 
@@ -62,13 +72,15 @@ fi
 
 JWT=$(jwtgen -a HS256 -s "$JWTSECRET" -c server_id=hans -c iss=arangodb)
 AGENTPOD=$(kubectl get pods -o json -n $DEPLOYMENTNAMESPACE -l role=agent,arango_deployment=$DEPLOYMENTNAME | jq -r .items[0].metadata.name)
-echo JWT: $JWT
 
 if [ ! $? -eq 0 ] ; then
   echo "Failed to get agency-pod"
   exit 0
 fi
 
+MUSTFORWARD=1
+HOST=localhost
+PORT=9898
 SCHEME=https
 AAAPARAMS=-k
 
@@ -80,12 +92,21 @@ fi
 
 if [ "$DUMPPREFIX" != "" ] ; then
   AAAPARAMS=$AAAPARAMS --dump=$DUMPPREFIX
+fi
 
-# create pod port-forwarding
-kubectl port-forward -n $DEPLOYMENTNAMESPACE $AGENTPOD 9898:8529 &
-PFPID=$!
-sleep 2
+if [ "$EASERVICE" != "null" ] ; then
+  HOST=$EASERVICE
+  PORT=8529
+  MUSTFORWARD=0
+fi
 
-python3 aaa.py $AAAPARAMS $SCHEME://localhost:9898/ $JWT
+if [ "$MUSTFORWARD" == "1" ] ; then
+  # create pod port-forwarding
+  kubectl port-forward -n $DEPLOYMENTNAMESPACE $AGENTPOD 9898:8529 &
+  PFPID=$!
+  sleep 2
+fi
+
+python3 $SCRIPTDIR/aaa.py $AAAPARAMS $SCHEME://$HOST:$PORT/ $JWT
 
 kill -9 $PFPID
