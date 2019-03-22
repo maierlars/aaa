@@ -457,7 +457,7 @@ class ArangoAgencyAnalyserApp(App):
         self.focus = self.split
 
         self.provider = provider
-        self.refresh(updateSelection = True)
+        self.refresh(updateSelection = True, refreshProvider = False)
         # if len(argv) == 2:
         #     self.loadLogFromFile(argv[1])
         # elif len(argv) == 3:
@@ -474,11 +474,15 @@ class ArangoAgencyAnalyserApp(App):
     def restore(self, state):
         self.split.restore(state['split'])
 
-    def refresh(self, updateSelection = False):
-        self.provider.refresh()
+    def refresh(self, updateSelection = False, refreshProvider = True):
+        if refreshProvider:
+            self.provider.refresh()
+            self.clearWindow()
         self.log = self.provider.log()
         self.snapshot = self.provider.snapshot()
         self.firstValidLogIdx = None
+
+        self.update()
 
         msg = "Loaded {count} log entries, ranging from\n{first[timestamp]} ({first[_key]}) to {last[timestamp]} ({last[_key]}).".format(count = len(self.log), first = self.log[0], last = self.log[-1])
 
@@ -523,6 +527,8 @@ class ArangoAgencyAnalyserApp(App):
             self.stop = True
         elif cmd == "debug":
             self.debug = True
+        elif cmd == "r" or cmd == "refresh" or cmd == "ref":
+            self.refresh()
         elif cmd == "dump":
             if len(argv) != 2:
                 raise ValueError("Dump requires one parameter")
@@ -577,23 +583,6 @@ class ArangoAgencyAnalyserApp(App):
     def layout(self):
         super().layout()
         self.split.layout(self.rect)
-
-
-class ArangoAgencyLogProvider:
-
-    def __init__(self, logfile, snapshotFile):
-        self.logfile = logfile
-        self.snapshotFile = snapshotFile
-        self.refresh()
-
-    def log(self):
-        raise NotImplementedError
-
-    def snapshot(self):
-        raise NotImplementedError
-
-    def refresh(self):
-        raise NotImplementedError
 
 class ArangoAgencyLogFileProvider:
 

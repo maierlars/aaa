@@ -107,7 +107,7 @@ class LayoutColumns(Layout):
             if i == self.focus:
                 attr |= curses.A_STANDOUT
             maxlen =  ctrl.rect.width
-            self.app.stdscr.addnstr(0, ctrl.rect.x, ctrl.title().ljust(maxlen), maxlen, attr)
+            self.app.stdscr.addnstr(self.rect.y, ctrl.rect.x, ctrl.title().ljust(maxlen), maxlen, attr)
 
         # Paint vertical bars
         for x in self.bars:
@@ -396,6 +396,9 @@ class App:
 
     def userInput(self):
         self.input(self.stdscr.getch())
+
+    def clearWindow(self):
+        self.stdscr.clear()
 
     def run(self):
         while not self.stop:

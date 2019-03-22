@@ -7,7 +7,7 @@ class ArangoError(RuntimeError):
 
 class ArangoClient:
 
-  def __init__(self, connection, jwt):
+  def __init__(self, connection, jwt = None):
     self.connection = connection
     self.jwt = jwt
 
@@ -59,6 +59,16 @@ class ArangoClient:
   def agencyDump(self):
     response = self.request("GET", "/_api/cluster/agency-dump")
     # No error checking here
+    return response
+
+  def createCollection(self, dbname, **properties):
+    response = self.request("POST", "/_db/{}/_api/collection".format(dbname), body = properties)
+    ArangoClient.checkArangoError(response)
+    return response
+
+  def createDatabase(self, **properties):
+    response = self.request("POST", "/_api/database", body = properties)
+    ArangoClient.checkArangoError(response)
     return response
 
   def raiseArangoError(response):
