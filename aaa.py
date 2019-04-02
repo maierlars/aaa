@@ -140,7 +140,7 @@ class AgencyLogList(Control):
                 attr = 0
                 if idx == self.getSelectedIndex():
                     attr |= curses.A_STANDOUT
-                if not self.app.snapshot == None:
+                if not self.app.snapshot == None and not self.app.log[0]["_key"] == ARANGO_LOG_ZERO:
                     if ent["_key"] < self.app.snapshot["_key"]:
                         attr |= curses.A_DIM
 
@@ -284,6 +284,14 @@ class AgencyLogView(LineView):
                 self.jsonLines(None)
             elif not self.idx == None and self.idx < len(self.app.log):
                 entry = self.app.log[self.idx]
+
+                fields = ["_key", "_rev", "term", "clientId", "timestamp", "request"]
+
+                json = dict()
+                for name in fields:
+                    if name in entry:
+                        json[name] = entry[name]
+
                 self.head = None #entry['_key']
 
                 loglist = self.app.list
@@ -291,7 +299,7 @@ class AgencyLogView(LineView):
                     self.findStr = loglist.filterStr
                 else:
                     self.findStr = None
-                self.jsonLines(entry)
+                self.jsonLines(json)
 
         self.lastIdx = self.idx
         super().update()
@@ -486,7 +494,7 @@ class ArangoAgencyAnalyserApp(App):
 
         msg = "Loaded {count} log entries, ranging from\n{first[timestamp]} ({first[_key]}) to {last[timestamp]} ({last[_key]}).".format(count = len(self.log), first = self.log[0], last = self.log[-1])
 
-        if not self.snapshot == None:
+        if not self.snapshot == None and not self.log[0]["_key"] == ARANGO_LOG_ZERO:
             for i, e in enumerate(self.log):
                 if e["_key"] <= self.snapshot["_key"]:
                     self.firstValidLogIdx = i

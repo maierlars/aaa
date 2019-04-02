@@ -72,6 +72,7 @@ fi
 
 JWT=$(jwtgen -a HS256 -s "$JWTSECRET" -c server_id=hans -c iss=arangodb)
 AGENTPOD=$(kubectl get pods -o json -n $DEPLOYMENTNAMESPACE -l role=agent,arango_deployment=$DEPLOYMENTNAME | jq -r .items[0].metadata.name)
+echo $JWT
 
 if [ ! $? -eq 0 ] ; then
   echo "Failed to get agency-pod"
