@@ -353,7 +353,7 @@ class AgencyStoreView(LineView):
             # just apply all log entries
             self.store = agency.AgencyStore()
             for i in range(0, idx+1):
-                self.store.apply(self.app.log[i]["request"])
+                self.store.applyLog(self.app.log[i])
         elif snapshot == None:
             self.head = None
             self.lines = [[(ColorFormat.CF_ERROR, "No snapshot available")]]
@@ -370,7 +370,7 @@ class AgencyStoreView(LineView):
 
             for i in range(startidx, idx+1):
                 if log[idx]["_key"] >= snapshot["_key"]:
-                    self.store.apply(self.app.log[i]["request"])
+                    self.store.applyLog(self.app.log[i])
 
         self.lastIdx = idx
         self.jsonLines(self.store._ref(self.path))
