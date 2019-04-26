@@ -22,6 +22,8 @@ class AgencyLogList(Control):
     FILTER_GREP = 1
     FILTER_REGEX = 2
 
+
+
     def __init__(self, app, rect):
         super().__init__(app, rect)
         self.app = app
@@ -33,6 +35,7 @@ class AgencyLogList(Control):
         self.filterType = AgencyLogList.FILTER_NONE
         self.filterHistory = []
         self.formatString = "[{timestamp}|{term}] {_key} {urls}"
+        self.marked = dict()
 
     def title(self):
         return "Agency Log"
@@ -140,6 +143,9 @@ class AgencyLogList(Control):
                 attr = 0
                 if idx == self.getSelectedIndex():
                     attr |= curses.A_STANDOUT
+                if idx in self.marked:
+                    attr |= ColorFormat.MARKING_ATTR_LIST[self.marked[idx]]
+
                 if not self.app.snapshot == None and not self.app.log[0]["_key"] == ARANGO_LOG_ZERO:
                     if ent["_key"] < self.app.snapshot["_key"]:
                         attr |= curses.A_DIM
@@ -230,10 +236,16 @@ class AgencyLogList(Control):
                 if string:
                     self.filterHistory.append(string)
                 self.grep(string)
-        elif c == ord('R'):
+        elif c == ord('r'):
             yesNo = self.app.userStringLine(label = "Reset all filters", prompt = "[Y/n] ")
             if yesNo == "Y" or yesNo == "y":
                 self.reset()
+        elif c == ord('R'):
+            self.reset()
+        elif c == ord('m'):
+            self.toggleMarkLine()
+        elif c == ord('M'):
+            self.deleteMarkLine()
 
     # Returns the index of the selected log entry.
     #   This value is always with respect to the app.log array.
@@ -244,6 +256,20 @@ class AgencyLogList(Control):
                 return self.list[self.highlight]
             return None
         return self.highlight
+
+    def toggleMarkLine(self):
+        idx = self.getSelectedIndex()
+        if idx in self.marked:
+            self.marked[idx] += 1
+            if self.marked[idx] == len(ColorFormat.MARKING_ATTR_LIST):
+                del self.marked[idx]
+        else:
+            self.marked[idx] = 0
+
+    def deleteMarkLine(self):
+        idx = self.getSelectedIndex()
+        if idx in self.marked:
+            del self.marked[idx]
 
     def selectClosest(self, idx):
         if not self.list == None:
@@ -669,22 +695,45 @@ class ArangoAgencyLogEndpointProvider:
             self._snapshot = next(iter(snapshots), None)
 
 class ColorPairs:
+    CACHE = dict()
+
+    def getPair(fg, bg):
+        if (fg, bg) in ColorPairs.CACHE:
+            return ColorPairs.CACHE[(fg, bg)]
+        newid = len(ColorPairs.CACHE) + 1
+        curses.init_pair(newid, fg, bg)
+        cpair = curses.color_pair(newid)
+        ColorPairs.CACHE[(fg, bg)] = cpair
+        return cpair
+
+
     CP_RED_WHITE = 1
+    CP_WHITE_RED = 2
+    CP_RED_WHITE = 1
+    CP_WHITE_RED = 2
+
+#1:red, 2:green, 3:yellow, 4:blue, 5:magenta, 6:cyan
 
 class ColorFormat:
     CF_ERROR = None
 
+    MARKING_ATTR_LIST = None
 
 def main(stdscr, provider):
     stdscr.clear()
     curses.curs_set(0)
 
-    # initialise some colors
-    curses.init_pair(ColorPairs.CP_RED_WHITE, curses.COLOR_RED, curses.COLOR_BLACK)
-
     # Init color formats
-    ColorFormat.CF_ERROR = curses.A_BOLD | curses.color_pair(ColorPairs.CP_RED_WHITE);
+    ColorFormat.CF_ERROR = curses.A_BOLD | ColorPairs.getPair(curses.COLOR_RED, curses.COLOR_WHITE);
 
+    ColorFormat.MARKING_ATTR_LIST = [
+        ColorPairs.getPair(curses.COLOR_WHITE, curses.COLOR_RED),
+        ColorPairs.getPair(curses.COLOR_WHITE, curses.COLOR_GREEN),
+        ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_YELLOW),
+        ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_BLUE),
+        ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_MAGENTA),
+        ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_CYAN),
+    ]
 
     app = ArangoAgencyAnalyserApp(stdscr, provider)
     app.run()
