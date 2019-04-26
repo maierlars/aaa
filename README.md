@@ -28,6 +28,8 @@ Use `g` to do a basic grep like search on the log entries. Reset filters via `R`
 
 To dump the content of the JSON view into a file use `:dump filename`.
 
+In the log list you can toggle entry markers using `m`. To delete the marking immediately use `M`.
+
 ### Save and Restore states
 
 You can save and restore states of the analyizer. To store a state use:
