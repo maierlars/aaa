@@ -504,7 +504,7 @@ class ArangoAgencyAnalyserApp(App):
             if updateSelection:
                 self.list.selectClosest(self.firstValidLogIdx)
 
-            msg += "\nUsing snapshot {snapshot[_id]}.".format(snapshot = self.snapshot)
+            msg += "\nUsing snapshot {snapshot[_key]}.".format(snapshot = self.snapshot)
 
         self.displayMsg(msg, curses.A_STANDOUT)
 

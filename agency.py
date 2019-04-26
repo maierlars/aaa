@@ -110,13 +110,10 @@ class AgencyStore:
             value = request[path]
             path = AgencyStore.parsePath(path)
 
-            if not 'op' in value and not 'new' in value:
+            if (not isinstance(value, dict)) or ( not 'op' in value and not 'new' in value):
                 # directly apply value
                 self.set(path, value)
             else:
-                if not 'new' in value:
-                    return
-
                 op = value['op'] if 'op' in value else 'set'
                 normalizedPath = "/".join(path)
 
@@ -129,26 +126,30 @@ class AgencyStore:
                 if 'ttl' in value and not now == None:
                     heapq.heappush(self.ttlt, (now + value['ttl'], normalizedPath))
 
-                if op == "set":
-                    self.set(path, value['new'])
-                elif op == "delete" :
-                    self.delete(path)
+                if op == "shift":
+                    self.shift(path, value)
+                elif op == "prepend":
+                    self.prepend(path, value)
                 elif op == "increment":
                     delta = value['new'] if 'new' in value else 1
                     self.add(path, delta)
                 elif op == "decrement":
                     delta = value['new'] if 'new' in value else 1
                     self.add(path, - delta)
-                elif op == "push":
-                    self.push(path, value['new'])
-                elif op == "pop":
-                    self.pop(path, value['new'])
-                elif op == "erase":
+                elif op == "delete" :
+                        self.delete(path)
+
+                if 'new' in value:
+                    if op == "set":
+                        self.set(path, value['new'])
+                    elif op == "push":
+                        self.push(path, value['new'])
+                    elif op == "pop":
+                        self.pop(path, value['new'])
+
+                if op == "erase" and 'val' in value:
                     self.erase(path, value['val'])
-                elif op == "shift":
-                    self.shift(path, value)
-                elif op == "prepend":
-                    self.prepend(path, value)
+
 
     def parsePath(path):
         return list(filter(None, path.split('/')))
