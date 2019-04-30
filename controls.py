@@ -1,6 +1,7 @@
 import curses, curses.ascii
 import textwrap
 import json
+from bisect import bisect_left
 
 class Rect:
     def __init__(self, x, y, width, height):
@@ -124,7 +125,7 @@ class LayoutColumns(Layout):
         super().layout(rect)
 
         total = sum(self.rels)
-        offset = 0
+        offset = self.rect.x
         avail = self.rect.width - len(self.columns) + 1
         self.bars = []
 
@@ -132,8 +133,8 @@ class LayoutColumns(Layout):
             width = (avail * self.rels[i]) // total
 
             col.layout(Rect(
-                offset, 1,
-                width, self.rect.height - 1
+                offset, self.rect.y,
+                width, self.rect.height
             ))
             offset += width
             self.bars.append(offset)
@@ -189,6 +190,7 @@ class LineView(Control):
         self.highlight = None
         self.findStr = None
         self.findList = []
+        self.findHistory = []
 
     def serialize(self):
         return {
@@ -226,7 +228,7 @@ class LineView(Control):
             y += 1
 
         i = self.top
-        while y < self.rect.height:
+        while y < self.rect.height - 1:
 
             attr = 0
             if i == self.highlight:
@@ -242,6 +244,20 @@ class LineView(Control):
             y += 1
             i += 1
 
+        if y < self.rect.height:
+            lastLine = i if i < len(self.lines) else len(self.lines)
+            statusString = "Line {} to {} of {}".format(self.top, lastLine, len(self.lines))
+
+            if not self.findStr == None:
+                statusString += "; total {} occurences of `{}`".format(len(self.findList), self.findStr[0:10])
+
+                if len(self.findList) > 0:
+                    aboveCount = len(self.findList) - bisect_left(self.findList, self.top)
+                    statusString += "; {} below, {} above top line".format(aboveCount, len(self.findList) - aboveCount)
+
+            self.app.stdscr.addnstr(y, x, statusString.ljust(maxlen), maxlen, curses.A_BOLD)
+
+
     def find(self, string):
         if not string:
             self.reset()
@@ -249,6 +265,7 @@ class LineView(Control):
             self.findStr = string
             self.jsonLines(self.json)
             self.next()
+            self.findHistory.append(string)
 
     def reset(self):
         self.findStr = None
@@ -284,7 +301,7 @@ class LineView(Control):
         elif c == curses.KEY_HOME:
             self.top = 0
         elif c == ord('f'):
-            findStr = self.app.userStringLine(label = "Find", default = self.findStr, prompt = "> ")
+            findStr = self.app.userStringLine(label = "Find", default = self.findStr, prompt = "> ", history = self.findHistory)
             if not findStr == None:
                 self.find(findStr)
         elif c == ord('n'):
@@ -312,9 +329,6 @@ class LineView(Control):
         self.json = value
         self.lines = json.dumps(value, indent=4, separators=(',', ': ')).splitlines()
         self.highlightLines()
-
-    def head(self, headline):
-        self.head = headline
 
     def set(self, value):
         self.json = value
