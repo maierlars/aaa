@@ -133,8 +133,8 @@ class LayoutColumns(Layout):
             width = (avail * self.rels[i]) // total
 
             col.layout(Rect(
-                offset, self.rect.y,
-                width, self.rect.height
+                offset, self.rect.y + 1,
+                width, self.rect.height - 1
             ))
             offset += width
             self.bars.append(offset)
@@ -228,7 +228,7 @@ class LineView(Control):
             y += 1
 
         i = self.top
-        while y < self.rect.height - 1:
+        while y <= self.rect.height - 1:
 
             attr = 0
             if i == self.highlight:
@@ -244,9 +244,9 @@ class LineView(Control):
             y += 1
             i += 1
 
-        if y < self.rect.height:
+        if y <= self.rect.height:
             lastLine = i if i < len(self.lines) else len(self.lines)
-            statusString = "Line {} to {} of {}".format(self.top, lastLine, len(self.lines))
+            statusString = "Line {} to {} of {}".format(self.top + 1, lastLine, len(self.lines))
 
             if not self.findStr == None:
                 statusString += "; total {} occurences of `{}`".format(len(self.findList), self.findStr[0:10])
