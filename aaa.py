@@ -5,11 +5,12 @@ import os
 import json
 import datetime
 import re
+import copy
 from time import sleep
 import argparse
 from urllib.parse import urlparse
 
-import agency
+import agency, hlc
 from controls import *
 from client import *
 
@@ -283,8 +284,12 @@ class AgencyLogView(LineView):
             if self.idx == None:
                 self.jsonLines(None)
             elif not self.idx == None and self.idx < len(self.app.log):
-                entry = self.app.log[self.idx]
+                entry = copy.deepcopy(self.app.log[self.idx])
                 self.head = None #entry['_key']
+
+                if '_rev' in entry:
+                    ref = entry['_rev']
+                    entry['_rev'] = "{} ({})".format(ref, hlc.decode(ref))
 
                 loglist = self.app.list
                 if loglist.filterType == AgencyLogList.FILTER_GREP:

@@ -628,6 +628,19 @@ class App:
                 break
             x += strlen
 
+
+    def printWithAttributes(self, y, x, line, maxlen, attrs):
+        # attrs is a list of triples (from, to, attr) of attributes
+        # together with from and to indexes where to apply those
+        # attributes
+        # It will use the most recent color but ORs together all other styles
+        style = 0       # this is the current style
+        stylestack = [] # contains the style used before the change
+
+
+
+
+
     def showProgress(self, progress, msg, label = None):
         # clamp progress into [0, 1]
         progress = max(0.0, min(1.0, progress))

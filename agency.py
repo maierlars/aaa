@@ -89,7 +89,10 @@ class AgencyStore:
             value = request[path]
             path = AgencyStore.parsePath(path)
 
-            if not 'op' in value and not 'new' in value:
+            if not 'op' in value:
+        # Normalize the input
+        # Calculate new top line depending on mode
+        # Dump as many lines as possibleand not 'new' in value:
                 # directly apply value
                 self.set(path, value)
             else:
@@ -133,3 +136,9 @@ class AgencyStore:
 
     def get(self, path):
         return copy.deepcopy(self._ref(path))
+
+    def copyJson(self):
+        return copy.deepcopy(self.store)
+
+    def json(self):
+        return self.store
