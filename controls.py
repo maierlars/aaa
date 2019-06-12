@@ -648,26 +648,29 @@ class App:
                 break
             x += strlen
 
-    def showProgress(self, progress, msg, label = None):
+    def showProgress(self, progress, msg, label = None, rect = None):
         # clamp progress into [0, 1]
         progress = max(0.0, min(1.0, progress))
+
+        if rect == None:
+            rect = self.rect
 
         # If label is set and we have more than one line of space
         # Display the label left aligned.
         # Then display a progress bar, that contains msg string
         # and is highlighted for the percent part
-        if self.rect.height == 0:
+        if rect.height == 0:
             return
 
-        maxlen = self.rect.width - 1
+        maxlen = rect.width - 1
 
-        if self.rect.height > 1 and not label == None:
-            self.stdscr.addnstr(self.rect.height - 2, 0, label.ljust(maxlen), maxlen, curses.A_STANDOUT)
+        if rect.height > 1 and not label == None:
+            self.stdscr.addnstr(rect.height - 2, 0, label.ljust(maxlen), maxlen, curses.A_STANDOUT)
 
         donelen = int(maxlen * progress)
         string = msg.ljust(maxlen)
 
-        self.stdscr.addnstr(self.rect.height - 1, 0, string, donelen, curses.A_STANDOUT)
-        self.stdscr.addnstr(self.rect.height - 1, donelen, string[donelen:], maxlen - donelen, 0)
+        self.stdscr.addnstr(rect.height, rect.x, string, donelen, curses.A_STANDOUT)
+        self.stdscr.addnstr(rect.height, rect.x + donelen, string[donelen:], maxlen - donelen, 0)
 
         self.stdscr.refresh()

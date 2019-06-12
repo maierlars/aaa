@@ -3,7 +3,7 @@
 import sys
 import os
 import json
-import datetime
+import datetime, time
 import re
 import copy
 from time import sleep
@@ -379,8 +379,14 @@ class AgencyStoreView(LineView):
             if log[0]["_key"] == ARANGO_LOG_ZERO:
                 # just apply all log entries
                 self.store = agency.AgencyStore()
+                lastProgress = time.monotonic_ns()
                 for i in range(0, idx+1):
+                    now = time.monotonic_ns()
+                    if now - lastProgress > 1000 * 1000 * 10:
+                        self.app.showProgress (i / (idx+1), "Generating store {}/{}".format(i, idx+1), rect = self.rect)
+                        lastProgress = now
                     self.store.applyLog(self.app.log[i])
+                self.app.showProgress (1.0, "Generating store done".format(i, idx+1), rect = self.rect)
             elif snapshot == None:
                 self.head = None
                 self.lines = [[(ColorFormat.CF_ERROR, "No snapshot available")]]
@@ -395,13 +401,20 @@ class AgencyStoreView(LineView):
                     startidx = self.app.firstValidLogIdx
                     self.store = agency.AgencyStore(snapshot["readDB"][0])
 
+                lastProgress = time.monotonic_ns()
+
                 for i in range(startidx, idx+1):
+                    now = time.monotonic_ns()
+                    if now - lastProgress > 1000 * 1000 * 10:
+                        self.app.showProgress ((i - startidx) / (idx+1-startidx), "Generating store {}/{}".format(i, idx+1), rect = self.rect)
+                        lastProgress = now
                     if log[idx]["_key"] >= snapshot["_key"]:
                         self.store.applyLog(self.app.log[i])
 
+                self.app.showProgress (1.0, "Generating store done".format(i, idx+1), rect = self.rect)
+
             self.lastIdx = idx
             self.jsonLines(self.store._ref(self.path))
-
         elif updateJson:
             self.jsonLines(self.store._ref(self.path))
 
