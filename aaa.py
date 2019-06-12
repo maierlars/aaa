@@ -362,47 +362,48 @@ class AgencyStoreView(LineView):
     def layout(self, rect):
         super().layout(rect)
 
-    def updateStore(self):
+    def updateStore(self, updateJson = False):
         idx = self.app.list.getSelectedIndex()
         if idx == None:
             return
 
-        if self.lastIdx == idx:
-            return
+        if self.lastIdx != idx:
+            # if the id of the first log entry is ARANGO_LOG_ZERO,
+            # generate the agency from empty store
+            # otherwise check if the log entry is after (>=) the
+            log = self.app.log
+            if log == None or len(log) == 0:
+                return
+            snapshot = self.app.snapshot
 
-        # if the id of the first log entry is ARANGO_LOG_ZERO,
-        # generate the agency from empty store
-        # otherwise check if the log entry is after (>=) the
-        log = self.app.log
-        if log == None or len(log) == 0:
-            return
-        snapshot = self.app.snapshot
-
-        if log[0]["_key"] == ARANGO_LOG_ZERO:
-            # just apply all log entries
-            self.store = agency.AgencyStore()
-            for i in range(0, idx+1):
-                self.store.applyLog(self.app.log[i])
-        elif snapshot == None:
-            self.head = None
-            self.lines = [[(ColorFormat.CF_ERROR, "No snapshot available")]]
-            return
-        elif log[idx]["_key"] < snapshot["_key"]:
-            self.head = None
-            self.lines = [[(ColorFormat.CF_ERROR, "Can not replicate agency state. Not covered by snapshot.")]]
-            return
-        else:
-            startidx = self.lastIdx
-            if self.lastIdx == None or self.store == None or idx < self.lastIdx:
-                startidx = self.app.firstValidLogIdx
-                self.store = agency.AgencyStore(snapshot["readDB"][0])
-
-            for i in range(startidx, idx+1):
-                if log[idx]["_key"] >= snapshot["_key"]:
+            if log[0]["_key"] == ARANGO_LOG_ZERO:
+                # just apply all log entries
+                self.store = agency.AgencyStore()
+                for i in range(0, idx+1):
                     self.store.applyLog(self.app.log[i])
+            elif snapshot == None:
+                self.head = None
+                self.lines = [[(ColorFormat.CF_ERROR, "No snapshot available")]]
+                return
+            elif log[idx]["_key"] < snapshot["_key"]:
+                self.head = None
+                self.lines = [[(ColorFormat.CF_ERROR, "Can not replicate agency state. Not covered by snapshot.")]]
+                return
+            else:
+                startidx = self.lastIdx
+                if self.lastIdx == None or self.store == None or idx < self.lastIdx:
+                    startidx = self.app.firstValidLogIdx
+                    self.store = agency.AgencyStore(snapshot["readDB"][0])
 
-        self.lastIdx = idx
-        self.jsonLines(self.store._ref(self.path))
+                for i in range(startidx, idx+1):
+                    if log[idx]["_key"] >= snapshot["_key"]:
+                        self.store.applyLog(self.app.log[i])
+
+            self.lastIdx = idx
+            self.jsonLines(self.store._ref(self.path))
+
+        elif updateJson:
+            self.jsonLines(self.store._ref(self.path))
 
 
     def update(self):
@@ -415,7 +416,7 @@ class AgencyStoreView(LineView):
             pathstr = self.app.userStringLine(prompt = "> ", label = "Agency Path:", default=self.head, complete=self.completePath, history = self.pathHistory)
             self.path = agency.AgencyStore.parsePath(pathstr)
             self.pathHistory.append(pathstr)
-            self.lastIdx = None # trigger update
+            self.updateStore(updateJson = True)
         else:
             super().input(c)
 
