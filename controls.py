@@ -508,7 +508,7 @@ class App:
     #   the second the auto complete list.
     def userStringLine(self, label = None, complete = None, default = None, prompt = "> ", history = []):
         user = default if not default == None else ""
-        hints = []
+        hints = list()
         historyIdx = 0
 
         cursorIndex = len(user)
@@ -546,10 +546,12 @@ class App:
                 if not label == None:
                     height += 1
 
-                if height > self.rect.height:
-                    hints = []
-                else:
-                    height += len(hints)
+                maxHints = min(self.rect.height - height, 20) - 1
+
+                if len(hints) > maxHints:
+                    hints = hints[:maxHints] + ["(list truncated)"]
+                height += len(hints)
+
 
                 maxlen = self.rect.width
                 y = self.rect.y + self.rect.height - height
@@ -615,7 +617,7 @@ class App:
                 elif c == ord('\t'):
                     # tabulator, time for auto complete
                     if not complete == None:
-                        hints = []
+                        hints = list()
                         hint = complete(user)
                         if isinstance(hint, list):
                             hints = hint
@@ -624,7 +626,7 @@ class App:
                             cursorIndex = len(user)
                         elif isinstance(hint, tuple):
                             user = hint[0]
-                            hints = hint[1]
+                            hints = list(hint[1])
                             cursorIndex = len(user)
                 elif not curses.has_key(c):
                     user = user[:cursorIndex] + chr(c) + user[cursorIndex:]
