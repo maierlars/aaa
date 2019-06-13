@@ -228,13 +228,13 @@ class AgencyLogList(Control):
             self.highlight = self.__getListLen() - 1
         elif c == curses.KEY_HOME:
             self.highlight = 0
-        elif c == ord('f'):
+        elif False:
             regexStr = self.app.userStringLine(label = "Regular Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
             if not regexStr == None:
                 if regexStr:
                     self.filterHistory.append(regexStr)
                 self.regexp(regexStr)
-        elif c == ord('g'):
+        elif c == ord('g') or c == ord('f'):
             string = self.app.userStringLine(label = "Global Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
             if not string == None:
                 if string:
