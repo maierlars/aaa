@@ -9,6 +9,7 @@ import copy
 from time import sleep
 import argparse
 from urllib.parse import urlparse
+import bisect
 
 import agency
 from controls import *
@@ -337,11 +338,50 @@ class AgencyLogView(LineView):
         self.idx = idx
 
 
+class StoreCache:
+
+    def __init__(self, maxSize):
+        self.maxSize = maxSize
+        self.cache = dict()
+        self.list = list()
+        self.indexes = list()
+
+    def refresh(self, idx):
+        try:
+            self.list.remove(idx)
+        except:
+            pass
+        self.list.append(idx)
+
+    def get(self, idx):
+        if idx in self.cache:
+            self.refresh(idx)
+            return self.cache[idx]
+        return None
+
+    def closest(self, idx):
+        i = bisect_left(self.indexes, idx)
+        if i == 0:
+            return None
+        return self.indexes[i-1]
+
+    def set(self, idx, store):
+        self.refresh(idx)
+        if len(self.list) > self.maxSize:
+            oldIdx = self.list.pop()
+            self.indexes.remove(oldIdx)
+            del self.cache[oldIdx]
+        self.cache[idx] = store
+        bisect.insort_left(self.indexes, idx)
+
+
 class AgencyStoreView(LineView):
     def __init__(self, app, rect):
         super().__init__(app, rect)
         self.store = None
+        self.cache = StoreCache(512)
         self.lastIdx = None
+        self.lastWasCopy = False
         self.path = []
         self.pathHistory = []
 
@@ -376,30 +416,50 @@ class AgencyStoreView(LineView):
                 return
             snapshot = self.app.snapshot
 
+            startidx = None
+            snapshotRequired = True
+
             if log[0]["_key"] == ARANGO_LOG_ZERO:
-                # just apply all log entries
-                self.store = agency.AgencyStore()
-                lastProgress = time.clock()
-                for i in range(0, idx+1):
-                    now = time.clock()
-                    if now - lastProgress > 0.1:
-                        self.app.showProgress (i / (idx+1), "Generating store {}/{}".format(i, idx+1), rect = self.rect)
-                        lastProgress = now
-                    self.store.applyLog(self.app.log[i])
-                self.app.showProgress (1.0, "Generating store done".format(i, idx+1), rect = self.rect)
-            elif snapshot == None:
-                self.head = None
-                self.lines = [[(ColorFormat.CF_ERROR, "No snapshot available")]]
-                return
-            elif log[idx]["_key"] < snapshot["_key"]:
-                self.head = None
-                self.lines = [[(ColorFormat.CF_ERROR, "Can not replicate agency state. Not covered by snapshot.")]]
-                return
+                snapshotRequired = False
+
+            # early out for cases where we can not produce a store
+            if snapshotRequired:
+                if snapshot == None:
+                    self.head = None
+                    self.lines = [[(ColorFormat.CF_ERROR, "No snapshot available")]]
+                    return
+                elif log[idx]["_key"] < snapshot["_key"]:
+                    self.head = None
+                    self.lines = [[(ColorFormat.CF_ERROR, "Can not replicate agency state. Not covered by snapshot.")]]
+                    return
+
+            # first check cache
+            cache = self.cache.get(idx)
+            if not cache == None:
+                self.lastWasCopy = False
+                self.store = cache
             else:
                 startidx = self.lastIdx
                 if self.lastIdx == None or self.store == None or idx < self.lastIdx:
                     startidx = self.app.firstValidLogIdx
-                    self.store = agency.AgencyStore(snapshot["readDB"][0])
+                    if snapshotRequired:
+                        self.app.showProgress (1.0, "Copy from snapshot", rect = self.rect)
+                        self.store = agency.AgencyStore(snapshot["readDB"][0])
+                    else:
+                        self.store = agency.AgencyStore()
+                    self.lastWasCopy = True
+
+                # lets ask cache
+                cache = self.cache.closest(idx)
+                if not cache == None:
+                    if cache > startidx:
+                        startidx = cache
+                        self.app.showProgress (1.0, "Copy from cache", rect = self.rect)
+                        self.store = agency.AgencyStore.copyFrom(self.cache.get(cache))
+                        self.lastWasCopy = True
+
+                if not self.lastWasCopy:
+                    self.store = agency.AgencyStore.copyFrom(self.store)
 
                 lastProgress = time.clock()
 
@@ -411,13 +471,17 @@ class AgencyStoreView(LineView):
                     if log[idx]["_key"] >= snapshot["_key"]:
                         self.store.applyLog(self.app.log[i])
 
-                self.app.showProgress (1.0, "Generating store done".format(i, idx+1), rect = self.rect)
+                self.app.showProgress (1.0, "Generating store done - writing to cache", rect = self.rect)
+
+                self.cache.set(idx, agency.AgencyStore.copyFrom(self.store))
+
+                self.app.showProgress (1.0, "Dumping json", rect = self.rect)
 
             self.lastIdx = idx
-            self.jsonLines(self.store._ref(self.path))
-        elif updateJson:
-            self.jsonLines(self.store._ref(self.path))
+            updateJson = True
 
+        if updateJson:
+            self.jsonLines(self.store._ref(self.path))
 
     def update(self):
         self.head = "/" + "/".join(self.path)

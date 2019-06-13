@@ -13,6 +13,9 @@ class AgencyStore:
     def __str__(self):
         return json.dumps(self.store)
 
+    def copyFrom(store):
+        return AgencyStore(store.store, store.ttlt)
+
     def set(self, path, value):
         store = self.store
         for x in path[:-1]:
