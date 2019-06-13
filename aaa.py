@@ -142,7 +142,7 @@ class AgencyLogList(Control):
                 ent = self.app.log[idx]
 
                 text = " ".join(x for x in ent["request"])
-                msg = self.formatString.format(**ent, urls=text).ljust(self.rect.width)
+                msg = self.formatString.format(**ent, urls=text, i = idx).ljust(self.rect.width)
 
                 attr = 0
                 if idx == self.getSelectedIndex():
@@ -154,12 +154,11 @@ class AgencyLogList(Control):
                     if ent["_key"] < self.app.snapshot["_key"]:
                         attr |= curses.A_DIM
 
-                self.app.stdscr.addnstr(y, x, msg, maxlen, attr)
+                self.app.stdscr.addnstr(y, x, msg.ljust(maxlen), maxlen, attr)
             elif i == 0:
-                self.app.stdscr.addnstr(y, x, "Nothing to display", maxlen, curses.A_BOLD | ColorFormat.CF_ERROR)
+                self.app.stdscr.addnstr(y, x, "Nothing to display".ljust(maxlen), maxlen, curses.A_BOLD | ColorFormat.CF_ERROR)
             else:
-                self.app.stdscr.move(y, x)
-            self.app.stdscr.clrtoeol()
+                self.app.stdscr.addnstr(y, x, "".ljust(maxlen), maxlen, 0)
 
     def filter(self, predicate):
         # Make sure that the highlighted entry is the previously selected
@@ -359,6 +358,9 @@ class StoreCache:
             return self.cache[idx]
         return None
 
+    def has(self, idx):
+        return idx in self.cache
+
     def closest(self, idx):
         i = bisect_left(self.indexes, idx)
         if i == 0:
@@ -439,14 +441,16 @@ class AgencyStoreView(LineView):
                 self.lastWasCopy = False
                 self.store = cache
             else:
+                # check if we can use last index
                 startidx = self.lastIdx
+                doCopyLastSnapshot = False
                 if self.lastIdx == None or self.store == None or idx < self.lastIdx:
                     startidx = self.app.firstValidLogIdx
                     if snapshotRequired:
-                        self.app.showProgress (1.0, "Copy from snapshot", rect = self.rect)
-                        self.store = agency.AgencyStore(snapshot["readDB"][0])
+                        doCopyLastSnapshot = True
                     else:
                         self.store = agency.AgencyStore()
+                        startidx = 0
                     self.lastWasCopy = True
 
                 # lets ask cache
@@ -454,27 +458,32 @@ class AgencyStoreView(LineView):
                 if not cache == None:
                     if cache > startidx:
                         startidx = cache
-                        self.app.showProgress (1.0, "Copy from cache", rect = self.rect)
+                        self.app.showProgress (0.0, "Copy index {} from cache".format(cache), rect = self.rect)
                         self.store = agency.AgencyStore.copyFrom(self.cache.get(cache))
                         self.lastWasCopy = True
+                        doCopyLastSnapshot = False
 
-                if not self.lastWasCopy:
+                if doCopyLastSnapshot:
+                    self.app.showProgress (0.0, "Copy from snapshot", rect = self.rect)
+                    self.store = agency.AgencyStore(snapshot["readDB"][0])
+                elif not self.lastWasCopy:
                     self.store = agency.AgencyStore.copyFrom(self.store)
 
                 lastProgress = time.clock()
 
                 for i in range(startidx, idx+1):
                     now = time.clock()
-                    if now - lastProgress > 0.1:
+                    #if log[idx]["_key"] >= snapshot["_key"]:
+                    self.store.applyLog(self.app.log[i])
+                    if i % 5000 == 0 and not self.cache.has(i):
+                        self.app.showProgress ((i - startidx) / (idx+1-startidx), "Generating store {}/{} - writing to cache".format(i, idx+1), rect = self.rect)
+                        self.cache.set(i, agency.AgencyStore.copyFrom(self.store))
+                    elif now - lastProgress > 0.1:
                         self.app.showProgress ((i - startidx) / (idx+1-startidx), "Generating store {}/{}".format(i, idx+1), rect = self.rect)
                         lastProgress = now
-                    if log[idx]["_key"] >= snapshot["_key"]:
-                        self.store.applyLog(self.app.log[i])
 
                 self.app.showProgress (1.0, "Generating store done - writing to cache", rect = self.rect)
-
                 self.cache.set(idx, agency.AgencyStore.copyFrom(self.store))
-
                 self.app.showProgress (1.0, "Dumping json", rect = self.rect)
 
             self.lastIdx = idx

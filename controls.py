@@ -1,6 +1,6 @@
 import curses, curses.ascii
 import textwrap
-import json
+import json, time
 from bisect import bisect_left
 
 class Rect:
@@ -236,10 +236,9 @@ class LineView(Control):
 
             if i < len(self.lines):
                 line = self.lines[i]
-                self.app.printStyleLine(y, x, line, maxlen, attr)
+                self.app.printStyleLine(y, x, line.ljust(maxlen), maxlen, attr)
             else:
-                self.app.stdscr.move(y, x)
-            self.app.stdscr.clrtoeol()
+                self.app.stdscr.addnstr(y, x, "".ljust(maxlen), maxlen, 0)
 
             y += 1
             i += 1
