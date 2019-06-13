@@ -379,10 +379,10 @@ class AgencyStoreView(LineView):
             if log[0]["_key"] == ARANGO_LOG_ZERO:
                 # just apply all log entries
                 self.store = agency.AgencyStore()
-                lastProgress = time.monotonic_ns()
+                lastProgress = time.clock()
                 for i in range(0, idx+1):
-                    now = time.monotonic_ns()
-                    if now - lastProgress > 1000 * 1000 * 10:
+                    now = time.clock()
+                    if now - lastProgress > 0.1:
                         self.app.showProgress (i / (idx+1), "Generating store {}/{}".format(i, idx+1), rect = self.rect)
                         lastProgress = now
                     self.store.applyLog(self.app.log[i])
@@ -401,11 +401,11 @@ class AgencyStoreView(LineView):
                     startidx = self.app.firstValidLogIdx
                     self.store = agency.AgencyStore(snapshot["readDB"][0])
 
-                lastProgress = time.monotonic_ns()
+                lastProgress = time.clock()
 
                 for i in range(startidx, idx+1):
-                    now = time.monotonic_ns()
-                    if now - lastProgress > 1000 * 1000 * 10:
+                    now = time.clock()
+                    if now - lastProgress > 0.1:
                         self.app.showProgress ((i - startidx) / (idx+1-startidx), "Generating store {}/{}".format(i, idx+1), rect = self.rect)
                         lastProgress = now
                     if log[idx]["_key"] >= snapshot["_key"]:
