@@ -469,10 +469,10 @@ class AgencyStoreView(LineView):
                 elif not self.lastWasCopy:
                     self.store = agency.AgencyStore.copyFrom(self.store)
 
-                lastProgress = time.clock()
+                lastProgress = time.process_time()
 
                 for i in range(startidx, idx+1):
-                    now = time.clock()
+                    now = time.process_time()
                     #if log[idx]["_key"] >= snapshot["_key"]:
                     self.store.applyLog(self.app.log[i])
                     if i % 5000 == 0 and not self.cache.has(i):
