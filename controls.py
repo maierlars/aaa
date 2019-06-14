@@ -236,7 +236,10 @@ class LineView(Control):
 
             if i < len(self.lines):
                 line = self.lines[i]
-                self.app.printStyleLine(y, x, line.ljust(maxlen), maxlen, attr)
+                strlen = self.app.printStyleLine(y, x, line, maxlen, attr)
+                if strlen < maxlen:
+                    rlen = maxlen - strlen
+                    self.app.stdscr.addnstr(y, x + strlen, "".ljust(rlen), rlen, 0)
             else:
                 self.app.stdscr.addnstr(y, x, "".ljust(maxlen), maxlen, 0)
 
@@ -646,6 +649,8 @@ class App:
             if maxlen <= 0:
                 break
             x += strlen
+        return strlen
+
 
     def showProgress(self, progress, msg, label = None, rect = None):
         # clamp progress into [0, 1]

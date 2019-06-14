@@ -814,7 +814,7 @@ def main(stdscr, provider):
     curses.curs_set(0)
 
     # Init color formats
-    ColorFormat.CF_ERROR = curses.A_BOLD | ColorPairs.getPair(curses.COLOR_RED, curses.COLOR_WHITE);
+    ColorFormat.CF_ERROR = curses.A_BOLD | ColorPairs.getPair(curses.COLOR_RED, curses.COLOR_BLACK);
 
     ColorFormat.MARKING_ATTR_LIST = [
         ColorPairs.getPair(curses.COLOR_WHITE, curses.COLOR_RED),
