@@ -639,17 +639,18 @@ class App:
     def printStyleLine(self, y, x, line, maxlen, defaultAttr = 0):
         if isinstance(line, str):
             line = [line]
-
+        totalLen = 0
         for p in line:
             if isinstance(p, str):
                 p = (defaultAttr, p)
             strlen = len(p[1])
+            totalLen += strlen
             self.stdscr.addnstr(y, x, p[1], maxlen, p[0])
             maxlen -= strlen
             if maxlen <= 0:
                 break
             x += strlen
-        return strlen
+        return totalLen
 
 
     def showProgress(self, progress, msg, label = None, rect = None):

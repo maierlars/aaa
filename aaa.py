@@ -429,10 +429,12 @@ class AgencyStoreView(LineView):
                 if snapshot == None:
                     self.head = None
                     self.lines = [[(ColorFormat.CF_ERROR, "No snapshot available")]]
+                    self.lastIdx = idx
                     return
                 elif log[idx]["_key"] < snapshot["_key"]:
                     self.head = None
                     self.lines = [[(ColorFormat.CF_ERROR, "Can not replicate agency state. Not covered by snapshot.")]]
+                    self.lastIdx = idx
                     return
 
             # first check cache
@@ -486,9 +488,9 @@ class AgencyStoreView(LineView):
                 self.cache.set(idx, agency.AgencyStore.copyFrom(self.store))
                 self.app.showProgress (1.0, "Dumping json", rect = self.rect)
 
-            self.lastIdx = idx
             updateJson = True
 
+        self.lastIdx = idx
         if updateJson:
             self.jsonLines(self.store._ref(self.path))
 
