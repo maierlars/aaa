@@ -284,6 +284,11 @@ class AgencyLogList(Control):
             self.highlight = idx
             self.top = idx
 
+    def goto(self, idx):
+        # get global index of first log entry
+        startgidx = int(self.app.log[0]["_key"])
+        self.selectClosest(idx - startgidx)
+
 class AgencyLogView(LineView):
     def __init__(self, app, rect):
         super().__init__(app, rect)
@@ -584,13 +589,6 @@ class ArangoAgencyAnalyserApp(App):
 
         self.provider = provider
         self.refresh(updateSelection = True, refreshProvider = False)
-        # if len(argv) == 2:
-        #     self.loadLogFromFile(argv[1])
-        # elif len(argv) == 3:
-        #     self.loadLogFromFile(argv[1])
-        #     self.loadSnapshotFromFile(argv[2], updateSelection = True)
-        # else:
-        #     raise RuntimeError("Invalid number of arguments")
 
     def serialize(self):
         return {
@@ -653,6 +651,10 @@ class ArangoAgencyAnalyserApp(App):
             self.stop = True
         elif cmd == "debug":
             self.debug = True
+        elif cmd == "goto":
+            if len(argv) != 2:
+                raise ValueError("Goto requires one parameter")
+            self.list.goto(int(argv[1]))
         elif cmd == "r" or cmd == "refresh" or cmd == "ref":
             self.refresh()
         elif cmd == "dump":
@@ -683,7 +685,7 @@ class ArangoAgencyAnalyserApp(App):
             dumpSnapshotFile = argv[1] + ".snapshot.json"
             if os.path.isfile(dumpLogFile) or os.path.isfile(dumpSnapshotFile):
                 yesNo = self.app.userStringLine(label = "Some file already exist. Continue?", prompt = "[Y/n] ")
-                if not (yesNo == "Y" or yesNo == "y"):
+                if not (yesNo == "Y" or yesNo == "y" or yesNo == ""):
                     return
             self.dumpAll(dumpLogFile, dumpSnapshotFile)
 
