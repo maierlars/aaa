@@ -482,7 +482,16 @@ class AgencyStoreView(LineView):
                     now = time.process_time()
                     #if log[idx]["_key"] >= snapshot["_key"]:
                     self.store.applyLog(self.app.log[i])
-                    if i % 5000 == 0 and not self.cache.has(i):
+                    storeIntermediate = i % 5000 == 0 and not self.cache.has(i)
+
+                    if not storeIntermediate:
+                        didx = idx - i
+                        if didx < 500:
+                            storeIntermediate = didx % 200 == 0
+                        elif didx < 2500:
+                            storeIntermediate = didx % 1000 == 0
+
+                    if storeIntermediate:
                         self.app.showProgress ((i - startidx) / (idx+1-startidx), "Generating store {}/{} - writing to cache".format(i, idx+1), rect = self.rect)
                         self.cache.set(i, agency.AgencyStore.copyFrom(self.store))
                     elif now - lastProgress > 0.1:
