@@ -91,7 +91,11 @@ class AgencyStore:
             self.set(path, delta)
 
     def applyLog(self, log):
-        now = dateutil.parser.parse(log["timestamp"]) if "timestamp" in log else None
+        now = None
+        try:
+            now = dateutil.parser.parse(log["timestamp"]) if "timestamp" in log else None
+        except:
+            pass
         self.apply(log["request"], datetime.datetime.timestamp(now))
 
 
