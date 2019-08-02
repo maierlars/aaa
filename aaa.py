@@ -376,7 +376,10 @@ class StoreCache:
         self.refresh(idx)
         if len(self.list) > self.maxSize:
             oldIdx = self.list.pop()
-            self.indexes.remove(oldIdx)
+            try:
+                self.indexes.remove(oldIdx)
+            except:
+                pass
             del self.cache[oldIdx]
         self.cache[idx] = store
         bisect.insort_left(self.indexes, idx)
@@ -847,6 +850,7 @@ if __name__ == '__main__':
         parser.add_argument("log", help="log file or endpoint", type=str)
         parser.add_argument('add', nargs='?', type=str, help="optional, snapshot file or jwt")
         parser.add_argument("-k", "--noverify", help="don't verify certs", action="store_true")
+        parser.add_argument("-s", "--jwt-secret", help="")
         args = parser.parse_args()
 
         o = urlparse(args.log)
