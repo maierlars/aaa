@@ -99,6 +99,21 @@ class AgencyStore:
         self.apply(log["request"], datetime.datetime.timestamp(now))
 
 
+    def readLock(self, path, user):
+        self.push(path, user)
+
+    def readUnlock(self, path, user):
+        self.erase(path, user)
+        ref = self._ref(path)
+        if isinstance(ref, list) and len(ref) == 0:
+            self.delete(path)
+
+    def writeLock(self, path, user):
+        self.set(path, user)
+
+    def writeUnlock(self, path, user):
+        self.delete(path)
+
     def apply(self, request, now = None):
 
         # Lets have a look into the TTL
@@ -153,6 +168,16 @@ class AgencyStore:
                         self.push(path, value['new'])
                     elif op == "pop":
                         self.pop(path, value['new'])
+
+                if 'by' in value:
+                    if op == "read-lock":
+                        self.readLock(path, value['by'])
+                    elif op == "read-unlock":
+                        self.readUnlock(path, value['by'])
+                    elif op == "write-lock":
+                        self.writeLock(path, value['by'])
+                    elif op == "write-unlock":
+                        self.writeUnlock(path, value['by'])
 
                 if op == "erase" and 'val' in value:
                     self.erase(path, value['val'])

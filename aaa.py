@@ -378,9 +378,9 @@ class StoreCache:
             oldIdx = self.list.pop()
             try:
                 self.indexes.remove(oldIdx)
+                del self.cache[oldIdx]
             except:
                 pass
-            del self.cache[oldIdx]
         self.cache[idx] = store
         bisect.insort_left(self.indexes, idx)
 
@@ -452,7 +452,7 @@ class AgencyStoreView(LineView):
                 self.store = cache
             else:
                 # check if we can use last index
-                startidx = self.lastIdx
+                startidx = self.lastIdx + 1 if not self.lastIdx == None else None
                 doCopyLastSnapshot = False
                 if self.lastIdx == None or self.store == None or idx < self.lastIdx:
                     startidx = self.app.firstValidLogIdx
@@ -467,7 +467,7 @@ class AgencyStoreView(LineView):
                 cache = self.cache.closest(idx)
                 if not cache == None:
                     if cache > startidx:
-                        startidx = cache
+                        startidx = cache + 1
                         self.app.showProgress (0.0, "Copy index {} from cache".format(cache), rect = self.rect)
                         self.store = agency.AgencyStore.copyFrom(self.cache.get(cache))
                         self.lastWasCopy = True
