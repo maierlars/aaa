@@ -375,12 +375,12 @@ class StoreCache:
     def set(self, idx, store):
         self.refresh(idx)
         if len(self.list) > self.maxSize:
-            oldIdx = self.list.pop()
+            oldIdx = self.list.pop(0)
             try:
                 self.indexes.remove(oldIdx)
-                del self.cache[oldIdx]
             except:
                 pass
+            del self.cache[oldIdx]
         self.cache[idx] = store
         bisect.insort_left(self.indexes, idx)
 
