@@ -241,7 +241,7 @@ class AgencyLogList(Control):
                 self.grep(string)
         elif c == ord('r'):
             yesNo = self.app.userStringLine(label = "Reset all filters", prompt = "[Y/n] ")
-            if yesNo == "Y" or yesNo == "y":
+            if yesNo == "Y" or yesNo == "y" or yesNo == "":
                 self.reset()
         elif c == ord('R'):
             self.reset()
@@ -465,7 +465,7 @@ class AgencyStoreView(LineView):
 
                 # lets ask cache
                 cache = self.cache.closest(idx)
-                if not cache == None:
+                if not cache == None and not startidx == None:
                     if cache > startidx:
                         startidx = cache + 1
                         self.app.showProgress (0.0, "Copy index {} from cache".format(cache), rect = self.rect)
@@ -637,14 +637,15 @@ class ArangoAgencyAnalyserApp(App):
         self.displayMsg(msg, curses.A_STANDOUT)
 
     def dumpJSON(self, filename):
+        data = None
         if self.switch.idx == 0:
-            entry = self.log[self.logView.idx]
-            with open(filename, "w") as f:
-                json.dump(entry, f)
+            data = self.log[self.logView.idx]
         elif self.switch.idx == 1:
-            store = self.view.store._ref(self.view.path)
-            with open(filename, "w") as f:
-                json.dump(store, f)
+            self.displayMsg("Hello world!", curses.A_STANDOUT)
+            data = self.view.store._ref(self.view.path)
+
+        with open(filename, "w") as f:
+                json.dump(data, f)
 
     def dumpAll(self, logfile, snapshotfile):
         with open(logfile, "w") as f:

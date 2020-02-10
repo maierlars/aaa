@@ -63,17 +63,21 @@ if [ "$USEEA" != "0" ] ; then
   EASERVICE=$(kubectl get service -o json -n $DEPLOYMENTNAMESPACE $DEPLOYMENTNAME-ea | jq -r .status.loadBalancer.ingress[0].ip)
 fi
 
-JWTSECRET=$(kubectl get secret -o json -n $DEPLOYMENTNAMESPACE $JWTSECRETNAME | jq -r .data.token | base64 -d -w0)
+JWT=
+JWTSECRET=
+if [ "$JWTSECRETNAME" != "None" ] ; then
+  JWTSECRET=$(kubectl get secret -o json -n $DEPLOYMENTNAMESPACE $JWTSECRETNAME | jq -r .data.token | base64 -d -w0)
 
-if [ ! $? -eq 0 ] ; then
-  echo "Failed to get jwt-secret"
-  exit 0
+  if [ ! $? -eq 0 ] ; then
+    echo "Failed to get jwt-secret"
+    exit 0
+  fi
+
+  JWT=$(jwtgen -a HS256 -s "$JWTSECRET" -c server_id=hans -c iss=arangodb)
+  echo $JWT
 fi
 
-JWT=$(jwtgen -a HS256 -s "$JWTSECRET" -c server_id=hans -c iss=arangodb)
 AGENTPOD=$(kubectl get pods -o json -n $DEPLOYMENTNAMESPACE -l role=agent,arango_deployment=$DEPLOYMENTNAME | jq -r .items[0].metadata.name)
-echo $JWT
-
 if [ ! $? -eq 0 ] ; then
   echo "Failed to get agency-pod"
   exit 0
