@@ -2,6 +2,12 @@
 
 Allows analysis of arangodbs agency logs.
 
+## Setup
+Install required python dependencies. 
+```
+pip install -r requirements.txt
+```
+
 ## Usage
 
 Given a JSON encoded agency log in a file, start with
