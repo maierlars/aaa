@@ -1,15 +1,30 @@
 import json, codecs
 import sys, ssl
+import base64
 from http.client import HTTPConnection, HTTPSConnection
 
 class ArangoError(RuntimeError):
   pass
 
+class ArangoJwtAuth:
+  def __init__(self, jwt):
+    self.jwt = jwt
+
+  def header(self):
+    return "bearer " + self.jwt;
+
+class ArangoBasicAuth:
+  def __init__(self, userpass):
+    self.userpass = userpass
+
+  def header(self):
+    return "Basic " + base64.b64encode(self.userpass.encode('utf-8')).decode('ascii')
+
 class ArangoClient:
 
-  def __init__(self, connection, jwt = None):
+  def __init__(self, connection, auth = None):
     self.connection = connection
-    self.jwt = jwt
+    self.auth = auth
 
   class QueryCursor:
 
@@ -36,8 +51,8 @@ class ArangoClient:
         self.result = response["result"]
 
   def request(self, method, url, body = None, header = dict()):
-    if not self.jwt == None:
-      header["Authorization"] = "bearer " + self.jwt
+    if not self.auth == None:
+      header["Authorization"] = self.auth.header()
 
     self.connection.request(method, url, json.dumps(body), header)
     with self.connection.getresponse() as httpresp:

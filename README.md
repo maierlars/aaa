@@ -13,9 +13,10 @@ pip install -r requirements.txt
 Given a JSON encoded agency log in a file, start with
 ```
 python aaa.py <log file> <snapshot file>
-python aaa.py http|https://<endpoint> <jwt>
+python aaa.py [-k] http|https://<endpoint> <jwt>
+python aaa.py [-k] -u http|https://<endpoint> username:password
 ```
-Close the program via `:q`.
+Close the program via `:q`. Use `-k` to disable ssl certificate validation.
 
 On the left side you can see a list of all log entries ordered by time. Use the `UP/DOWN` to navigate.
 The right side contains different views of information. Currently supported modes are

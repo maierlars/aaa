@@ -851,7 +851,7 @@ if __name__ == '__main__':
         parser.add_argument("log", help="log file or endpoint", type=str)
         parser.add_argument('add', nargs='?', type=str, help="optional, snapshot file or jwt")
         parser.add_argument("-k", "--noverify", help="don't verify certs", action="store_true")
-        parser.add_argument("-s", "--jwt-secret", help="")
+        parser.add_argument("-u", "--userpass", help="use username and password instead of jwt", action="store_true")
         args = parser.parse_args()
 
         o = urlparse(args.log)
@@ -860,24 +860,31 @@ if __name__ == '__main__':
             provider = ArangoAgencyLogFileProvider(o.path, args.add)
         else:
             host = o.netloc
-            jwt = args.add
+            authstr = args.add
+            auth = None
+
+            if not authstr is None:
+                if not args.userpass:
+                    # jwt string is of the form username:password
+                    auth = ArangoJwtAuth(authstr)
+                else:
+                    # use the jwt string
+                    auth = ArangoBasicAuth(authstr)
 
             if o.scheme in ["http", "tcp", ""]:
                 conn = HTTPConnection(host)
-                print("Connecting to {}".format(host))
-                conn.connect()
             elif o.scheme in ["https", "ssl"]:
                 options = dict()
                 if args.noverify:
                     options["context"] = ssl._create_unverified_context()
 
                 conn = HTTPSConnection(host, **options)
-                print("Connecting to {}".format(host))
-                conn.connect()
             else:
                 raise Exception("Unknown scheme: {}".format(o.scheme))
 
-            client = ArangoClient(conn, jwt)
+            print("Connecting to {}".format(host))
+            conn.connect()
+            client = ArangoClient(conn, auth)
             provider = ArangoAgencyLogEndpointProvider(client)
 
         os.putenv("ESCDELAY", "0")  # Ugly hack to enabled escape key for direct use
