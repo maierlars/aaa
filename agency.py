@@ -153,10 +153,10 @@ class AgencyStore:
                 elif op == "prepend":
                     self.prepend(path, value)
                 elif op == "increment":
-                    delta = value['new'] if 'new' in value else 1
+                    delta = value['step'] if 'step' in value else 1
                     self.add(path, delta)
                 elif op == "decrement":
-                    delta = value['new'] if 'new' in value else 1
+                    delta = value['step'] if 'step' in value else 1
                     self.add(path, - delta)
                 elif op == "delete" :
                         self.delete(path)
