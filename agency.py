@@ -121,6 +121,42 @@ class AgencyStore:
                 if entry == val:
                     ref[index] = new
 
+    def executeOperation(self, path, op, value):
+        if op == "shift":
+            self.shift(path, value)
+        elif op == "prepend":
+            self.prepend(path, value)
+        elif op == "increment":
+            delta = value['step'] if 'step' in value else 1
+            self.add(path, delta)
+        elif op == "decrement":
+            delta = value['step'] if 'step' in value else 1
+            self.add(path, - delta)
+        elif op == "delete" :
+                self.delete(path)
+        elif op == "set":
+            self.set(path, value['new'])
+        elif op == "push":
+            self.push(path, value['new'])
+        elif op == "pop":
+            self.pop(path, value['new'])
+
+        elif op == "read-lock":
+            self.readLock(path, value['by'])
+        elif op == "read-unlock":
+            self.readUnlock(path, value['by'])
+        elif op == "write-lock":
+            self.writeLock(path, value['by'])
+        elif op == "write-unlock":
+            self.writeUnlock(path, value['by'])
+
+        elif op == "erase":
+            self.erase(path, value['val'])
+        elif op == "replace":
+            self.replace(path, value['val'], value['new'])
+        else:
+            raise Exception("Unknown operation")
+
     def apply(self, request, now = None):
 
         # Lets have a look into the TTL
@@ -139,7 +175,7 @@ class AgencyStore:
             value = request[path]
             path = AgencyStore.parsePath(path)
 
-            if (not isinstance(value, dict)) or ( not 'op' in value and not 'new' in value):
+            if (not isinstance(value, dict)) or ( not 'op' in value and not 'new' in value ):
                 # directly apply value
                 self.set(path, value)
             else:
@@ -155,42 +191,13 @@ class AgencyStore:
                 if 'ttl' in value and not now == None:
                     heapq.heappush(self.ttlt, (now + value['ttl'], normalizedPath))
 
-                if op == "shift":
-                    self.shift(path, value)
-                elif op == "prepend":
-                    self.prepend(path, value)
-                elif op == "increment":
-                    delta = value['step'] if 'step' in value else 1
-                    self.add(path, delta)
-                elif op == "decrement":
-                    delta = value['step'] if 'step' in value else 1
-                    self.add(path, - delta)
-                elif op == "delete" :
-                        self.delete(path)
+                try:
+                    self.executeOperation(path, op, value)
+                except KeyError as e:
+                    raise Exception("{path}: Missing field for operation `{op}`: {text}".format(path=normalizedPath, op=op, text=str(e)))
+                except Exception as e:
+                    raise Exception("{path}: Exception when executing operation `{op}`: {text}".format(path=normalizedPath, op=op, text=str(e)))
 
-                if 'new' in value:
-                    if op == "set":
-                        self.set(path, value['new'])
-                    elif op == "push":
-                        self.push(path, value['new'])
-                    elif op == "pop":
-                        self.pop(path, value['new'])
-
-                if 'by' in value:
-                    if op == "read-lock":
-                        self.readLock(path, value['by'])
-                    elif op == "read-unlock":
-                        self.readUnlock(path, value['by'])
-                    elif op == "write-lock":
-                        self.writeLock(path, value['by'])
-                    elif op == "write-unlock":
-                        self.writeUnlock(path, value['by'])
-
-                if op == "erase" and 'val' in value:
-                    self.erase(path, value['val'])
-
-                if op == "replace" and 'val' in value and 'new' in value:
-                    self.replace(path, value['val'], value['new'])
 
 
     def parsePath(path):

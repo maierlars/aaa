@@ -484,7 +484,10 @@ class AgencyStoreView(LineView):
                 for i in range(startidx, idx+1):
                     now = time.process_time()
                     #if log[idx]["_key"] >= snapshot["_key"]:
-                    self.store.applyLog(self.app.log[i])
+                    try:
+                        self.store.applyLog(self.app.log[i])
+                    except Exception as e:
+                        raise Exception("In log entry {idx}: {text}".format(idx = i, text = str(e)))
                     storeIntermediate = i % 5000 == 0 and not self.cache.has(i)
 
                     if not storeIntermediate:
