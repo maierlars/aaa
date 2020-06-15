@@ -114,6 +114,13 @@ class AgencyStore:
     def writeUnlock(self, path, user):
         self.delete(path)
 
+    def replace(self, path, val, new):
+        ref = self._ref(path)
+        if isinstance(ref, list):
+            for index, entry in enumerate(ref):
+                if entry == val:
+                    ref[index] = new
+
     def apply(self, request, now = None):
 
         # Lets have a look into the TTL
@@ -181,6 +188,9 @@ class AgencyStore:
 
                 if op == "erase" and 'val' in value:
                     self.erase(path, value['val'])
+
+                if op == "replace" and 'val' in value and 'new' in value:
+                    self.replace(path, value['val'], value['new'])
 
 
     def parsePath(path):
