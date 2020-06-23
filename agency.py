@@ -154,6 +154,8 @@ class AgencyStore:
             self.erase(path, value['val'])
         elif op == "replace":
             self.replace(path, value['val'], value['new'])
+        elif op == "unobserve" or op == "observe":
+            pass
         else:
             raise Exception("Unknown operation")
 
