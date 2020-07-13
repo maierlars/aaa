@@ -96,7 +96,7 @@ class AgencyStore:
             now = dateutil.parser.parse(log["timestamp"]) if "timestamp" in log else None
         except:
             pass
-        self.apply(log["request"], datetime.datetime.timestamp(now))
+        self.apply(log["request"], 0 if now is None else datetime.datetime.timestamp(now))
 
 
     def readLock(self, path, user):
