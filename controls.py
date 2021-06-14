@@ -236,7 +236,8 @@ class LineView(Control):
 
             if i < len(self.lines):
                 line = self.lines[i]
-                strlen = self.app.printStyleLine(y, x, line, maxlen, attr)
+                formatted = self.format_line(line)
+                strlen = self.app.printStyleLine(y, x, formatted, maxlen, attr)
                 if strlen < maxlen:
                     rlen = maxlen - strlen
                     self.app.stdscr.addnstr(y, x + strlen, "".ljust(rlen), rlen, 0)
@@ -311,31 +312,33 @@ class LineView(Control):
         elif c == ord('N'):
             self.prev()
 
-    def annotateLines(self):
+    def searchLines(self):
+        if self.findStr is not None:
+            self.findList = []
+            for i, line in enumerate(self.lines):
+                if line.find(self.findStr) != -1:
+                    self.findList.append(i)
+
+    def format_line(self, line):
         def intersperse(lst, item):
             result = [item] * (len(lst) * 2 - 1)
             result[0::2] = lst
             return result
 
+        annotation = self.getLineAnnotation(line)
+        res = [line]
         if self.findStr is not None:
-            self.findList = []
-        for i, line in enumerate(self.lines):
-            if i % 1000 == 0:
-                self.app.showProgress (i / len(self.lines), "Annotating lines", rect = self.rect)
+            split = line.split(self.findStr)
+            if len(split) > 1:
+                part = intersperse(split, (curses.A_STANDOUT, self.findStr))
+                res = part
+        if annotation is not None:
+            if res is None:
+                res = [line]
+            assert isinstance(annotation, str)
+            res.append((curses.A_ITALIC, " // {}".format(annotation)))
+        return res
 
-            annotation = self.getLineAnnotation(line)
-            res = [line]
-            if self.findStr is not None:
-                split = line.split(self.findStr)
-                if len(split) > 1:
-                    self.findList.append(i)
-                    part = intersperse(split, (curses.A_STANDOUT, self.findStr))
-                    res = part
-            if annotation is not None:
-                assert isinstance(annotation, str)
-                res.append((curses.A_ITALIC, " // {}".format(annotation)))
-
-            self.lines[i] = res
 
     def getLineAnnotation(self, line):
         return None
@@ -343,7 +346,7 @@ class LineView(Control):
     def jsonLines(self, value):
         self.json = value
         self.lines = json.dumps(value, indent=4, separators=(',', ': ')).splitlines()
-        self.annotateLines()
+        self.searchLines()
 
     def set(self, value):
         self.json = value

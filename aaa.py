@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 import bisect
 
 import agency
+import trie
 from controls import *
 from client import *
 
@@ -390,11 +391,14 @@ class AgencyStoreView(LineView):
         super().__init__(app, rect)
         self.store = None
         self.cache = StoreCache(512)
+        self.annotationCache = StoreCache(64)
         self.lastIdx = None
         self.lastWasCopy = False
         self.path = []
         self.pathHistory = []
-        self.dbservers = dict()
+        self.annotations = dict()
+        self.annotationRegex = None
+        self.fastMatcher = re.compile("(?:PRMR|CRDN|[0-9])")
 
     def title(self):
         return "Agency Store View"
@@ -513,7 +517,7 @@ class AgencyStoreView(LineView):
 
         self.lastIdx = idx
         if updateJson:
-            self.loadDBServerInfo()
+            self.load_annotations()
             self.jsonLines(self.store._ref(self.path))
 
     def update(self):
@@ -521,23 +525,41 @@ class AgencyStoreView(LineView):
         self.updateStore()
         super().update()
 
-    def loadDBServerInfo(self):
-        self.dbservers = self.store.get(agency.AgencyStore.parsePath("arango/Supervision/Health"))
-        if self.dbservers is None:
-            self.app.displayMsg("No Supervision/Health found")
-            self.dbservers = dict()
+    def load_annotations(self):
+        idx = self.app.list.getSelectedIndex()
+        if idx is None:
+            return
+
+        if self.annotationCache.has(idx):
+            self.annotations = self.annotationCache.get(idx)
+            return
+
+        new_annotations = dict()
+        dbservers = self.store.get(["arango", "Supervision", "Health"])
+        if dbservers is not None:
+            for serverId, data in dbservers.items():
+                new_annotations[serverId] = "{ShortName}, {Endpoint}, {Status}".format(**data)
+        collections = self.store._ref(["arango", "Plan", "Collections"])
+        if collections is not None:
+            for dbname, database_collections in collections.items():
+                for collection_id, data in database_collections.items():
+                    new_annotations[collection_id] = "Collection `{}`".format(data['name'])
+                    for shardId, servers in data["shards"].items():
+                        new_annotations[shardId] = "Shard of `{}`".format(data['name'])
+
+        self.annotations = new_annotations
+        self.annotationRegex = trie.Trie(new_annotations.keys()) #re.compile("(?:{})".format("|".join([re.escape(x) for x in self.annotations])))
+        self.annotationCache.set(idx, new_annotations)
 
     def getLineAnnotation(self, line):
+        matches = self.annotationRegex.find_all(line)
         annotation = list()
-        for name in self.dbservers:
-            if line.find(name) != -1:
-                annotation.append(self.dbservers[name]["ShortName"])
-                annotation.append(self.dbservers[name]["Endpoint"])
-                annotation.append(self.dbservers[name]["Status"])
+        for x in matches:
+            annotation.append(self.annotations[x])
 
         if len(annotation) == 0:
             return None
-        return ", ".join(annotation)
+        return "; ".join(annotation)
 
     def input(self, c):
         if c == ord('p'):
@@ -664,11 +686,10 @@ class ArangoAgencyAnalyserApp(App):
         if self.switch.idx == 0:
             data = self.log[self.logView.idx]
         elif self.switch.idx == 1:
-            self.displayMsg("Hello world!", curses.A_STANDOUT)
             data = self.view.store._ref(self.view.path)
 
         with open(filename, "w") as f:
-                json.dump(data, f)
+            json.dump(data, f)
 
     def dumpAll(self, logfile, snapshotfile):
         with open(logfile, "w") as f:
