@@ -311,26 +311,39 @@ class LineView(Control):
         elif c == ord('N'):
             self.prev()
 
-
-    def highlightLines(self):
+    def annotateLines(self):
         def intersperse(lst, item):
             result = [item] * (len(lst) * 2 - 1)
             result[0::2] = lst
             return result
 
-        if not self.findStr == None:
+        if self.findStr is not None:
             self.findList = []
-            for i, line in enumerate(self.lines):
+        for i, line in enumerate(self.lines):
+            if i % 1000 == 0:
+                self.app.showProgress (i / len(self.lines), "Annotating lines", rect = self.rect)
+
+            annotation = self.getLineAnnotation(line)
+            res = [line]
+            if self.findStr is not None:
                 split = line.split(self.findStr)
                 if len(split) > 1:
                     self.findList.append(i)
                     part = intersperse(split, (curses.A_STANDOUT, self.findStr))
-                    self.lines[i] = part
+                    res = part
+            if annotation is not None:
+                assert isinstance(annotation, str)
+                res.append((curses.A_ITALIC, " // {}".format(annotation)))
+
+            self.lines[i] = res
+
+    def getLineAnnotation(self, line):
+        return None
 
     def jsonLines(self, value):
         self.json = value
         self.lines = json.dumps(value, indent=4, separators=(',', ': ')).splitlines()
-        self.highlightLines()
+        self.annotateLines()
 
     def set(self, value):
         self.json = value

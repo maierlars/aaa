@@ -394,6 +394,7 @@ class AgencyStoreView(LineView):
         self.lastWasCopy = False
         self.path = []
         self.pathHistory = []
+        self.dbservers = dict()
 
     def title(self):
         return "Agency Store View"
@@ -512,12 +513,31 @@ class AgencyStoreView(LineView):
 
         self.lastIdx = idx
         if updateJson:
+            self.loadDBServerInfo()
             self.jsonLines(self.store._ref(self.path))
 
     def update(self):
         self.head = "/" + "/".join(self.path)
         self.updateStore()
         super().update()
+
+    def loadDBServerInfo(self):
+        self.dbservers = self.store.get(agency.AgencyStore.parsePath("arango/Supervision/Health"))
+        if self.dbservers is None:
+            self.app.displayMsg("No Supervision/Health found")
+            self.dbservers = dict()
+
+    def getLineAnnotation(self, line):
+        annotation = list()
+        for name in self.dbservers:
+            if line.find(name) != -1:
+                annotation.append(self.dbservers[name]["ShortName"])
+                annotation.append(self.dbservers[name]["Endpoint"])
+                annotation.append(self.dbservers[name]["Status"])
+
+        if len(annotation) == 0:
+            return None
+        return ", ".join(annotation)
 
     def input(self, c):
         if c == ord('p'):
@@ -817,8 +837,6 @@ class ColorPairs:
         return cpair
 
 
-    CP_RED_WHITE = 1
-    CP_WHITE_RED = 2
     CP_RED_WHITE = 1
     CP_WHITE_RED = 2
 
