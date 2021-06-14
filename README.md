@@ -49,3 +49,27 @@ again name is optional and if empty a prompt with autocomplete will open.
 
 You can use `0-9` keys as shortcuts to restore state `"0"-"9"`. To save the state
 use `ALT + "x"`.
+
+# Annotations Format
+
+You can modify the annotations format. There are currently three topics:
+- `server`
+- `collection`
+- `shard`
+
+The format string is a Python Format string. Each topic provides a specific set
+of format keys as described below. Format strings look like this:
+```
+Collection `{database}/{name}`
+```
+
+You can change a format string using `:f <topic>`.
+
+## Keys in `server` Topic
+All key from the `Supervision/Health` entry of that server are available.
+
+## Keys in `collection` Topic
+All keys in the collection entry are available. Additionally `database` is available.
+
+## Keys in `shard` Topic
+Same as for `collection` but additionally `shardId` and `servers`.

@@ -397,8 +397,12 @@ class AgencyStoreView(LineView):
         self.path = []
         self.pathHistory = []
         self.annotations = dict()
-        self.annotationRegex = None
-        self.fastMatcher = re.compile("(?:PRMR|CRDN|[0-9])")
+        self.annotationsTrie = None
+        self.annotations_format = {
+            "server": "{ShortName}, {Endpoint}, {Status}",
+            "collection": "Collection `{database}/{name}`",
+            "shard": "Shard of `{database}/{name}`"
+        }
 
     def title(self):
         return "Agency Store View"
@@ -525,34 +529,52 @@ class AgencyStoreView(LineView):
         self.updateStore()
         super().update()
 
-    def load_annotations(self):
+    def update_format_string(self, what):
+        if what not in self.annotations_format:
+            raise ValueError("Unknown format topic `{}`".format(what))
+        new_str = self.app.userStringLine(label="Format string for {}".format(what),
+                                          default=self.annotations_format[what])
+        if new_str is not None:
+            self.annotations_format[what] = new_str
+
+    def load_annotations(self, flush = False):
+        def format_user_string(format_str, kvs):
+            try:
+                return format_str.format(**kvs)
+            except Exception as ex:
+                return "<bad format string: {}>".format(repr(ex))
+
         idx = self.app.list.getSelectedIndex()
         if idx is None:
             return
 
-        if self.annotationCache.has(idx):
+        if not flush and self.annotationCache.has(idx):
             self.annotations = self.annotationCache.get(idx)
             return
 
         new_annotations = dict()
-        dbservers = self.store.get(["arango", "Supervision", "Health"])
-        if dbservers is not None:
-            for serverId, data in dbservers.items():
-                new_annotations[serverId] = "{ShortName}, {Endpoint}, {Status}".format(**data)
+        all_servers = self.store.get(["arango", "Supervision", "Health"])
+        if all_servers is not None:
+            for serverId, data in all_servers.items():
+                new_annotations[serverId] = format_user_string(self.annotations_format["server"], data)
         collections = self.store._ref(["arango", "Plan", "Collections"])
         if collections is not None:
             for dbname, database_collections in collections.items():
                 for collection_id, data in database_collections.items():
-                    new_annotations[collection_id] = "Collection `{}`".format(data['name'])
+                    format_dict = {"database": dbname, **data}
+                    new_annotations[collection_id] = format_user_string(self.annotations_format["collection"],
+                                                                        format_dict)
                     for shardId, servers in data["shards"].items():
-                        new_annotations[shardId] = "Shard of `{}`".format(data['name'])
+                        shard_format_dict = {**format_dict, "servers": servers, "shardId": shardId}
+                        new_annotations[shardId] = format_user_string(self.annotations_format["shard"],
+                                                                      shard_format_dict)
 
         self.annotations = new_annotations
-        self.annotationRegex = trie.Trie(new_annotations.keys()) #re.compile("(?:{})".format("|".join([re.escape(x) for x in self.annotations])))
+        self.annotationsTrie = trie.Trie(new_annotations.keys())
         self.annotationCache.set(idx, new_annotations)
 
     def getLineAnnotation(self, line):
-        matches = self.annotationRegex.find_all(line)
+        matches = self.annotationsTrie.find_all(line)
         annotation = list()
         for x in matches:
             annotation.append(self.annotations[x])
@@ -752,6 +774,13 @@ class ArangoAgencyAnalyserApp(App):
             self.displayMsg("Nobody can help you now - except maybe README.md")
         elif cmd == "error":
             raise Exception("This is a long error message with \n line breaks")
+        elif cmd in ["f", "fmt", "format"]:
+            if len(argv) != 2:
+                raise ValueError("format <what> <format-string>")
+            what = argv[1]
+            self.view.update_format_string(what)
+            self.view.load_annotations(flush=True)
+            self.view.update()
         else:
             super().execCmd(argv)
 
