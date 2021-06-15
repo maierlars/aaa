@@ -570,14 +570,14 @@ class AgencyStoreView(LineView):
                                                                       shard_format_dict)
 
         self.annotations = new_annotations
-        self.annotationsTrie = trie.Trie(new_annotations.keys())
+        # self.annotationsTrie = trie.Trie(["{}".format(x) for x in new_annotations.keys()])
         self.annotationCache.set(idx, new_annotations)
 
     def getLineAnnotation(self, line):
-        matches = self.annotationsTrie.find_all(line)
         annotation = list()
-        for x in matches:
-            annotation.append(self.annotations[x])
+        for key in self.annotations:
+            if '"{}"'.format(key) in line:
+                annotation.append(self.annotations[key])
 
         if len(annotation) == 0:
             return None
