@@ -342,7 +342,6 @@ class AgencyLogView(LineView):
     def set(self, idx):
         self.idx = idx
 
-
 class StoreCache:
 
     def __init__(self, maxSize):
@@ -385,54 +384,32 @@ class StoreCache:
         self.cache[idx] = store
         bisect.insort_left(self.indexes, idx)
 
+class StoreUpdateResult:
+    OK = 0
+    UPDATE_JSON = 1
+    NO_SNAPSHOT = 2
+    NOT_COVERED = 3
 
-class AgencyStoreView(LineView):
+
+class StoreProvider:
     def __init__(self, app, rect):
-        super().__init__(app, rect)
+        self.app = app
         self.store = None
         self.cache = StoreCache(512)
-        self.annotationCache = StoreCache(64)
         self.lastIdx = None
         self.lastWasCopy = False
-        self.path = []
-        self.pathHistory = []
-        self.annotations = dict()
-        self.annotationsTrie = None
-        self.annotations_format = {
-            "server": "{ShortName}, {Endpoint}, {Status}",
-            "collection": "Collection `{database}/{name}`",
-            "shard": "Shard of `{database}/{name}`"
-        }
+        self.rect = rect
 
-    def title(self):
-        return "Agency Store View"
-
-    def serialize(self):
-        return {
-            'path': self.path,
-            'pathHistory': self.pathHistory
-        }
-
-    def restore(self, state):
-        self.path = state['path']
-        self.pathHistory = state['pathHistory']
-        self.lastIdx = None
-
-    def layout(self, rect):
-        super().layout(rect)
-
-    def updateStore(self, updateJson = False):
-        idx = self.app.list.getSelectedIndex()
-        if idx == None:
-            return
-
+    def updateIndex(self, idx):
+        updateJson = True
         if self.lastIdx != idx:
+            updateJson = True
             # if the id of the first log entry is ARANGO_LOG_ZERO,
             # generate the agency from empty store
             # otherwise check if the log entry is after (>=) the
             log = self.app.log
             if log == None or len(log) == 0:
-                return
+                return StoreUpdateResult.NO_SNAPSHOT
             snapshot = self.app.snapshot
 
             startidx = None
@@ -444,15 +421,9 @@ class AgencyStoreView(LineView):
             # early out for cases where we can not produce a store
             if snapshotRequired:
                 if snapshot == None:
-                    self.head = None
-                    self.lines = [[(ColorFormat.CF_ERROR, "No snapshot available")]]
-                    self.lastIdx = idx
-                    return
+                    return StoreUpdateResult.NO_SNAPSHOT
                 elif log[idx]["_key"] < snapshot["_key"]:
-                    self.head = None
-                    self.lines = [[(ColorFormat.CF_ERROR, "Can not replicate agency state. Not covered by snapshot.")]]
-                    self.lastIdx = idx
-                    return
+                    return StoreUpdateResult.NOT_COVERED
 
             # first check cache
             cache = self.cache.get(idx)
@@ -517,9 +488,72 @@ class AgencyStoreView(LineView):
                 self.cache.set(idx, agency.AgencyStore.copyFrom(self.store))
                 self.app.showProgress (1.0, "Dumping json", rect = self.rect)
 
-            updateJson = True
-
         self.lastIdx = idx
+        return StoreUpdateResult.UPDATE_JSON if updateJson else \
+            StoreUpdateResult.OK
+
+    def get(self, path):
+        return self.store.get(path)
+
+    def _ref(self, path):
+        return self.store._ref(path)
+
+    def has_store(self):
+        return self.store is not None
+
+
+class AgencyStoreView(LineView):
+    def __init__(self, app, rect):
+        super().__init__(app, rect)
+        self.store = app.storeProvider
+        self.path = []
+        self.pathHistory = []
+        self.annotations = dict()
+        self.annotationCache = StoreCache(64)
+        self.annotationsTrie = None
+        self.annotations_format = {
+            "server": "{ShortName}, {Endpoint}, {Status}",
+            "collection": "Collection `{database}/{name}`",
+            "shard": "Shard of `{database}/{name}`"
+        }
+
+    def title(self):
+        return "Agency Store View"
+
+    def serialize(self):
+        return {
+            'path': self.path,
+            'pathHistory': self.pathHistory
+        }
+
+    def restore(self, state):
+        self.path = state['path']
+        self.pathHistory = state['pathHistory']
+        self.lastIdx = None
+
+    def layout(self, rect):
+        self.store.rect = rect
+        super().layout(rect)
+
+    def updateStore(self, updateJson = False):
+        idx = self.app.list.getSelectedIndex()
+        if idx == None:
+            return
+        result = self.store.updateIndex(idx)
+        if result == StoreUpdateResult.NO_SNAPSHOT:
+            self.head = None
+            self.lines = [(ColorFormat.CF_ERROR, "No snapshot available")]
+            return
+        elif result == StoreUpdateResult.NOT_COVERED:
+            self.head = None
+            self.lines = [(ColorFormat.CF_ERROR, "Can not replicate agency state. Not covered by snapshot.")]
+            return
+        elif result == StoreUpdateResult.UPDATE_JSON:
+            updateJson = True
+        else:
+            assert result == StoreUpdateResult.OK
+
+
         if updateJson:
             self.load_annotations()
             self.jsonLines(self.store._ref(self.path))
@@ -574,6 +608,9 @@ class AgencyStoreView(LineView):
         self.annotationCache.set(idx, new_annotations)
 
     def getLineAnnotation(self, line):
+        if not self.store.has_store():
+            return None
+
         annotation = []
         for w in self.annotationsTrie.find_all(line):
             annotation.append(self.annotations[w[1:-1]])
@@ -650,6 +687,86 @@ class AgencyStoreView(LineView):
                     return "/" + "/".join(path[:-1] + [keys[0]])
         return None
 
+class AgencyDiffView(PureLineView):
+    def __init__(self, app, rect):
+        super().__init__(app, rect)
+        self.store = app.storeProvider
+
+    def layout(self, rect):
+        self.store.rect = rect
+        super().layout(rect)
+
+    def title(self):
+        return "Agency Store Diff"
+
+    def getStoreRef(self, idx):
+        result = self.store.updateIndex(idx)
+        if result == StoreUpdateResult.NO_SNAPSHOT:
+            self.head = None
+            self.lines = [(ColorFormat.CF_ERROR, "No snapshot available")]
+            return None
+        elif result == StoreUpdateResult.NOT_COVERED:
+            self.head = None
+            self.lines = [(ColorFormat.CF_ERROR, "Can not replicate agency state. Not covered by snapshot.")]
+            return None
+        else:
+            return self.store.store
+
+    def update(self):
+
+        idx = self.app.list.getSelectedIndex()
+        if idx == None or idx == 0:
+            return
+
+        oldStore = self.getStoreRef(idx-1)
+        newStore = self.getStoreRef(idx)
+
+        if oldStore is None or newStore is None:
+            return
+
+        entry = self.app.log[idx]
+        lines = []
+        for path in entry["request"]:
+            lines.append([(curses.A_BOLD, path)])
+            parsedPath = agency.AgencyStore.parsePath(path)
+            oldLines = AgencyDiffView.split_json(oldStore._ref(parsedPath))
+            newLines = AgencyDiffView.split_json(newStore._ref(parsedPath))
+            diffLines = self.computeDiff(oldLines, newLines)
+            lines.extend(diffLines)
+        self.lines = lines
+        super().update()
+
+    @staticmethod
+    def computeDiff(old, new):
+        cred = ColorPairs.getPair(curses.COLOR_RED, curses.COLOR_BLACK)
+        cgreen = ColorPairs.getPair(curses.COLOR_GREEN, curses.COLOR_BLACK)
+        try:
+            queue = [(0, 0, 0, abs(len(old)-len(new)), [])]
+            i = 0
+            while i < 300:
+                i += 1
+                queue.sort(key=lambda x: x[2] + x[3])
+                x, y, cost, est, path = queue.pop(0)
+                if x == len(old) and y == len(new):
+                    return path
+                if x != len(old) and y != len(new) and old[x] == new[y]:
+                    queue.append((x+1, y+1, cost, est, path + [" " + old[x]]))
+                else:
+                    if x < len(old):
+                        queue.append((x+1, y, cost+1, abs(x+1-y), path + [[(cred, "-" + old[x])]]))
+                    elif y < len(new):
+                        queue.append((x, y+1, cost+1, abs(x+1-y), path + [[(cgreen, "+" + new[y])]]))
+
+            raise RuntimeError(f"diff failed with {old, new=}")
+
+        except Exception as e:
+            raise RuntimeError(f"diff failed with {old, new=}")
+
+    @staticmethod
+    def split_json(value):
+        return json.dumps(value, indent=4, separators=(',', ': ')).splitlines()
+
+
 class ArangoAgencyAnalyserApp(App):
     def __init__(self, stdscr, provider):
         super().__init__(stdscr)
@@ -657,10 +774,12 @@ class ArangoAgencyAnalyserApp(App):
         self.snapshot = None
         self.firstValidLogIdx = None
 
+        self.storeProvider = StoreProvider(self, Rect.zero())
         self.list = AgencyLogList(self, Rect.zero())
         self.view = AgencyStoreView(self, Rect.zero())
+        self.diffView = AgencyDiffView(self, Rect.zero())
         self.logView = AgencyLogView(self, Rect.zero())
-        self.switch = LayoutSwitch(Rect.zero(), [self.logView, self.view])
+        self.switch = LayoutSwitch(Rect.zero(), [self.logView, self.view, self.diffView])
 
         self.split = LayoutColumns(self, self.rect, [self.list, self.switch], [4,6])
         self.focus = self.split
@@ -748,12 +867,14 @@ class ArangoAgencyAnalyserApp(App):
 
         elif cmd == "view":
             if len(argv) != 2:
-                raise ValueError("View requires either `log` or `store`")
+                raise ValueError("View requires either `log`, `diff` or `store`")
 
             if argv[1] == "log":
                 self.switch.select(0)
             elif argv[1] == "store":
                 self.switch.select(1)
+            elif argv[1] == "diff":
+                self.switch.select(2)
             else:
                 raise ValueError("Unkown view: {}".format(argv[1]))
         elif cmd == "dump-all":
@@ -790,6 +911,8 @@ class ArangoAgencyAnalyserApp(App):
             self.switch.select(0)
         elif c == curses.KEY_F2:
             self.switch.select(1)
+        elif c == curses.KEY_F3:
+            self.switch.select(2)
         else:
             super().input(c)
 

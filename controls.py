@@ -179,6 +179,79 @@ class Control:
     def title(self):
         raise NotImplementedError("Title was not implemented by the Control")
 
+class PureLineView(Control):
+    def __init__(self, app, rect):
+        super().__init__(app, rect)
+        self.lines = []
+        self.top = 0
+        self.head = None
+
+    def serialize(self):
+        return {
+            'top': self.top,
+            'head': self.head,
+        }
+
+    def restore(self, state):
+        self.top = state['top']
+        self.head = state['head']
+
+    def update(self):
+        if self.rect.width == 0 or self.rect.height == 0:
+            return
+
+        maxtop = len(self.lines) - self.rect.height + 1
+        if self.head != None:
+            maxtop += 1
+        if self.top > maxtop:
+            self.top = maxtop
+        if self.top < 0:
+            self .top = 0
+
+        maxlen = self.rect.width
+        x = self.rect.x
+        y = self.rect.y
+
+        if self.head != None:
+            # print a head line
+            self.app.stdscr.addnstr(y, x, self.head.ljust(maxlen), maxlen, curses.A_BOLD)
+            y += 1
+
+        i = self.top
+        while y <= self.rect.height - 1:
+
+            attr = 0
+            if i < len(self.lines):
+                line = self.lines[i]
+                strlen = self.app.printStyleLine(y, x, line, maxlen, attr)
+                if strlen < maxlen:
+                    rlen = maxlen - strlen
+                    self.app.stdscr.addnstr(y, x + strlen, "".ljust(rlen), rlen, 0)
+            else:
+                self.app.stdscr.addnstr(y, x, "".ljust(maxlen), maxlen, 0)
+
+            y += 1
+            i += 1
+
+        if y <= self.rect.height:
+            lastLine = i if i < len(self.lines) else len(self.lines)
+            statusString = "Line {} to {} of {}".format(self.top + 1, lastLine, len(self.lines))
+            self.app.stdscr.addnstr(y, x, statusString.ljust(maxlen), maxlen, curses.A_BOLD)
+
+    def input(self, c):
+        if c == curses.KEY_UP:
+            self.top -= 1
+        elif c == curses.KEY_DOWN:
+            self.top += 1
+        elif c == curses.KEY_NPAGE:
+            self.top += self.rect.height
+        elif c == curses.KEY_PPAGE:
+            self.top -= self.rect.height
+        elif c == curses.KEY_END:
+            self.top = len(self.lines) - 1
+        elif c == curses.KEY_HOME:
+            self.top = 0
+
 
 class LineView(Control):
     def __init__(self, app, rect):
@@ -350,6 +423,7 @@ class LineView(Control):
 
     def set(self, value):
         self.json = value
+
 
 class App:
     def __init__(self, stdscr):
@@ -659,6 +733,8 @@ class App:
         for p in line:
             if isinstance(p, str):
                 p = (defaultAttr, p)
+            if len(p) < 2:
+                raise RuntimeError(f"{p=}")
             strlen = len(p[1])
             totalLen += strlen
             self.stdscr.addnstr(y, x, p[1], maxlen, p[0])
