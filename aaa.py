@@ -738,24 +738,33 @@ class AgencyDiffView(PureLineView):
 
     @staticmethod
     def computeDiff(old, new):
+        def estimate(x, y):
+            return 0 #abs(len(old)-x+(len(new)-y))
+        found = set()
         cred = ColorPairs.getPair(curses.COLOR_RED, curses.COLOR_BLACK)
         cgreen = ColorPairs.getPair(curses.COLOR_GREEN, curses.COLOR_BLACK)
         try:
-            queue = [(0, 0, 0, abs(len(old)-len(new)), [])]
+            queue = [(0, 0, 0, estimate(0, 0), [])]
             i = 0
             while i < 300:
-                i += 1
-                queue.sort(key=lambda x: x[2] + x[3])
+                #i += 1
+                queue.sort(key=lambda x: (x[2] + x[3], -x[0]))
                 x, y, cost, est, path = queue.pop(0)
+                if (x, y) in found:
+                    continue
+                found.add((x, y))
+                #print(x, y, cost + est)
                 if x == len(old) and y == len(new):
                     return path
                 if x != len(old) and y != len(new) and old[x] == new[y]:
-                    queue.append((x+1, y+1, cost, est, path + [" " + old[x]]))
+                    queue.append((x+1, y+1, cost, estimate(x+1, y+1), path + [" " + old[x]]))
                 else:
                     if x < len(old):
-                        queue.append((x+1, y, cost+1, abs(x+1-y), path + [[(cred, "-" + old[x])]]))
-                    elif y < len(new):
-                        queue.append((x, y+1, cost+1, abs(x+1-y), path + [[(cgreen, "+" + new[y])]]))
+                        new_est = estimate(x+1, y)
+                        queue.append((x+1, y, cost+1, new_est, path + [[(cred, "-" + old[x])]]))
+                    if y < len(new):
+                        new_est = estimate(x, y+1)
+                        queue.append((x, y+1, cost+1, new_est, path + [[(cgreen, "+" + new[y])]]))
 
             raise RuntimeError(f"diff failed with {old, new=}")
 
@@ -764,7 +773,7 @@ class AgencyDiffView(PureLineView):
 
     @staticmethod
     def split_json(value):
-        return json.dumps(value, indent=4, separators=(',', ': ')).splitlines()
+        return json.dumps(value, indent=4, separators=(',', ': '), sort_keys=True).splitlines()
 
 
 class ArangoAgencyAnalyserApp(App):
