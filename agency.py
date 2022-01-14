@@ -46,6 +46,23 @@ class AgencyStore:
         else:
             self.set(path, [value])
 
+    def push_queue(self, path, value, max_len):
+        default_value = [value][-max_len:] if max_len > 0 else []
+        ref = self._ref(path[:-1])
+        if isinstance(ref, dict):
+            key = path[-1]
+            if key in ref:
+                if isinstance(ref[key], list):
+                    ref[key].append(value)
+                    while len(ref[key]) > max_len:
+                        ref[key].pop(0)
+                else:
+                    ref[key] = default_value
+            else:
+                ref[key] = default_value
+        else:
+            self.set(path, default_value)
+
     def pop(self, path, value):
         ref = self._ref(path)
         if isinstance(ref, list):
@@ -138,6 +155,8 @@ class AgencyStore:
             self.set(path, value['new'])
         elif op == "push":
             self.push(path, value['new'])
+        elif op == "push-queue":
+            self.push_queue(path, value['new'], value['len'])
         elif op == "pop":
             self.pop(path, value['new'])
 
