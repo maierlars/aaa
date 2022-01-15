@@ -532,8 +532,13 @@ class App:
             try:
                 self.update()
                 self.handle_events()
+            except KeyboardInterrupt:
+                pass
             except Exception as err:
-                raise
+                try:
+                    self.displayMsg("Error: " + str(err))
+                except:
+                    pass
 
     def queueEvent(self, ev):
         self.input_queue.put(ev)

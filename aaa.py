@@ -41,6 +41,7 @@ class AgencyLogList(Control):
         self.filterHistory = []
         self.formatString = "[{timestamp}|{term}] {_key} {urls}"
         self.marked = dict()
+        self.follow = False
 
     def title(self):
         return "Agency Log"
@@ -110,6 +111,10 @@ class AgencyLogList(Control):
         # Update top
         maxPos = self.__getListLen() - 1
         maxTop = max(0, maxPos - self.rect.height + 1)
+
+        # update highlight if follow
+        if self.follow:
+            self.highlight = maxPos
 
         if not self.highlight == None:
             if self.highlight > maxPos:
@@ -217,18 +222,24 @@ class AgencyLogList(Control):
 
     def input(self, c):
         if c == curses.KEY_UP:
+            self.follow = False
             self.highlight -= 1
         elif c == curses.KEY_DOWN:
+            self.follow = False
             self.highlight += 1
         elif c == curses.KEY_NPAGE:
+            self.follow = False
             self.highlight += self.rect.height
             self.top += self.rect.height
         elif c == curses.KEY_PPAGE:
+            self.follow = False
             self.highlight -= self.rect.height
             self.top -= self.rect.height
         elif c == curses.KEY_END:
+            self.follow = False
             self.highlight = self.__getListLen() - 1
         elif c == curses.KEY_HOME:
+            self.follow = False
             self.highlight = 0
         elif False:
             regexStr = self.app.userStringLine(label = "Regular Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
@@ -840,7 +851,7 @@ class ArangoAgencyAnalyserApp(App):
 
             msg += "\nUsing snapshot {snapshot[_key]}.".format(snapshot = self.snapshot)
 
-        self.displayMsg(msg, curses.A_STANDOUT)
+        #self.displayMsg(msg, curses.A_STANDOUT)
 
     def dumpJSON(self, filename):
         data = None
@@ -884,6 +895,8 @@ class ArangoAgencyAnalyserApp(App):
 
         if cmd == "quit" or cmd == "q":
             self.stop = True
+        elif cmd in ["f", "follow"]:
+            self.list.follow = True
         elif cmd == "debug":
             self.debug = True
         elif cmd == "goto":
