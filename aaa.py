@@ -41,7 +41,7 @@ class AgencyLogList(Control):
         self.filterHistory = []
         self.formatString = "[{timestamp}|{term}] {_key} {urls}"
         self.marked = dict()
-        self.follow = False
+        self.follow = True
 
     def title(self):
         return "Agency Log"
