@@ -2,6 +2,8 @@ import curses, curses.ascii
 import textwrap
 import json, time
 from bisect import bisect_left
+import threading
+import queue
 
 class Rect:
     def __init__(self, x, y, width, height):
@@ -425,16 +427,25 @@ class LineView(Control):
         self.json = value
 
 
+class InputEvent:
+    def __init__(self, key):
+        self.key = key
+
+
 class App:
     def __init__(self, stdscr):
         self.stdscr = stdscr
         self.stop = False
         self.states = dict()
+        self.stdscr.nodelay(True)
+
+        self.input_queue = queue.Queue()
+        self.input_thread = threading.Thread(target=self.read_input)
+        self.input_thread.start()
 
         self.debug = False
         self.focus = None
         self.layoutWindow()
-
 
     def loadLogFromFile(self, filename):
         with open(filename) as f:
@@ -476,22 +487,6 @@ class App:
 
             if len(cmdline) > 0:
                 self.execCmd(cmdline)
-        elif c == 27:   # escape or alt key pressed
-            # HACK INCOMMING
-            # In order to distinguish ESC from ALT + KEY, set nodelay to check
-            # if there is another key
-            self.stdscr.nodelay(True)
-            c = self.stdscr.getch()
-            self.stdscr.nodelay(False)
-
-            if c == curses.ERR:
-                # it was a escape key! :)
-                pass
-            else:
-                if ord('0') <= c and c <= ord('9'):
-                    self.saveState(chr(c))
-        elif ord('0') <= c and c <= ord('9'):
-            self.restoreState(chr(c))
         else:
             if not self.focus == None:
                 self.focus.input(c)
@@ -500,21 +495,48 @@ class App:
         curses.update_lines_cols()
         self.layout()
 
-    def userInput(self):
-        self.input(self.stdscr.getch())
+    def read_input(self):
+        try:
+            import select, sys
+            while not self.stop:
+                select.select([sys.stdin], [], [])
+                inc = self.stdscr.getch()
+                self.input_queue.put(InputEvent(inc))
+        except:
+            pass
 
     def clearWindow(self):
         self.stdscr.clear()
+
+    def handleEvent(self, action):
+        if isinstance(action, InputEvent):
+            self.input(action.key)
+        else:
+            raise RuntimeError("Unknown action")
+
+    def handle_events(self):
+        item = self.input_queue.get()
+        self.handleEvent(item)
+
+    def waitForInput(self):
+        self.stdscr.refresh()
+        while True:
+            item = self.input_queue.get()
+            if isinstance(item, InputEvent):
+                return item.key
+            self.handleEvent(item)
+
 
     def run(self):
         while not self.stop:
             try:
                 self.update()
-                self.userInput()
+                self.handle_events()
             except Exception as err:
-                self.displayMsg("Error: {}".format(err), 0)
-                if self.debug:
-                    raise err
+                raise
+
+    def queueEvent(self, ev):
+        self.input_queue.put(ev)
 
     def __statesAutocomplete(self, user):
         return App.__autocompleteFromList(user, self.states.keys())
@@ -583,7 +605,7 @@ class App:
                 self.stdscr.addnstr(top + i, x, line.ljust(maxlen), maxlen, attr)
 
 
-            c = self.stdscr.getch()
+            c = self.waitForInput()
             if c == curses.KEY_RESIZE:
                 self.resize()
                 self.update()
@@ -670,7 +692,7 @@ class App:
                 if not cursorPosY == None:
                     self.stdscr.move(y, self.rect.y + cursorPosY)
 
-                c = self.stdscr.getch()
+                c = self.waitForInput()
                 if c == curses.KEY_RESIZE:
                     self.resize()
                     self.update()

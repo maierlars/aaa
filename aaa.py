@@ -10,6 +10,8 @@ from time import sleep
 import argparse
 from urllib.parse import urlparse
 import bisect
+import threading
+import queue
 
 import agency
 import trie
@@ -776,6 +778,14 @@ class AgencyDiffView(PureLineView):
         return json.dumps(value, indent=4, separators=(',', ': '), sort_keys=True).splitlines()
 
 
+class NewLogEntriesEvent:
+    def __init__(self, log):
+        self.log = log
+
+class ExceptionInNetworkThread:
+    def __init__(self, msg):
+        self.msg = msg
+
 class ArangoAgencyAnalyserApp(App):
     def __init__(self, stdscr, provider):
         super().__init__(stdscr)
@@ -796,6 +806,7 @@ class ArangoAgencyAnalyserApp(App):
         self.provider = provider
         self.refresh(updateSelection = True, refreshProvider = False)
 
+
     def serialize(self):
         return {
             'split': self.split.serialize(),
@@ -811,6 +822,7 @@ class ArangoAgencyAnalyserApp(App):
         self.log = self.provider.log()
         self.snapshot = self.provider.snapshot()
         self.firstValidLogIdx = None
+        self.provider.start_live_view(int(self.log[-1]['_key']), self)
 
         self.update()
 
@@ -849,6 +861,23 @@ class ArangoAgencyAnalyserApp(App):
     def update(self):
         self.split.update()
         super().update()
+
+    def handleEvent(self, ev):
+        if isinstance(ev, NewLogEntriesEvent):
+            modified = []
+            for e in ev.log:
+                e2 = dict()
+                e2['request'] = e['query']
+                e2['term'] = '???'
+                e2['_key'] = str(e['index'])
+                e2['timestamp'] = '???'
+                modified.append(e2)
+
+            self.log.extend(modified)
+        elif isinstance(ev, ExceptionInNetworkThread):
+            self.displayMsg(ev.msg, curses.A_STANDOUT)
+        else:
+            super().handleEvent(ev)
 
     def execCmd(self, argv):
         cmd = argv[0]
@@ -929,6 +958,8 @@ class ArangoAgencyAnalyserApp(App):
         super().layout()
         self.split.layout(self.rect)
 
+
+
 class ArangoAgencyLogFileProvider:
 
     def __init__(self, logfile, snapshotFile):
@@ -941,6 +972,9 @@ class ArangoAgencyLogFileProvider:
 
     def snapshot(self):
         return self._snapshot
+
+    def start_live_view(self, first_index, app):
+        pass
 
     def refresh(self):
         log = None
@@ -979,6 +1013,7 @@ class ArangoAgencyLogEndpointProvider:
 
     def __init__(self, client):
         self.client = client
+        self.process = None
         self.refresh()
 
     def log(self):
@@ -1004,6 +1039,30 @@ class ArangoAgencyLogEndpointProvider:
             print("Querying for snapshot")
             snapshots = self.client.query("for s in compact filter s._key >= @first sort s._key limit 1 return s", first = self._log[0]["_key"])
             self._snapshot = next(iter(snapshots), None)
+
+    def poll_entries(self, index, app):
+        try:
+            while True:
+                resp = self.client.agentPoll(index + 1)
+                log = resp['result']['log']
+                if isinstance(log, list):
+                    app.queueEvent(NewLogEntriesEvent(log))
+                    index = log[-1]['index']
+        except Exception as e:
+            app.queueEvent(ExceptionInNetworkThread(str(e)))
+
+    def start_live_view(self, first_index, app):
+        if self.process is not None:
+            return
+
+        role = self.client.serverRole()
+        if role == "AGENT":
+            self.process = threading.Thread(target = self.poll_entries, args = (first_index,app))
+            self.process.start()
+
+    def stop_live_view(self):
+        pass
+
 
 class ColorPairs:
     CACHE = dict()
@@ -1047,6 +1106,11 @@ def main(stdscr, provider):
     app = ArangoAgencyAnalyserApp(stdscr, provider)
     app.run()
 
+#A = ["0"]
+#B = ["A", "B", "C", "D", "A", "B", "C", "D", "A", "B", "C", "D"]
+#AgencyDiffView.computeDiff(A, B)
+#quit()
+
 if __name__ == '__main__':
     try:
         parser = argparse.ArgumentParser()
@@ -1054,6 +1118,7 @@ if __name__ == '__main__':
         parser.add_argument('add', nargs='?', type=str, help="optional, snapshot file or jwt")
         parser.add_argument("-k", "--noverify", help="don't verify certs", action="store_true")
         parser.add_argument("-u", "--userpass", help="use username and password instead of jwt", action="store_true")
+        parser.add_argument("--live", help="automatically receive updates (experimental)", action="store_true")
         args = parser.parse_args()
 
         o = urlparse(args.log)
@@ -1091,5 +1156,6 @@ if __name__ == '__main__':
 
         os.putenv("ESCDELAY", "0")  # Ugly hack to enabled escape key for direct use
         curses.wrapper(main, provider)
+        os._exit(1)
     except Exception as e:
         raise e

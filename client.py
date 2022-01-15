@@ -93,6 +93,10 @@ class ArangoClient:
     if response["error"]:
       ArangoClient.raiseArangoError(response)
 
+  def agentPoll(self, index):
+    response = self.request("GET", f"/_api/agency/poll?index={index}")
+    #ArangoClient.checkArangoError(response)
+    return response
 
 
 # options = {"context": ssl._create_unverified_context(), "host": "172.30.0.11:8531"}
