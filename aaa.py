@@ -22,14 +22,11 @@ ARANGO_LOG_ZERO = "00000000000000000000"
 
 
 class AgencyLogList(Control):
-
     FILTER_NONE = 0
     FILTER_GREP = 1
     FILTER_REGEX = 2
 
-
-
-    def __init__(self, app, rect):
+    def __init__(self, app, rect, args):
         super().__init__(app, rect)
         self.app = app
         self.top = 0
@@ -39,9 +36,10 @@ class AgencyLogList(Control):
         self.list = None
         self.filterType = AgencyLogList.FILTER_NONE
         self.filterHistory = []
+        self.last_predicate = None
         self.formatString = "[{timestamp}|{term}] {_key} {urls}"
         self.marked = dict()
-        self.follow = True
+        self.follow = args.follow
 
     def title(self):
         return "Agency Log"
@@ -82,7 +80,7 @@ class AgencyLogList(Control):
 
     def __getIndexRelative(self, i):
         idx = self.top + i
-        if not self.list == None:
+        if self.list is not None:
             if idx >= len(self.list):
                 return None
             idx = self.list[idx]
@@ -100,7 +98,6 @@ class AgencyLogList(Control):
         if idx >= len(self.app.log):
             return None
         return idx
-
 
     def __getListLen(self):
         if not self.list == None:
@@ -150,7 +147,7 @@ class AgencyLogList(Control):
                 ent = self.app.log[idx]
 
                 text = " ".join(x for x in ent["request"])
-                msg = self.formatString.format(**ent, urls=text, i = idx).ljust(self.rect.width)
+                msg = self.formatString.format(**ent, urls=text, i=idx).ljust(self.rect.width)
 
                 attr = 0
                 if idx == self.getSelectedIndex():
@@ -164,7 +161,8 @@ class AgencyLogList(Control):
 
                 self.app.stdscr.addnstr(y, x, msg.ljust(maxlen), maxlen, attr)
             elif i == 0:
-                self.app.stdscr.addnstr(y, x, "Nothing to display".ljust(maxlen), maxlen, curses.A_BOLD | ColorFormat.CF_ERROR)
+                self.app.stdscr.addnstr(y, x, "Nothing to display".ljust(maxlen), maxlen,
+                                        curses.A_BOLD | ColorFormat.CF_ERROR)
             else:
                 self.app.stdscr.addnstr(y, x, "".ljust(maxlen), maxlen, 0)
 
@@ -177,6 +175,7 @@ class AgencyLogList(Control):
 
         self.list = []
         self.highlight = 0
+        self.last_predicate = predicate
         for i, e in enumerate(self.app.log):
             match = predicate(e)
             if match:
@@ -210,15 +209,25 @@ class AgencyLogList(Control):
         self.filterType = AgencyLogList.FILTER_GREP
         self.filter(predicate)
 
-
     def reset(self):
         # get the current index to keep the selected entry
         self.highlight = self.getSelectedIndex()
-        if self.highlight == None:
+        if self.highlight is None:
             self.highlight = 0
         self.list = None
         self.filterStr = None
         self.filterType = AgencyLogList.FILTER_NONE
+        self.last_predicate = None
+
+    def filter_new_entries(self, new_entries):
+        if self.filterType == AgencyLogList.FILTER_NONE:
+            return
+        start_idx = len(self.app.log) - 1
+        for idx, e in enumerate(new_entries):
+            if self.last_predicate(e):
+                self.list.append(start_idx + idx)
+
+
 
     def input(self, c):
         if c == curses.KEY_UP:
@@ -242,19 +251,21 @@ class AgencyLogList(Control):
             self.follow = False
             self.highlight = 0
         elif False:
-            regexStr = self.app.userStringLine(label = "Regular Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
+            regexStr = self.app.userStringLine(label="Regular Search Expr", default=self.filterStr, prompt="> ",
+                                               history=self.filterHistory)
             if not regexStr == None:
                 if regexStr:
                     self.filterHistory.append(regexStr)
                 self.regexp(regexStr)
         elif c == ord('g') or c == ord('f'):
-            string = self.app.userStringLine(label = "Global Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
+            string = self.app.userStringLine(label="Global Search Expr", default=self.filterStr, prompt="> ",
+                                             history=self.filterHistory)
             if not string == None:
                 if string:
                     self.filterHistory.append(string)
                 self.grep(string)
         elif c == ord('r'):
-            yesNo = self.app.userStringLine(label = "Reset all filters", prompt = "[Y/n] ")
+            yesNo = self.app.userStringLine(label="Reset all filters", prompt="[Y/n] ")
             if yesNo == "Y" or yesNo == "y" or yesNo == "":
                 self.reset()
         elif c == ord('R'):
@@ -303,6 +314,7 @@ class AgencyLogList(Control):
         startgidx = int(self.app.log[0]["_key"])
         self.selectClosest(idx - startgidx)
 
+
 class AgencyLogView(LineView):
     def __init__(self, app, rect):
         super().__init__(app, rect)
@@ -327,7 +339,7 @@ class AgencyLogView(LineView):
     def update(self):
         self.idx = self.app.list.getSelectedIndex()
 
-        if not self.idx == self.lastIdx :
+        if not self.idx == self.lastIdx:
             if self.idx == None:
                 self.jsonLines(None)
             elif not self.idx == None and self.idx < len(self.app.log):
@@ -340,7 +352,7 @@ class AgencyLogView(LineView):
                     if name in entry:
                         json[name] = entry[name]
 
-                self.head = None #entry['_key']
+                self.head = None  # entry['_key']
 
                 loglist = self.app.list
                 if loglist.filterType == AgencyLogList.FILTER_GREP:
@@ -354,6 +366,7 @@ class AgencyLogView(LineView):
 
     def set(self, idx):
         self.idx = idx
+
 
 class StoreCache:
 
@@ -383,7 +396,7 @@ class StoreCache:
         i = bisect_left(self.indexes, idx)
         if i == 0:
             return None
-        return self.indexes[i-1]
+        return self.indexes[i - 1]
 
     def set(self, idx, store):
         self.refresh(idx)
@@ -396,6 +409,7 @@ class StoreCache:
             del self.cache[oldIdx]
         self.cache[idx] = store
         bisect.insort_left(self.indexes, idx)
+
 
 class StoreUpdateResult:
     OK = 0
@@ -461,26 +475,26 @@ class StoreProvider:
                 if not cache == None and not startidx == None:
                     if cache > startidx:
                         startidx = cache + 1
-                        self.app.showProgress (0.0, "Copy index {} from cache".format(cache), rect = self.rect)
+                        self.app.showProgress(0.0, "Copy index {} from cache".format(cache), rect=self.rect)
                         self.store = agency.AgencyStore.copyFrom(self.cache.get(cache))
                         self.lastWasCopy = True
                         doCopyLastSnapshot = False
 
                 if doCopyLastSnapshot:
-                    self.app.showProgress (0.0, "Copy from snapshot", rect = self.rect)
+                    self.app.showProgress(0.0, "Copy from snapshot", rect=self.rect)
                     self.store = agency.AgencyStore(snapshot["readDB"][0])
                 elif not self.lastWasCopy:
                     self.store = agency.AgencyStore.copyFrom(self.store)
 
                 lastProgress = time.process_time()
 
-                for i in range(startidx, idx+1):
+                for i in range(startidx, idx + 1):
                     now = time.process_time()
-                    #if log[idx]["_key"] >= snapshot["_key"]:
+                    # if log[idx]["_key"] >= snapshot["_key"]:
                     try:
                         self.store.applyLog(self.app.log[i])
                     except Exception as e:
-                        raise Exception("In log entry {idx}: {text}".format(idx = i, text = str(e)))
+                        raise Exception("In log entry {idx}: {text}".format(idx=i, text=str(e)))
                     storeIntermediate = i % 5000 == 0 and not self.cache.has(i)
 
                     if not storeIntermediate:
@@ -491,15 +505,18 @@ class StoreProvider:
                             storeIntermediate = didx % 1000 == 0
 
                     if storeIntermediate:
-                        self.app.showProgress ((i - startidx) / (idx+1-startidx), "Generating store {}/{} - writing to cache".format(i, idx+1), rect = self.rect)
+                        self.app.showProgress((i - startidx) / (idx + 1 - startidx),
+                                              "Generating store {}/{} - writing to cache".format(i, idx + 1),
+                                              rect=self.rect)
                         self.cache.set(i, agency.AgencyStore.copyFrom(self.store))
                     elif now - lastProgress > 0.1:
-                        self.app.showProgress ((i - startidx) / (idx+1-startidx), "Generating store {}/{}".format(i, idx+1), rect = self.rect)
+                        self.app.showProgress((i - startidx) / (idx + 1 - startidx),
+                                              "Generating store {}/{}".format(i, idx + 1), rect=self.rect)
                         lastProgress = now
 
-                self.app.showProgress (1.0, "Generating store done - writing to cache", rect = self.rect)
+                self.app.showProgress(1.0, "Generating store done - writing to cache", rect=self.rect)
                 self.cache.set(idx, agency.AgencyStore.copyFrom(self.store))
-                self.app.showProgress (1.0, "Dumping json", rect = self.rect)
+                self.app.showProgress(1.0, "Dumping json", rect=self.rect)
 
         self.lastIdx = idx
         return StoreUpdateResult.UPDATE_JSON if updateJson else \
@@ -548,7 +565,7 @@ class AgencyStoreView(LineView):
         self.store.rect = rect
         super().layout(rect)
 
-    def updateStore(self, updateJson = False):
+    def updateStore(self, updateJson=False):
         idx = self.app.list.getSelectedIndex()
         if idx == None:
             return
@@ -565,7 +582,6 @@ class AgencyStoreView(LineView):
             updateJson = True
         else:
             assert result == StoreUpdateResult.OK
-
 
         if updateJson:
             self.load_annotations()
@@ -584,7 +600,7 @@ class AgencyStoreView(LineView):
         if new_str is not None:
             self.annotations_format[what] = new_str
 
-    def load_annotations(self, flush = False):
+    def load_annotations(self, flush=False):
         def format_user_string(format_str, kvs):
             try:
                 return format_str.format(**kvs)
@@ -634,10 +650,11 @@ class AgencyStoreView(LineView):
 
     def input(self, c):
         if c == ord('p'):
-            pathstr = self.app.userStringLine(prompt = "> ", label = "Agency Path:", default=self.head, complete=self.completePath, history = self.pathHistory)
+            pathstr = self.app.userStringLine(prompt="> ", label="Agency Path:", default=self.head,
+                                              complete=self.completePath, history=self.pathHistory)
             self.path = agency.AgencyStore.parsePath(pathstr)
             self.pathHistory.append(pathstr)
-            self.updateStore(updateJson = True)
+            self.updateStore(updateJson=True)
         else:
             super().input(c)
 
@@ -657,7 +674,6 @@ class AgencyStoreView(LineView):
                 return i
 
         return maxlen
-
 
     def completePath(self, pathstr):
         if self.store == None:
@@ -700,6 +716,7 @@ class AgencyStoreView(LineView):
                     return "/" + "/".join(path[:-1] + [keys[0]])
         return None
 
+
 class AgencyDiffView(PureLineView):
     def __init__(self, app, rect):
         super().__init__(app, rect)
@@ -731,7 +748,7 @@ class AgencyDiffView(PureLineView):
         if idx == None or idx == 0:
             return
 
-        oldStore = self.getStoreRef(idx-1)
+        oldStore = self.getStoreRef(idx - 1)
         newStore = self.getStoreRef(idx)
 
         if oldStore is None or newStore is None:
@@ -752,7 +769,8 @@ class AgencyDiffView(PureLineView):
     @staticmethod
     def computeDiff(old, new):
         def estimate(x, y):
-            return 0 #abs(len(old)-x+(len(new)-y))
+            return 0  # abs(len(old)-x+(len(new)-y))
+
         found = set()
         cred = ColorPairs.getPair(curses.COLOR_RED, curses.COLOR_BLACK)
         cgreen = ColorPairs.getPair(curses.COLOR_GREEN, curses.COLOR_BLACK)
@@ -760,24 +778,24 @@ class AgencyDiffView(PureLineView):
             queue = [(0, 0, 0, estimate(0, 0), [])]
             i = 0
             while i < 300:
-                #i += 1
+                # i += 1
                 queue.sort(key=lambda x: (x[2] + x[3], -x[0]))
                 x, y, cost, est, path = queue.pop(0)
                 if (x, y) in found:
                     continue
                 found.add((x, y))
-                #print(x, y, cost + est)
+                # print(x, y, cost + est)
                 if x == len(old) and y == len(new):
                     return path
                 if x != len(old) and y != len(new) and old[x] == new[y]:
-                    queue.append((x+1, y+1, cost, estimate(x+1, y+1), path + [" " + old[x]]))
+                    queue.append((x + 1, y + 1, cost, estimate(x + 1, y + 1), path + [" " + old[x]]))
                 else:
                     if x < len(old):
-                        new_est = estimate(x+1, y)
-                        queue.append((x+1, y, cost+1, new_est, path + [[(cred, "-" + old[x])]]))
+                        new_est = estimate(x + 1, y)
+                        queue.append((x + 1, y, cost + 1, new_est, path + [[(cred, "-" + old[x])]]))
                     if y < len(new):
-                        new_est = estimate(x, y+1)
-                        queue.append((x, y+1, cost+1, new_est, path + [[(cgreen, "+" + new[y])]]))
+                        new_est = estimate(x, y + 1)
+                        queue.append((x, y + 1, cost + 1, new_est, path + [[(cgreen, "+" + new[y])]]))
 
             raise RuntimeError(f"diff failed with {old, new=}")
 
@@ -793,30 +811,35 @@ class NewLogEntriesEvent:
     def __init__(self, log):
         self.log = log
 
+
 class ExceptionInNetworkThread:
     def __init__(self, msg):
         self.msg = msg
 
+
 class ArangoAgencyAnalyserApp(App):
-    def __init__(self, stdscr, provider):
+    def __init__(self, stdscr, provider, args):
         super().__init__(stdscr)
         self.log = None
         self.snapshot = None
         self.firstValidLogIdx = None
+        self.args = args
 
         self.storeProvider = StoreProvider(self, Rect.zero())
-        self.list = AgencyLogList(self, Rect.zero())
+        self.list = AgencyLogList(self, Rect.zero(), args)
         self.view = AgencyStoreView(self, Rect.zero())
         self.diffView = AgencyDiffView(self, Rect.zero())
         self.logView = AgencyLogView(self, Rect.zero())
         self.switch = LayoutSwitch(Rect.zero(), [self.logView, self.view, self.diffView])
 
-        self.split = LayoutColumns(self, self.rect, [self.list, self.switch], [4,6])
+        self.split = LayoutColumns(self, self.rect, [self.list, self.switch], [4, 6])
         self.focus = self.split
 
         self.provider = provider
-        self.refresh(updateSelection = True, refreshProvider = False)
+        self.refresh(updateSelection=True, refreshProvider=False)
 
+        if args.filter:
+            self.list.grep(args.filter)
 
     def serialize(self):
         return {
@@ -826,18 +849,15 @@ class ArangoAgencyAnalyserApp(App):
     def restore(self, state):
         self.split.restore(state['split'])
 
-    def refresh(self, updateSelection = False, refreshProvider = True):
+    def refresh(self, updateSelection=False, refreshProvider=True):
         if refreshProvider:
             self.provider.refresh()
             self.clearWindow()
         self.log = self.provider.log()
         self.snapshot = self.provider.snapshot()
         self.firstValidLogIdx = None
-        self.provider.start_live_view(int(self.log[-1]['_key']), self)
-
-        self.update()
-
-        msg = "Loaded {count} log entries, ranging from\n{first[timestamp]} ({first[_key]}) to {last[timestamp]} ({last[_key]}).".format(count = len(self.log), first = self.log[0], last = self.log[-1])
+        if self.args.live:
+            self.provider.start_live_view(int(self.log[-1]['_key']), self)
 
         if not self.snapshot == None and not self.log[0]["_key"] == ARANGO_LOG_ZERO:
             for i, e in enumerate(self.log):
@@ -848,10 +868,6 @@ class ArangoAgencyAnalyserApp(App):
 
             if updateSelection:
                 self.list.selectClosest(self.firstValidLogIdx)
-
-            msg += "\nUsing snapshot {snapshot[_key]}.".format(snapshot = self.snapshot)
-
-        #self.displayMsg(msg, curses.A_STANDOUT)
 
     def dumpJSON(self, filename):
         data = None
@@ -885,8 +901,9 @@ class ArangoAgencyAnalyserApp(App):
                 modified.append(e2)
 
             self.log.extend(modified)
+            self.list.filter_new_entries(modified)
         elif isinstance(ev, ExceptionInNetworkThread):
-            self.displayMsg(ev.msg, curses.A_STANDOUT)
+            self.displayMsg("Network thread: " + ev.msg, curses.A_STANDOUT)
         else:
             super().handleEvent(ev)
 
@@ -934,7 +951,7 @@ class ArangoAgencyAnalyserApp(App):
             dumpLogFile = argv[1] + ".log.json"
             dumpSnapshotFile = argv[1] + ".snapshot.json"
             if os.path.isfile(dumpLogFile) or os.path.isfile(dumpSnapshotFile):
-                yesNo = self.app.userStringLine(label = "Some file already exist. Continue?", prompt = "[Y/n] ")
+                yesNo = self.app.userStringLine(label="Some file already exist. Continue?", prompt="[Y/n] ")
                 if not (yesNo == "Y" or yesNo == "y" or yesNo == ""):
                     return
             self.dumpAll(dumpLogFile, dumpSnapshotFile)
@@ -970,7 +987,6 @@ class ArangoAgencyAnalyserApp(App):
     def layout(self):
         super().layout()
         self.split.layout(self.rect)
-
 
 
 class ArangoAgencyLogFileProvider:
@@ -1009,7 +1025,7 @@ class ArangoAgencyLogFileProvider:
 
             if not isinstance(log, list):
                 raise Exception("Expected log to be a list")
-            log.sort(key = lambda x : x["_key"])
+            log.sort(key=lambda x: x["_key"])
 
         if self.snapshotFile:
             if snapshot == None:
@@ -1021,6 +1037,7 @@ class ArangoAgencyLogFileProvider:
 
         self._log = log
         self._snapshot = snapshot
+
 
 class ArangoAgencyLogEndpointProvider:
 
@@ -1050,7 +1067,8 @@ class ArangoAgencyLogEndpointProvider:
             print("Querying for log")
             self._log = list(self.client.query("for l in log sort l._key return l"))
             print("Querying for snapshot")
-            snapshots = self.client.query("for s in compact filter s._key >= @first sort s._key limit 1 return s", first = self._log[0]["_key"])
+            snapshots = self.client.query("for s in compact filter s._key >= @first sort s._key limit 1 return s",
+                                          first=self._log[0]["_key"])
             self._snapshot = next(iter(snapshots), None)
 
     def poll_entries(self, index, app):
@@ -1070,7 +1088,7 @@ class ArangoAgencyLogEndpointProvider:
 
         role = self.client.serverRole()
         if role == "AGENT":
-            self.process = threading.Thread(target = self.poll_entries, args = (first_index,app))
+            self.process = threading.Thread(target=self.poll_entries, args=(first_index, app))
             self.process.start()
 
     def stop_live_view(self):
@@ -1089,18 +1107,19 @@ class ColorPairs:
         ColorPairs.CACHE[(fg, bg)] = cpair
         return cpair
 
-
     CP_RED_WHITE = 1
     CP_WHITE_RED = 2
 
-#1:red, 2:green, 3:yellow, 4:blue, 5:magenta, 6:cyan
+
+# 1:red, 2:green, 3:yellow, 4:blue, 5:magenta, 6:cyan
 
 class ColorFormat:
     CF_ERROR = None
 
     MARKING_ATTR_LIST = None
 
-def main(stdscr, provider):
+
+def main(stdscr, provider, args):
     stdscr.clear()
     curses.curs_set(0)
 
@@ -1116,13 +1135,14 @@ def main(stdscr, provider):
         ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_CYAN),
     ]
 
-    app = ArangoAgencyAnalyserApp(stdscr, provider)
+    app = ArangoAgencyAnalyserApp(stdscr, provider, args)
     app.run()
 
-#A = ["0"]
-#B = ["A", "B", "C", "D", "A", "B", "C", "D", "A", "B", "C", "D"]
-#AgencyDiffView.computeDiff(A, B)
-#quit()
+
+# A = ["0"]
+# B = ["A", "B", "C", "D", "A", "B", "C", "D", "A", "B", "C", "D"]
+# AgencyDiffView.computeDiff(A, B)
+# quit()
 
 if __name__ == '__main__':
     try:
@@ -1132,6 +1152,8 @@ if __name__ == '__main__':
         parser.add_argument("-k", "--noverify", help="don't verify certs", action="store_true")
         parser.add_argument("-u", "--userpass", help="use username and password instead of jwt", action="store_true")
         parser.add_argument("--live", help="automatically receive updates (experimental)", action="store_true")
+        parser.add_argument("--follow", help="start with follow mode on", action="store_true")
+        parser.add_argument("-f", "--filter", help="set initial filter condition", type=str)
         args = parser.parse_args()
 
         o = urlparse(args.log)
@@ -1168,7 +1190,7 @@ if __name__ == '__main__':
             provider = ArangoAgencyLogEndpointProvider(client)
 
         os.putenv("ESCDELAY", "0")  # Ugly hack to enabled escape key for direct use
-        curses.wrapper(main, provider)
+        curses.wrapper(main, provider, args)
         os._exit(1)
     except Exception as e:
         raise e
