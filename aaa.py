@@ -40,6 +40,9 @@ class AgencyLogList(Control):
         self.formatString = "[{timestamp}|{term}] {_key} {urls}"
         self.marked = dict()
         self.follow = args.follow
+        self.highlight_predicate = None
+        self.highlight_string = None
+        self.highlight_history = []
 
     def title(self):
         return "Agency Log"
@@ -154,6 +157,9 @@ class AgencyLogList(Control):
                     attr |= curses.A_STANDOUT
                 if idx in self.marked:
                     attr |= ColorFormat.MARKING_ATTR_LIST[self.marked[idx]]
+                if self.highlight_predicate is not None:
+                    if self.highlight_predicate(ent):
+                        attr |= ColorFormat.MARKING_ATTR_LIST[0]
 
                 if not self.app.snapshot == None and not self.app.log[0]["_key"] == ARANGO_LOG_ZERO:
                     if ent["_key"] < self.app.snapshot["_key"]:
@@ -222,12 +228,10 @@ class AgencyLogList(Control):
     def filter_new_entries(self, new_entries):
         if self.filterType == AgencyLogList.FILTER_NONE:
             return
-        start_idx = len(self.app.log) - 1
-        for idx, e in enumerate(new_entries):
-            if self.last_predicate(e):
-                self.list.append(start_idx + idx)
+        self.filter(self.last_predicate)
 
-
+    def highlight_entries(self, string):
+        self.highlight_predicate = lambda e: string in json.dumps(e)
 
     def input(self, c):
         if c == curses.KEY_UP:
@@ -274,6 +278,13 @@ class AgencyLogList(Control):
             self.toggleMarkLine()
         elif c == ord('M'):
             self.deleteMarkLine()
+        elif c == ord('h'):
+            string = self.app.userStringLine(label="Highlight Search Expr", prompt="> ", default=self.highlight_string,
+                                             history=self.highlight_history)
+            if string is not None:
+                self.highlight_entries(string)
+        elif c == ord('H'):
+            self.highlight_predicate = None
 
     # Returns the index of the selected log entry.
     #   This value is always with respect to the app.log array.
@@ -840,6 +851,8 @@ class ArangoAgencyAnalyserApp(App):
 
         if args.filter:
             self.list.grep(args.filter)
+        if args.highlight:
+            self.list.highlight_entries(args.highlight)
 
     def serialize(self):
         return {
@@ -1154,6 +1167,7 @@ if __name__ == '__main__':
         parser.add_argument("--live", help="automatically receive updates (experimental)", action="store_true")
         parser.add_argument("--follow", help="start with follow mode on", action="store_true")
         parser.add_argument("-f", "--filter", help="set initial filter condition", type=str)
+        parser.add_argument("-H", "--highlight", help="set initial highlight condition", type=str)
         args = parser.parse_args()
 
         o = urlparse(args.log)
