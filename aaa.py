@@ -899,6 +899,7 @@ class ArangoAgencyAnalyserApp(App):
             json.dump(self.snapshot, f)
 
     def update(self):
+        self.clearWindow()
         self.split.update()
         super().update()
 
@@ -1089,7 +1090,7 @@ class ArangoAgencyLogEndpointProvider:
             while True:
                 resp = self.client.agentPoll(index + 1)
                 log = resp['result']['log']
-                if isinstance(log, list):
+                if isinstance(log, list) and len(log) > 0:
                     app.queueEvent(NewLogEntriesEvent(log))
                     index = log[-1]['index']
         except Exception as e:
