@@ -5,6 +5,7 @@ from bisect import bisect_left
 import threading
 import queue
 
+
 class Rect:
     def __init__(self, x, y, width, height):
         self.x = x
@@ -18,6 +19,7 @@ class Rect:
     def zero():
         return Rect(0, 0, 0, 0)
 
+
 class Layout:
     def __init__(self, rect):
         self.rect = rect
@@ -27,6 +29,7 @@ class Layout:
 
     def layout(self, rect):
         self.rect = rect
+
 
 class LayoutSwitch(Layout):
     def __init__(self, rect, subs):
@@ -70,6 +73,7 @@ class LayoutSwitch(Layout):
     def title(self):
         return self.subs[self.idx].title()
 
+
 class LayoutColumns(Layout):
     def __init__(self, app, rect, columns, rels):
         super().__init__(rect)
@@ -109,7 +113,7 @@ class LayoutColumns(Layout):
             attr = curses.A_UNDERLINE
             if i == self.focus:
                 attr |= curses.A_STANDOUT
-            maxlen =  ctrl.rect.width
+            maxlen = ctrl.rect.width
             self.app.stdscr.addnstr(self.rect.y, ctrl.rect.x, ctrl.title().ljust(maxlen), maxlen, attr)
 
         # Paint vertical bars
@@ -121,7 +125,6 @@ class LayoutColumns(Layout):
                     attr = curses.A_UNDERLINE
                     c = " "
                 self.app.stdscr.addch(self.rect.y + y, x, c, attr)
-
 
     def layout(self, rect):
         super().layout(rect)
@@ -145,7 +148,6 @@ class LayoutColumns(Layout):
         # remove last bar
         self.bars.pop()
 
-
     def setRelations(self, rels):
         if len(rels) != len(self.columns):
             raise ValueError("Invalid length of rels")
@@ -156,6 +158,7 @@ class LayoutColumns(Layout):
 
     def toggleFocus(self):
         self.focus = (self.focus + 1) % len(self.columns)
+
 
 class Control:
 
@@ -180,6 +183,7 @@ class Control:
 
     def title(self):
         raise NotImplementedError("Title was not implemented by the Control")
+
 
 class PureLineView(Control):
     def __init__(self, app, rect):
@@ -208,7 +212,7 @@ class PureLineView(Control):
         if self.top > maxtop:
             self.top = maxtop
         if self.top < 0:
-            self .top = 0
+            self.top = 0
 
         maxlen = self.rect.width
         x = self.rect.x
@@ -291,7 +295,7 @@ class LineView(Control):
         if self.top > maxtop:
             self.top = maxtop
         if self.top < 0:
-            self .top = 0
+            self.top = 0
 
         maxlen = self.rect.width
         x = self.rect.x
@@ -334,7 +338,6 @@ class LineView(Control):
                     statusString += "; {} below, {} above top line".format(aboveCount, len(self.findList) - aboveCount)
 
             self.app.stdscr.addnstr(y, x, statusString.ljust(maxlen), maxlen, curses.A_BOLD)
-
 
     def find(self, string):
         if not string:
@@ -379,7 +382,7 @@ class LineView(Control):
         elif c == curses.KEY_HOME:
             self.top = 0
         elif c == ord('f'):
-            findStr = self.app.userStringLine(label = "Find", default = self.findStr, prompt = "> ", history = self.findHistory)
+            findStr = self.app.userStringLine(label="Find", default=self.findStr, prompt="> ", history=self.findHistory)
             if not findStr == None:
                 self.find(findStr)
         elif c == ord('n'):
@@ -414,7 +417,6 @@ class LineView(Control):
             res.append((curses.A_ITALIC, " // {}".format(annotation)))
         return res
 
-
     def getLineAnnotation(self, line):
         return None
 
@@ -437,11 +439,12 @@ class App:
         self.stdscr = stdscr
         self.stop = False
         self.states = dict()
-        self.stdscr.nodelay(True)
+        #self.stdscr.nodelay(True)
 
         self.input_queue = queue.Queue()
         self.input_thread = threading.Thread(target=self.read_input)
         self.input_thread.start()
+        self.wait_event = threading.Event()
 
         self.debug = False
         self.focus = None
@@ -466,7 +469,7 @@ class App:
     def saveState(self, name):
         # load the specific states if set
         if name in self.states:
-            yesNo = self.userStringLine(label = "Overwrite state {}".format(name), prompt = "[Y/n] ")
+            yesNo = self.userStringLine(label="Overwrite state {}".format(name), prompt="[Y/n] ")
             if not (yesNo == "Y" or yesNo == "y" or yesNo == ""):
                 return
         self.states[name] = self.serialize()
@@ -483,7 +486,7 @@ class App:
         if c == curses.KEY_RESIZE:
             self.resize()
         elif c == ord(':'):
-            cmdline = self.userStringLine(prompt = ":").split()
+            cmdline = self.userStringLine(prompt=":").split()
 
             if len(cmdline) > 0:
                 self.execCmd(cmdline)
@@ -500,8 +503,9 @@ class App:
             import select, sys
             while not self.stop:
                 select.select([sys.stdin], [], [])
-                inc = self.stdscr.getch()
-                self.input_queue.put(InputEvent(inc))
+                self.wait_event.clear()
+                self.input_queue.put(InputEvent(0))
+                self.wait_event.wait()
         except:
             pass
 
@@ -510,22 +514,29 @@ class App:
 
     def handleEvent(self, action):
         if isinstance(action, InputEvent):
-            self.input(action.key)
+            inc = self.stdscr.getch()
+            self.wait_event.set()
+            self.input(inc)
         else:
             raise RuntimeError("Unknown action")
 
     def handle_events(self):
-        item = self.input_queue.get()
-        self.handleEvent(item)
+        try:
+            item = self.input_queue.get()
+            self.handleEvent(item)
+        except:
+            pass
 
     def waitForInput(self):
         self.stdscr.refresh()
         while True:
             item = self.input_queue.get()
             if isinstance(item, InputEvent):
-                return item.key
-            self.handleEvent(item)
+                inc = self.stdscr.getch()
+                self.wait_event.set()
+                return inc
 
+            self.handleEvent(item)
 
     def run(self):
         while not self.stop:
@@ -570,7 +581,6 @@ class App:
             idx = common_prefix_idx(valid)
             return (string[:idx], valid)
 
-
     def execCmd(self, argv):
         cmd = argv[0]
 
@@ -578,7 +588,7 @@ class App:
             if len(argv) == 2:
                 self.saveState(argv[1])
             elif len(argv) == 1:
-                name = self.userStringLine(label="Save to state: ", prompt="> ", complete = self.__statesAutocomplete)
+                name = self.userStringLine(label="Save to state: ", prompt="> ", complete=self.__statesAutocomplete)
                 if name:
                     self.saveState(name)
             else:
@@ -587,7 +597,7 @@ class App:
             if len(argv) == 2:
                 self.restoreState(argv[1])
             elif len(argv) == 1:
-                name = self.userStringLine(label="Restore state: ", prompt="> ", complete = self.__statesAutocomplete)
+                name = self.userStringLine(label="Restore state: ", prompt="> ", complete=self.__statesAutocomplete)
                 if name:
                     self.restoreState(name)
             else:
@@ -595,20 +605,19 @@ class App:
         else:
             raise NotImplementedError("Unknown command: {}".format(argv[0]))
 
-    def displayMsg(self, msg, attr = 0):
+    def displayMsg(self, msg, attr=0):
         while True:
             x = self.rect.x
             maxlen = self.rect.width
 
             # display line by line, wrap long lines
-            lines = [ wrap for line in msg.splitlines() for wrap in textwrap.wrap(line, maxlen) ]
+            lines = [wrap for line in msg.splitlines() for wrap in textwrap.wrap(line, maxlen)]
             top = self.rect.y + self.rect.height - len(lines)
 
             # display lines
             self.update()
             for i, line in enumerate(lines):
                 self.stdscr.addnstr(top + i, x, line.ljust(maxlen), maxlen, attr)
-
 
             c = self.waitForInput()
             if c == curses.KEY_RESIZE:
@@ -625,7 +634,7 @@ class App:
     #   possible completions or a string containing the completed text.
     #   Finally it can return a tuple, the first being the new string,
     #   the second the auto complete list.
-    def userStringLine(self, label = None, complete = None, default = None, prompt = "> ", history = []):
+    def userStringLine(self, label=None, complete=None, default=None, prompt="> ", history=[]):
         user = default if not default == None else ""
         hints = list()
         historyIdx = 0
@@ -671,7 +680,6 @@ class App:
                     hints = hints[:maxHints] + ["(list truncated)"]
                 height += len(hints)
 
-
                 maxlen = self.rect.width
                 y = self.rect.y + self.rect.height - height
                 x = self.rect.x
@@ -703,10 +711,10 @@ class App:
                     self.update()
                 elif c == curses.KEY_DC:
                     if not cursorIndex == len(user):
-                        user = user[:cursorIndex] + user[cursorIndex+1:]
+                        user = user[:cursorIndex] + user[cursorIndex + 1:]
                 elif c == curses.KEY_BACKSPACE or c == curses.ascii.DEL:
                     if not cursorIndex == 0:
-                        user = user[:cursorIndex-1] + user[cursorIndex:]
+                        user = user[:cursorIndex - 1] + user[cursorIndex:]
                         cursorIndex -= 1
                 elif c == ord('\n') or c == ord('\r'):
                     self.update()
@@ -753,7 +761,7 @@ class App:
         finally:
             curses.curs_set(0)
 
-    def printStyleLine(self, y, x, line, maxlen, defaultAttr = 0):
+    def printStyleLine(self, y, x, line, maxlen, defaultAttr=0):
         if isinstance(line, str):
             line = [line]
         totalLen = 0
@@ -771,8 +779,7 @@ class App:
             x += strlen
         return totalLen
 
-
-    def showProgress(self, progress, msg, label = None, rect = None):
+    def showProgress(self, progress, msg, label=None, rect=None):
         # clamp progress into [0, 1]
         progress = max(0.0, min(1.0, progress))
 

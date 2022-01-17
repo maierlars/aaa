@@ -899,7 +899,6 @@ class ArangoAgencyAnalyserApp(App):
             json.dump(self.snapshot, f)
 
     def update(self):
-        self.clearWindow()
         self.split.update()
         super().update()
 
