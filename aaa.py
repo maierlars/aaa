@@ -1259,8 +1259,8 @@ def main(stdscr, provider, args):
         ColorPairs.getPair(curses.COLOR_WHITE, curses.COLOR_GREEN),
         ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_BLUE),
         ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_YELLOW),
-        ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_MAGENTA),
         ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_CYAN),
+        ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_MAGENTA),
     ]
 
     app = ArangoAgencyAnalyserApp(stdscr, provider, args)
