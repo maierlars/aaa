@@ -521,11 +521,8 @@ class App:
             raise RuntimeError("Unknown action")
 
     def handle_events(self):
-        try:
-            item = self.input_queue.get()
-            self.handleEvent(item)
-        except:
-            pass
+        item = self.input_queue.get()
+        self.handleEvent(item)
 
     def waitForInput(self):
         self.stdscr.refresh()

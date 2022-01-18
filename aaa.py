@@ -21,6 +21,14 @@ from client import *
 ARANGO_LOG_ZERO = "00000000000000000000"
 
 
+class HighlightCommand:
+    def __init__(self, color, clear, save, regex, expr):
+        self.color = color
+        self.clear = clear
+        self.save = save
+        self.regex = regex
+        self.expr = expr
+
 class AgencyLogList(Control):
     FILTER_NONE = 0
     FILTER_GREP = 1
@@ -40,7 +48,7 @@ class AgencyLogList(Control):
         self.formatString = "[{timestamp}|{term}] {_key} {urls}"
         self.marked = dict()
         self.follow = args.follow
-        self.highlight_predicate = None
+        self.highlight_predicate = dict()
         self.highlight_string = None
         self.highlight_history = []
 
@@ -155,13 +163,11 @@ class AgencyLogList(Control):
                 attr = 0
                 if idx == self.getSelectedIndex():
                     attr |= curses.A_STANDOUT
-                if idx in self.marked:
-                    attr |= ColorFormat.MARKING_ATTR_LIST[self.marked[idx]]
-                if self.highlight_predicate is not None:
-                    if self.highlight_predicate(ent):
-                        attr |= ColorFormat.MARKING_ATTR_LIST[0]
+                add = self.__get_line_highlight(idx)
+                if add is not None:
+                    attr |= add
 
-                if not self.app.snapshot == None and not self.app.log[0]["_key"] == ARANGO_LOG_ZERO:
+                if not self.app.snapshot is None and not self.app.log[0]["_key"] == ARANGO_LOG_ZERO:
                     if ent["_key"] < self.app.snapshot["_key"]:
                         attr |= curses.A_DIM
 
@@ -171,6 +177,31 @@ class AgencyLogList(Control):
                                         curses.A_BOLD | ColorFormat.CF_ERROR)
             else:
                 self.app.stdscr.addnstr(y, x, "".ljust(maxlen), maxlen, 0)
+
+    def __get_line_highlight(self, idx):
+        if idx in self.marked:
+            return ColorFormat.MARKING_ATTR_LIST[self.marked[idx]]
+
+        ent_string = json.dumps(self.app.log[idx])
+
+        colors = {
+            "r": ColorFormat.MARKING_ATTR_LIST[0],
+            "g": ColorFormat.MARKING_ATTR_LIST[1],
+            "b": ColorFormat.MARKING_ATTR_LIST[2],
+            "y": ColorFormat.MARKING_ATTR_LIST[3],
+            "c": ColorFormat.MARKING_ATTR_LIST[4],
+            "m": ColorFormat.MARKING_ATTR_LIST[5],
+        }
+
+        for color in colors:
+            # find the first color that matches
+            if color not in self.highlight_predicate:
+                continue
+            pred = self.highlight_predicate[color]
+            if pred(ent_string):
+                return colors[color]
+
+        return None
 
     def filter(self, predicate):
         # Make sure that the highlighted entry is the previously selected
@@ -231,7 +262,18 @@ class AgencyLogList(Control):
         self.filter(self.last_predicate)
 
     def highlight_entries(self, string):
-        self.highlight_predicate = lambda e: string in json.dumps(e)
+        color = "r"
+        assert len(string) > 0
+        if string[0] in ["r", "g", "b", "y", "c", "m"]:
+            if len(string) == 1:
+                color = string[0]
+                string = None
+            if len(string) > 2 and string[1] == " ":
+                color = string[0]
+                string = string[2:]
+
+        cmd = HighlightCommand(color, False, False, False, string)
+        self.execute_highlight_command(cmd)
 
     def input(self, c):
         if c == curses.KEY_UP:
@@ -262,12 +304,7 @@ class AgencyLogList(Control):
                     self.filterHistory.append(regexStr)
                 self.regexp(regexStr)
         elif c == ord('g') or c == ord('f'):
-            string = self.app.userStringLine(label="Global Search Expr", default=self.filterStr, prompt="> ",
-                                             history=self.filterHistory)
-            if not string == None:
-                if string:
-                    self.filterHistory.append(string)
-                self.grep(string)
+            self.run_filter_prompt()
         elif c == ord('r'):
             yesNo = self.app.userStringLine(label="Reset all filters", prompt="[Y/n] ")
             if yesNo == "Y" or yesNo == "y" or yesNo == "":
@@ -284,7 +321,19 @@ class AgencyLogList(Control):
             if string is not None:
                 self.highlight_entries(string)
         elif c == ord('H'):
-            self.highlight_predicate = None
+            yesNo = self.app.userStringLine(label="Reset all highlights", prompt="[Y/n] ")
+            if yesNo == "Y" or yesNo == "y" or yesNo == "":
+                self.highlight_predicate = dict()
+
+
+    def run_filter_prompt(self, string = None):
+        if string is None:
+            string = self.app.userStringLine(label="Global Search Expr", default=self.filterStr, prompt="> ",
+                                             history=self.filterHistory)
+        if not string == None:
+            if string:
+                self.filterHistory.append(string)
+            self.grep(string)
 
     # Returns the index of the selected log entry.
     #   This value is always with respect to the app.log array.
@@ -324,6 +373,67 @@ class AgencyLogList(Control):
         # get global index of first log entry
         startgidx = int(self.app.log[0]["_key"])
         self.selectClosest(idx - startgidx)
+
+    @staticmethod
+    def parse_highlight_command(cmd, argv):
+        try:
+            cmd = cmd.lower()
+            assert len(cmd) >= 2
+            assert cmd[0] == "h"
+            idx = 1
+
+            # parse color
+            color = None
+            if cmd[idx] in ["r", "g", "b", "y", "c", "m"]:
+                color = cmd[idx]
+                idx += 1
+
+            # parse clear
+            clear = False
+            if idx < len(cmd) and cmd[idx] == "c":
+                clear = True
+                idx += 1
+
+            # parse save
+            save = False
+            if  idx < len(cmd) and cmd[idx] == "s":
+                save = True
+                idx += 1
+
+            # parse regex
+            regex = False
+            if  idx < len(cmd) and cmd[idx] == "r":
+                regex = True
+                idx += 1
+
+            if idx != len(cmd):
+                raise RuntimeError("to many chars")
+
+            expr = None
+            if len(argv) > 0:
+                expr = argv[0]
+
+            return HighlightCommand(color, clear, save, regex, expr)
+
+        except Exception as e:
+            raise RuntimeError("Invalid highlight command, expected something that matches h[r|g|b|y|c|m]c?s?r? - " + str(e))
+
+    def execute_highlight_command(self, cmd : HighlightCommand):
+        if cmd.save or cmd.clear:
+            raise RuntimeException("save and clear not yet implemented")
+
+        if cmd.expr is None:
+            # delete that highlight
+            del self.highlight_predicate[cmd.color]
+        else:
+            # update
+            if cmd.regex:
+                pattern = re.compile(cmd.expr)
+                predicate = lambda x: pattern.search(x) is not None
+                self.highlight_predicate[cmd.color] = predicate
+            else:
+                self.highlight_predicate[cmd.color] = lambda x: cmd.expr in x
+
 
 
 class AgencyLogView(LineView):
@@ -849,10 +959,9 @@ class ArangoAgencyAnalyserApp(App):
         self.provider = provider
         self.refresh(updateSelection=True, refreshProvider=False)
 
-        if args.filter:
-            self.list.grep(args.filter)
-        if args.highlight:
-            self.list.highlight_entries(args.highlight)
+        if args.execute:
+            for cmd in args.execute:
+                self.execCmd(cmd.split())
 
     def serialize(self):
         return {
@@ -921,7 +1030,7 @@ class ArangoAgencyAnalyserApp(App):
             super().handleEvent(ev)
 
     def execCmd(self, argv):
-        cmd = argv[0]
+        cmd = argv[0].lower()
 
         if cmd == "quit" or cmd == "q":
             self.stop = True
@@ -982,6 +1091,12 @@ class ArangoAgencyAnalyserApp(App):
             self.view.update_format_string(what)
             self.view.load_annotations(flush=True)
             self.view.update()
+        elif cmd == "filter":
+            self.list.run_filter_prompt(argv[1])
+        elif cmd[0] == "h":
+            # highlight command
+            cmd = AgencyLogList.parse_highlight_command(cmd, argv[1:])
+            self.list.execute_highlight_command(cmd)
         else:
             super().execCmd(argv)
 
@@ -1142,8 +1257,8 @@ def main(stdscr, provider, args):
     ColorFormat.MARKING_ATTR_LIST = [
         ColorPairs.getPair(curses.COLOR_WHITE, curses.COLOR_RED),
         ColorPairs.getPair(curses.COLOR_WHITE, curses.COLOR_GREEN),
-        ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_YELLOW),
         ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_BLUE),
+        ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_YELLOW),
         ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_MAGENTA),
         ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_CYAN),
     ]
@@ -1166,8 +1281,7 @@ if __name__ == '__main__':
         parser.add_argument("-u", "--userpass", help="use username and password instead of jwt", action="store_true")
         parser.add_argument("--live", help="automatically receive updates (experimental)", action="store_true")
         parser.add_argument("--follow", help="start with follow mode on", action="store_true")
-        parser.add_argument("-f", "--filter", help="set initial filter condition", type=str)
-        parser.add_argument("-H", "--highlight", help="set initial highlight condition", type=str)
+        parser.add_argument('-e', '--execute', action='append', help="execute this command during startup")
         args = parser.parse_args()
 
         o = urlparse(args.log)
