@@ -717,6 +717,13 @@ class App:
                             user = hint[0]
                             hints = list(hint[1])
                             cursorIndex = len(user)
+                elif c == 27:
+                    # Looking for ESC
+                    self.stdscr.nodelay(True)
+                    c = self.stdscr.getch()
+                    self.stdscr.nodelay(False)
+                    if c == curses.ERR:
+                        return ""
                 elif not curses.has_key(c):
                     user = user[:cursorIndex] + chr(c) + user[cursorIndex:]
                     cursorIndex += 1
