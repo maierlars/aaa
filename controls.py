@@ -2,6 +2,7 @@ import curses, curses.ascii
 import textwrap
 import json, time
 from bisect import bisect_left
+from history import History, CmdHistory
 import threading
 import queue
 
@@ -269,7 +270,7 @@ class LineView(Control):
         self.highlight = None
         self.findStr = None
         self.findList = []
-        self.findHistory = []
+        self.findHistory = History()
 
     def serialize(self):
         return {
@@ -448,6 +449,7 @@ class App:
 
         self.debug = False
         self.focus = None
+        self.history = CmdHistory()
         self.layoutWindow()
 
     def loadLogFromFile(self, filename):
@@ -486,10 +488,10 @@ class App:
         if c == curses.KEY_RESIZE:
             self.resize()
         elif c == ord(':'):
-            cmdline = self.userStringLine(prompt=":").split()
-
+            cmdline = self.userStringLine(prompt=":", history=self.history)
             if len(cmdline) > 0:
-                self.execCmd(cmdline)
+                self.history.append(cmdline)
+                self.execCmd(cmdline.split())
         else:
             if not self.focus == None:
                 self.focus.input(c)
@@ -631,10 +633,11 @@ class App:
     #   possible completions or a string containing the completed text.
     #   Finally it can return a tuple, the first being the new string,
     #   the second the auto complete list.
-    def userStringLine(self, label=None, complete=None, default=None, prompt="> ", history=[]):
+    def userStringLine(self, label=None, complete=None, default=None, prompt="> ", history=None):
         user = default if not default == None else ""
         hints = list()
-        historyIdx = 0
+        history = history or History()
+        history.reset()
 
         cursorIndex = len(user)
         userDisplayIndex = 0
@@ -725,19 +728,13 @@ class App:
                 elif c == curses.KEY_END:
                     cursorIndex = len(user)
                 elif c == curses.KEY_UP:
-                    historyIdx = max(historyIdx - 1, -len(history))
-                    if not historyIdx == 0:
-                        user = history[historyIdx]
+                    user = history.up()
+                    if user:
                         cursorIndex = len(user)
-                    else:
-                        user = ""
                 elif c == curses.KEY_DOWN:
-                    historyIdx = min(historyIdx + 1, 0)
-                    if not historyIdx == 0:
-                        user = history[historyIdx]
+                    user = history.down()
+                    if user:
                         cursorIndex = len(user)
-                    else:
-                        user = ""
                 elif c == ord('\t'):
                     # tabulator, time for auto complete
                     if not complete == None:
@@ -752,6 +749,13 @@ class App:
                             user = hint[0]
                             hints = list(hint[1])
                             cursorIndex = len(user)
+                elif c == 27:
+                    # Looking for ESC
+                    self.stdscr.nodelay(True)
+                    c = self.stdscr.getch()
+                    self.stdscr.nodelay(False)
+                    if c == curses.ERR:
+                        return ""
                 elif not curses.has_key(c):
                     user = user[:cursorIndex] + chr(c) + user[cursorIndex:]
                     cursorIndex += 1
