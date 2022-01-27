@@ -22,12 +22,14 @@ ARANGO_LOG_ZERO = "00000000000000000000"
 
 
 class HighlightCommand:
-    def __init__(self, color, clear, save, regex, expr):
+    def __init__(self, color, clear, save, regex, expr, only_path):
         self.color = color
         self.clear = clear
         self.save = save
         self.regex = regex
         self.expr = expr
+        self.only_path = only_path
+
 
 class AgencyLogList(Control):
     FILTER_NONE = 0
@@ -157,12 +159,15 @@ class AgencyLogList(Control):
             if not idx == None:
                 ent = self.app.log[idx]
 
+                is_selected = idx == self.getSelectedIndex()
+
                 text = " ".join(x for x in ent["request"])
-                msg = self.formatString.format(**ent, urls=text, i=idx).ljust(self.rect.width)
+                prefix = ">" if is_selected else " "
+                msg = prefix + self.formatString.format(**ent, urls=text, i=idx).ljust(self.rect.width)
 
                 attr = 0
-                if idx == self.getSelectedIndex():
-                    attr |= curses.A_STANDOUT
+                if is_selected:
+                    attr |= curses.A_STANDOUT | curses.A_UNDERLINE
                 add = self.__get_line_highlight(idx)
                 if add is not None:
                     attr |= add
@@ -183,6 +188,7 @@ class AgencyLogList(Control):
             return ColorFormat.MARKING_ATTR_LIST[self.marked[idx]]
 
         ent_string = json.dumps(self.app.log[idx])
+        ent_paths = " ".join(x for x in self.app.log[idx]["request"])
 
         colors = {
             "r": ColorFormat.MARKING_ATTR_LIST[0],
@@ -198,7 +204,7 @@ class AgencyLogList(Control):
             if color not in self.highlight_predicate:
                 continue
             pred = self.highlight_predicate[color]
-            if pred(ent_string):
+            if pred(ent_string, ent_paths):
                 return colors[color]
 
         return None
@@ -325,8 +331,7 @@ class AgencyLogList(Control):
             if yesNo == "Y" or yesNo == "y" or yesNo == "":
                 self.highlight_predicate = dict()
 
-
-    def run_filter_prompt(self, string = None):
+    def run_filter_prompt(self, string=None):
         if string is None:
             string = self.app.userStringLine(label="Global Search Expr", default=self.filterStr, prompt="> ",
                                              history=self.filterHistory)
@@ -396,14 +401,19 @@ class AgencyLogList(Control):
 
             # parse save
             save = False
-            if  idx < len(cmd) and cmd[idx] == "s":
+            if idx < len(cmd) and cmd[idx] == "s":
                 save = True
                 idx += 1
 
             # parse regex
             regex = False
-            if  idx < len(cmd) and cmd[idx] == "r":
+            if idx < len(cmd) and cmd[idx] == "r":
                 regex = True
+                idx += 1
+            # only consider path names
+            only_paths = False
+            if idx < len(cmd) and cmd[idx] == "p":
+                only_paths = True
                 idx += 1
 
             if idx != len(cmd):
@@ -413,12 +423,13 @@ class AgencyLogList(Control):
             if len(argv) > 0:
                 expr = argv[0]
 
-            return HighlightCommand(color, clear, save, regex, expr)
+            return HighlightCommand(color, clear, save, regex, expr, only_paths)
 
         except Exception as e:
-            raise RuntimeError("Invalid highlight command, expected something that matches h[r|g|b|y|c|m]c?s?r? - " + str(e))
+            raise RuntimeError(
+                "Invalid highlight command, expected something that matches h[r|g|b|y|c|m]c?s?r?p? - " + str(e))
 
-    def execute_highlight_command(self, cmd : HighlightCommand):
+    def execute_highlight_command(self, cmd: HighlightCommand):
         if cmd.save or cmd.clear:
             raise RuntimeException("save and clear not yet implemented")
 
@@ -429,11 +440,16 @@ class AgencyLogList(Control):
             # update
             if cmd.regex:
                 pattern = re.compile(cmd.expr)
-                predicate = lambda x: pattern.search(x) is not None
-                self.highlight_predicate[cmd.color] = predicate
+                find_predicate = lambda x: pattern.search(x) is not None
             else:
-                self.highlight_predicate[cmd.color] = lambda x: cmd.expr in x
+                find_predicate = lambda x: cmd.expr in x
 
+            if cmd.only_path:
+                select_predicate = lambda json, paths: paths
+            else:
+                select_predicate = lambda json, paths: json
+
+            self.highlight_predicate[cmd.color] = lambda json, paths: find_predicate(select_predicate(json, paths))
 
 
 class AgencyLogView(LineView):
