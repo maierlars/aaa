@@ -278,7 +278,7 @@ class AgencyLogList(Control):
                 color = string[0]
                 string = string[2:]
 
-        cmd = HighlightCommand(color, False, False, False, string)
+        cmd = HighlightCommand(color, False, False, False, string, False)
         self.execute_highlight_command(cmd)
 
     def input(self, c):
@@ -324,7 +324,7 @@ class AgencyLogList(Control):
         elif c == ord('h'):
             string = self.app.userStringLine(label="Highlight Search Expr", prompt="> ", default=self.highlight_string,
                                              history=self.highlight_history)
-            if string is not None:
+            if string is not None and len(string) > 0:
                 self.highlight_entries(string)
         elif c == ord('H'):
             yesNo = self.app.userStringLine(label="Reset all highlights", prompt="[Y/n] ")
