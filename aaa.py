@@ -17,6 +17,7 @@ import agency
 import trie
 from controls import *
 from client import *
+from history import History
 
 ARANGO_LOG_ZERO = "00000000000000000000"
 
