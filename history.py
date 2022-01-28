@@ -23,6 +23,14 @@ class History:
             return self._history[self._idx]
         return ""
 
+    @property
+    def history(self):
+        return self._history
+
+    @history.setter
+    def history(self, value):
+        self._history = value
+
 
 class CmdHistory(History):
     def __init__(self):
