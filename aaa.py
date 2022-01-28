@@ -45,14 +45,14 @@ class AgencyLogList(Control):
         # list contains all displayed log indexes
         self.list = None
         self.filterType = AgencyLogList.FILTER_NONE
-        self.filterHistory = []
+        self.filterHistory = History()
         self.last_predicate = None
         self.formatString = "[{timestamp}|{term}] {_key} {urls}"
         self.marked = dict()
         self.follow = args.follow
         self.highlight_predicate = dict()
         self.highlight_string = None
-        self.highlight_history = []
+        self.highlight_history = History()
 
     def title(self):
         return "Agency Log"
@@ -63,7 +63,7 @@ class AgencyLogList(Control):
             'highlight': self.highlight,
             'filterStr': self.filterStr,
             'filterType': self.filterType,
-            'filterHistory': self.filterHistory,
+            'filterHistory': self.filterHistory.history,
             'formatString': self.formatString,
             'marked': copy.deepcopy(self.marked)
         }
@@ -73,7 +73,7 @@ class AgencyLogList(Control):
         self.highlight = state['highlight']
         self.filterStr = state['filterStr']
         self.filterType = state['filterType']
-        self.filterHistory = state['filterHistory']
+        self.filterHistory.history = state['filterHistory']
         self.formatString = state['formatString']
         self.marked = copy.deepcopy(state['marked'])
         self.__rebuildFilterList()
@@ -674,7 +674,7 @@ class AgencyStoreView(LineView):
         super().__init__(app, rect)
         self.store = app.storeProvider
         self.path = []
-        self.pathHistory = []
+        self.pathHistory = History()
         self.annotations = dict()
         self.annotationCache = StoreCache(64)
         self.annotationsTrie = None
@@ -690,12 +690,12 @@ class AgencyStoreView(LineView):
     def serialize(self):
         return {
             'path': self.path,
-            'pathHistory': self.pathHistory
+            'pathHistory': self.pathHistory.history
         }
 
     def restore(self, state):
         self.path = state['path']
-        self.pathHistory = state['pathHistory']
+        self.pathHistory.history = state['pathHistory']
         self.lastIdx = None
 
     def layout(self, rect):
