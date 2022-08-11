@@ -23,7 +23,7 @@ def wait_for_agency_endpoint():
 
         for pid in new:
             p = psutil.Process(pid)
-            if p.name() == "arangod":
+            if p.name() == "arangod" or p.name() == "arangod.exe":
                 cmdline = p.cmdline()
                 if get_cmdline_value(cmdline, "--agency.activate") == "true":
                     return get_cmdline_value(cmdline, "--agency.my-address")
@@ -35,7 +35,7 @@ def wait_for_leader(endpoint):
             response = requests.get(f"{endpoint}/_api/agency/config")
             if response.status_code == 200:
                 config = response.json()
-                if 'leaderId' in config:
+                if config.get('leaderId'):
                     return config['configuration']['pool'][config['leaderId']]
                 else:
                     print("leader not yet available", file=sys.stderr)
@@ -68,4 +68,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    main()
