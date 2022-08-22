@@ -432,7 +432,7 @@ class AgencyLogList(Control):
 
     def execute_highlight_command(self, cmd: HighlightCommand):
         if cmd.save or cmd.clear:
-            raise RuntimeException("save and clear not yet implemented")
+            raise RuntimeError("save and clear not yet implemented")
 
         if cmd.expr is None:
             # delete that highlight

@@ -500,11 +500,20 @@ class App:
         curses.update_lines_cols()
         self.layout()
 
+    def wait_for_stdin(self):
+        import platform
+        if platform.system() == "Windows":
+            import win32file, win32event, win32api
+            win32file.FlushFileBuffers(win32api.STD_INPUT_HANDLE)
+            win32event.WaitForSingleObject(win32api.STD_INPUT_HANDLE, win32event.INFINITE)
+        else:
+            import select, sys
+            select.select([sys.stdin], [], [])
+
     def read_input(self):
         try:
-            import select, sys
             while not self.stop:
-                select.select([sys.stdin], [], [])
+                self.wait_for_stdin()
                 self.wait_event.clear()
                 self.input_queue.put(InputEvent(0))
                 self.wait_event.wait()
