@@ -18,6 +18,9 @@ from client import *
 
 ARANGO_LOG_ZERO = "00000000000000000000"
 
+def format_ms_timestamp(ms):
+    dt = datetime.datetime.fromtimestamp(ms/1000.0)
+    return dt.isoformat(timespec='milliseconds') + "Z"
 
 class AgencyLogList(Control):
 
@@ -37,7 +40,7 @@ class AgencyLogList(Control):
         self.list = None
         self.filterType = AgencyLogList.FILTER_NONE
         self.filterHistory = []
-        self.formatString = "[{timestamp}|{term}] {_key} {urls}"
+        self.formatString = "{ts} [{term}|{_key}] {urls}"
         self.marked = dict()
 
     def title(self):
@@ -143,7 +146,8 @@ class AgencyLogList(Control):
                 ent = self.app.log[idx]
 
                 text = " ".join(x for x in ent["request"])
-                msg = self.formatString.format(**ent, urls=text, i = idx).ljust(self.rect.width)
+                ts = format_ms_timestamp(ent["epoch_millis"])
+                msg = self.formatString.format(**ent, urls=text, i = idx, ts = ts).ljust(self.rect.width)
 
                 attr = 0
                 if idx == self.getSelectedIndex():
@@ -320,7 +324,7 @@ class AgencyLogView(LineView):
             elif not self.idx == None and self.idx < len(self.app.log):
                 entry = self.app.log[self.idx]
 
-                fields = ["_key", "_rev", "term", "clientId", "timestamp", "request"]
+                fields = ["_key", "_rev", "term", "clientId", "timestamp", "epoch_millis", "request"]
 
                 json = dict()
                 for name in fields:
@@ -338,6 +342,11 @@ class AgencyLogView(LineView):
 
         self.lastIdx = self.idx
         super().update()
+
+    def getLineAnnotation(self, line):
+        if "epoch_millis" in line:
+            return format_ms_timestamp(int(line[line.find(":")+1: -1]))
+        return None
 
     def set(self, idx):
         self.idx = idx
@@ -691,6 +700,7 @@ class AgencyDiffView(PureLineView):
     def __init__(self, app, rect):
         super().__init__(app, rect)
         self.store = app.storeProvider
+        self.last_idx = None
 
     def layout(self, rect):
         self.store.rect = rect
@@ -718,6 +728,10 @@ class AgencyDiffView(PureLineView):
         if idx == None or idx == 0:
             return
 
+        if self.last_idx == idx:
+            super().update()
+            return
+
         oldStore = self.getStoreRef(idx-1)
         newStore = self.getStoreRef(idx)
 
@@ -734,6 +748,7 @@ class AgencyDiffView(PureLineView):
             diffLines = self.computeDiff(oldLines, newLines)
             lines.extend(diffLines)
         self.lines = lines
+        self.last_idx = idx
         super().update()
 
     @staticmethod
