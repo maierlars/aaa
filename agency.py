@@ -63,7 +63,7 @@ class AgencyStore:
         else:
             self.set(path, default_value)
 
-    def pop(self, path, value):
+    def pop(self, path):
         ref = self._ref(path)
         if isinstance(ref, list):
             ref.pop()
