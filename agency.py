@@ -38,7 +38,7 @@ class AgencyStore:
             key = path[-1]
             if key in ref:
                 if isinstance(ref[key], list):
-                    ref[key].insert(0, value)
+                    ref[key].append(value)
                 else:
                     ref[key] = [value]
             else:
@@ -68,7 +68,7 @@ class AgencyStore:
         if isinstance(ref, list):
             ref.pop()
 
-    def shift(self, path, value):
+    def shift(self, path):
         ref = self._ref(path)
         if isinstance(ref, list):
             ref.pop(0)
@@ -85,7 +85,7 @@ class AgencyStore:
             key = path[-1]
             if key in ref:
                 if isinstance(ref[key], list):
-                    ref[key].append(value)
+                    ref[key].insert(0, value)
                 else:
                     ref[key] = [value]
             else:
@@ -140,9 +140,9 @@ class AgencyStore:
 
     def executeOperation(self, path, op, value):
         if op == "shift":
-            self.shift(path, value)
+            self.shift(path)
         elif op == "prepend":
-            self.prepend(path, value)
+            self.prepend(path, value['new'])
         elif op == "increment":
             delta = value['step'] if 'step' in value else 1
             self.add(path, delta)
@@ -158,7 +158,7 @@ class AgencyStore:
         elif op == "push-queue":
             self.push_queue(path, value['new'], value['len'])
         elif op == "pop":
-            self.pop(path, value['new'])
+            self.pop(path)
 
         elif op == "read-lock":
             self.readLock(path, value['by'])
