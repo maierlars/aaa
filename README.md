@@ -50,6 +50,13 @@ again name is optional and if empty a prompt with autocomplete will open.
 You can use `0-9` keys as shortcuts to restore state `"0"-"9"`. To save the state
 use `ALT + "x"`.
 
+### Live mode
+
+You can make _aaa_ wait for a cluster to become available, then start following the agency live. 
+This is particularly useful during integration tests.  
+Before starting a test suite, run:  
+`python aaa.py --follow --live $(python wait-for-agency.py)` 
+
 # Annotations Format
 
 You can modify the annotations format. There are currently three topics:

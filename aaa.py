@@ -10,11 +10,14 @@ from time import sleep
 import argparse
 from urllib.parse import urlparse
 import bisect
+import threading
+import queue
 
 import agency
 import trie
 from controls import *
 from client import *
+from history import History
 
 ARANGO_LOG_ZERO = "00000000000000000000"
 
@@ -22,15 +25,22 @@ def format_ms_timestamp(ms):
     dt = datetime.datetime.fromtimestamp(ms/1000.0)
     return dt.isoformat(timespec='milliseconds') + "Z"
 
-class AgencyLogList(Control):
+class HighlightCommand:
+    def __init__(self, color, clear, save, regex, expr, only_path):
+        self.color = color
+        self.clear = clear
+        self.save = save
+        self.regex = regex
+        self.expr = expr
+        self.only_path = only_path
 
+
+class AgencyLogList(Control):
     FILTER_NONE = 0
     FILTER_GREP = 1
     FILTER_REGEX = 2
 
-
-
-    def __init__(self, app, rect):
+    def __init__(self, app, rect, args):
         super().__init__(app, rect)
         self.app = app
         self.top = 0
@@ -39,9 +49,14 @@ class AgencyLogList(Control):
         # list contains all displayed log indexes
         self.list = None
         self.filterType = AgencyLogList.FILTER_NONE
-        self.filterHistory = []
-        self.formatString = "{ts} [{term}|{_key}] {urls}"
+        self.filterHistory = History()
+        self.formatString = "[{timestamp}|{term}] {_key} {urls}"
+        self.last_predicate = None
         self.marked = dict()
+        self.follow = args.follow
+        self.highlight_predicate = dict()
+        self.highlight_string = None
+        self.highlight_history = History()
 
     def title(self):
         return "Agency Log"
@@ -52,7 +67,7 @@ class AgencyLogList(Control):
             'highlight': self.highlight,
             'filterStr': self.filterStr,
             'filterType': self.filterType,
-            'filterHistory': self.filterHistory,
+            'filterHistory': self.filterHistory.history,
             'formatString': self.formatString,
             'marked': copy.deepcopy(self.marked)
         }
@@ -62,7 +77,7 @@ class AgencyLogList(Control):
         self.highlight = state['highlight']
         self.filterStr = state['filterStr']
         self.filterType = state['filterType']
-        self.filterHistory = state['filterHistory']
+        self.filterHistory.history = state['filterHistory']
         self.formatString = state['formatString']
         self.marked = copy.deepcopy(state['marked'])
         self.__rebuildFilterList()
@@ -82,7 +97,7 @@ class AgencyLogList(Control):
 
     def __getIndexRelative(self, i):
         idx = self.top + i
-        if not self.list == None:
+        if self.list is not None:
             if idx >= len(self.list):
                 return None
             idx = self.list[idx]
@@ -101,7 +116,6 @@ class AgencyLogList(Control):
             return None
         return idx
 
-
     def __getListLen(self):
         if not self.list == None:
             return len(self.list)
@@ -111,6 +125,10 @@ class AgencyLogList(Control):
         # Update top
         maxPos = self.__getListLen() - 1
         maxTop = max(0, maxPos - self.rect.height + 1)
+
+        # update highlight if follow
+        if self.follow:
+            self.highlight = maxPos
 
         if not self.highlight == None:
             if self.highlight > maxPos:
@@ -145,25 +163,56 @@ class AgencyLogList(Control):
             if not idx == None:
                 ent = self.app.log[idx]
 
+                is_selected = idx == self.getSelectedIndex()
+
                 text = " ".join(x for x in ent["request"])
                 ts = format_ms_timestamp(ent["epoch_millis"])
-                msg = self.formatString.format(**ent, urls=text, i = idx, ts = ts).ljust(self.rect.width)
+                prefix = ">" if is_selected else " "
+                msg = prefix + self.formatString.format(**ent, urls=text, i=idx, ts = ts).ljust(self.rect.width)
 
                 attr = 0
-                if idx == self.getSelectedIndex():
-                    attr |= curses.A_STANDOUT
-                if idx in self.marked:
-                    attr |= ColorFormat.MARKING_ATTR_LIST[self.marked[idx]]
+                if is_selected:
+                    attr |= curses.A_STANDOUT | curses.A_UNDERLINE
+                add = self.__get_line_highlight(idx)
+                if add is not None:
+                    attr |= add
 
-                if not self.app.snapshot == None and not self.app.log[0]["_key"] == ARANGO_LOG_ZERO:
+                if not self.app.snapshot is None and not self.app.log[0]["_key"] == ARANGO_LOG_ZERO:
                     if ent["_key"] < self.app.snapshot["_key"]:
                         attr |= curses.A_DIM
 
                 self.app.stdscr.addnstr(y, x, msg.ljust(maxlen), maxlen, attr)
             elif i == 0:
-                self.app.stdscr.addnstr(y, x, "Nothing to display".ljust(maxlen), maxlen, curses.A_BOLD | ColorFormat.CF_ERROR)
+                self.app.stdscr.addnstr(y, x, "Nothing to display".ljust(maxlen), maxlen,
+                                        curses.A_BOLD | ColorFormat.CF_ERROR)
             else:
                 self.app.stdscr.addnstr(y, x, "".ljust(maxlen), maxlen, 0)
+
+    def __get_line_highlight(self, idx):
+        if idx in self.marked:
+            return ColorFormat.MARKING_ATTR_LIST[self.marked[idx]]
+
+        ent_string = json.dumps(self.app.log[idx])
+        ent_paths = " ".join(x for x in self.app.log[idx]["request"])
+
+        colors = {
+            "r": ColorFormat.MARKING_ATTR_LIST[0],
+            "g": ColorFormat.MARKING_ATTR_LIST[1],
+            "b": ColorFormat.MARKING_ATTR_LIST[2],
+            "y": ColorFormat.MARKING_ATTR_LIST[3],
+            "c": ColorFormat.MARKING_ATTR_LIST[4],
+            "m": ColorFormat.MARKING_ATTR_LIST[5],
+        }
+
+        for color in colors:
+            # find the first color that matches
+            if color not in self.highlight_predicate:
+                continue
+            pred = self.highlight_predicate[color]
+            if pred(ent_string, ent_paths):
+                return colors[color]
+
+        return None
 
     def filter(self, predicate):
         # Make sure that the highlighted entry is the previously selected
@@ -174,6 +223,7 @@ class AgencyLogList(Control):
 
         self.list = []
         self.highlight = 0
+        self.last_predicate = predicate
         for i, e in enumerate(self.app.log):
             match = predicate(e)
             if match:
@@ -207,45 +257,67 @@ class AgencyLogList(Control):
         self.filterType = AgencyLogList.FILTER_GREP
         self.filter(predicate)
 
-
     def reset(self):
         # get the current index to keep the selected entry
         self.highlight = self.getSelectedIndex()
-        if self.highlight == None:
+        if self.highlight is None:
             self.highlight = 0
         self.list = None
         self.filterStr = None
         self.filterType = AgencyLogList.FILTER_NONE
+        self.last_predicate = None
+
+    def filter_new_entries(self, new_entries):
+        if self.filterType == AgencyLogList.FILTER_NONE:
+            return
+        self.filter(self.last_predicate)
+
+    def highlight_entries(self, string):
+        color = "r"
+        assert len(string) > 0
+        if string[0] in ["r", "g", "b", "y", "c", "m"]:
+            if len(string) == 1:
+                color = string[0]
+                string = None
+            if len(string) > 2 and string[1] == " ":
+                color = string[0]
+                string = string[2:]
+
+        cmd = HighlightCommand(color, False, False, False, string, False)
+        self.execute_highlight_command(cmd)
 
     def input(self, c):
         if c == curses.KEY_UP:
+            self.follow = False
             self.highlight -= 1
         elif c == curses.KEY_DOWN:
+            self.follow = False
             self.highlight += 1
         elif c == curses.KEY_NPAGE:
+            self.follow = False
             self.highlight += self.rect.height
             self.top += self.rect.height
         elif c == curses.KEY_PPAGE:
+            self.follow = False
             self.highlight -= self.rect.height
             self.top -= self.rect.height
         elif c == curses.KEY_END:
+            self.follow = False
             self.highlight = self.__getListLen() - 1
         elif c == curses.KEY_HOME:
+            self.follow = False
             self.highlight = 0
         elif False:
-            regexStr = self.app.userStringLine(label = "Regular Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
+            regexStr = self.app.userStringLine(label="Regular Search Expr", default=self.filterStr, prompt="> ",
+                                               history=self.filterHistory)
             if not regexStr == None:
                 if regexStr:
                     self.filterHistory.append(regexStr)
                 self.regexp(regexStr)
         elif c == ord('g') or c == ord('f'):
-            string = self.app.userStringLine(label = "Global Search Expr", default = self.filterStr, prompt = "> ", history = self.filterHistory)
-            if not string == None:
-                if string:
-                    self.filterHistory.append(string)
-                self.grep(string)
+            self.run_filter_prompt()
         elif c == ord('r'):
-            yesNo = self.app.userStringLine(label = "Reset all filters", prompt = "[Y/n] ")
+            yesNo = self.app.userStringLine(label="Reset all filters", prompt="[Y/n] ")
             if yesNo == "Y" or yesNo == "y" or yesNo == "":
                 self.reset()
         elif c == ord('R'):
@@ -254,6 +326,24 @@ class AgencyLogList(Control):
             self.toggleMarkLine()
         elif c == ord('M'):
             self.deleteMarkLine()
+        elif c == ord('h'):
+            string = self.app.userStringLine(label="Highlight Search Expr", prompt="> ", default=self.highlight_string,
+                                             history=self.highlight_history)
+            if string is not None and len(string) > 0:
+                self.highlight_entries(string)
+        elif c == ord('H'):
+            yesNo = self.app.userStringLine(label="Reset all highlights", prompt="[Y/n] ")
+            if yesNo == "Y" or yesNo == "y" or yesNo == "":
+                self.highlight_predicate = dict()
+
+    def run_filter_prompt(self, string=None):
+        if string is None:
+            string = self.app.userStringLine(label="Global Search Expr", default=self.filterStr, prompt="> ",
+                                             history=self.filterHistory)
+        if not string == None:
+            if string:
+                self.filterHistory.append(string)
+            self.grep(string)
 
     # Returns the index of the selected log entry.
     #   This value is always with respect to the app.log array.
@@ -294,6 +384,79 @@ class AgencyLogList(Control):
         startgidx = int(self.app.log[0]["_key"])
         self.selectClosest(idx - startgidx)
 
+    @staticmethod
+    def parse_highlight_command(cmd, argv):
+        try:
+            cmd = cmd.lower()
+            assert len(cmd) >= 2
+            assert cmd[0] == "h"
+            idx = 1
+
+            # parse color
+            color = None
+            if cmd[idx] in ["r", "g", "b", "y", "c", "m"]:
+                color = cmd[idx]
+                idx += 1
+
+            # parse clear
+            clear = False
+            if idx < len(cmd) and cmd[idx] == "c":
+                clear = True
+                idx += 1
+
+            # parse save
+            save = False
+            if idx < len(cmd) and cmd[idx] == "s":
+                save = True
+                idx += 1
+
+            # parse regex
+            regex = False
+            if idx < len(cmd) and cmd[idx] == "r":
+                regex = True
+                idx += 1
+            # only consider path names
+            only_paths = False
+            if idx < len(cmd) and cmd[idx] == "p":
+                only_paths = True
+                idx += 1
+
+            if idx != len(cmd):
+                raise RuntimeError("to many chars")
+
+            expr = None
+            if len(argv) > 0:
+                expr = argv[0]
+
+            return HighlightCommand(color, clear, save, regex, expr, only_paths)
+
+        except Exception as e:
+            raise RuntimeError(
+                "Invalid highlight command, expected something that matches h[r|g|b|y|c|m]c?s?r?p? - " + str(e))
+
+    def execute_highlight_command(self, cmd: HighlightCommand):
+        if cmd.save or cmd.clear:
+            raise RuntimeError("save and clear not yet implemented")
+
+        if cmd.expr is None:
+            # delete that highlight
+            del self.highlight_predicate[cmd.color]
+        else:
+            # update
+            if cmd.regex:
+                pattern = re.compile(cmd.expr)
+                find_predicate = lambda x: pattern.search(x) is not None
+            else:
+                find_predicate = lambda x: cmd.expr in x
+
+            if cmd.only_path:
+                select_predicate = lambda json, paths: paths
+            else:
+                select_predicate = lambda json, paths: json
+
+            self.highlight_predicate[cmd.color] = lambda json, paths: find_predicate(select_predicate(json, paths))
+
+
 class AgencyLogView(LineView):
     def __init__(self, app, rect):
         super().__init__(app, rect)
@@ -318,7 +481,7 @@ class AgencyLogView(LineView):
     def update(self):
         self.idx = self.app.list.getSelectedIndex()
 
-        if not self.idx == self.lastIdx :
+        if not self.idx == self.lastIdx:
             if self.idx == None:
                 self.jsonLines(None)
             elif not self.idx == None and self.idx < len(self.app.log):
@@ -331,7 +494,7 @@ class AgencyLogView(LineView):
                     if name in entry:
                         json[name] = entry[name]
 
-                self.head = None #entry['_key']
+                self.head = None  # entry['_key']
 
                 loglist = self.app.list
                 if loglist.filterType == AgencyLogList.FILTER_GREP:
@@ -350,6 +513,7 @@ class AgencyLogView(LineView):
 
     def set(self, idx):
         self.idx = idx
+
 
 class StoreCache:
 
@@ -379,7 +543,7 @@ class StoreCache:
         i = bisect_left(self.indexes, idx)
         if i == 0:
             return None
-        return self.indexes[i-1]
+        return self.indexes[i - 1]
 
     def set(self, idx, store):
         self.refresh(idx)
@@ -392,6 +556,7 @@ class StoreCache:
             del self.cache[oldIdx]
         self.cache[idx] = store
         bisect.insort_left(self.indexes, idx)
+
 
 class StoreUpdateResult:
     OK = 0
@@ -457,26 +622,26 @@ class StoreProvider:
                 if not cache == None and not startidx == None:
                     if cache > startidx:
                         startidx = cache + 1
-                        self.app.showProgress (0.0, "Copy index {} from cache".format(cache), rect = self.rect)
+                        self.app.showProgress(0.0, "Copy index {} from cache".format(cache), rect=self.rect)
                         self.store = agency.AgencyStore.copyFrom(self.cache.get(cache))
                         self.lastWasCopy = True
                         doCopyLastSnapshot = False
 
                 if doCopyLastSnapshot:
-                    self.app.showProgress (0.0, "Copy from snapshot", rect = self.rect)
+                    self.app.showProgress(0.0, "Copy from snapshot", rect=self.rect)
                     self.store = agency.AgencyStore(snapshot["readDB"][0])
                 elif not self.lastWasCopy:
                     self.store = agency.AgencyStore.copyFrom(self.store)
 
                 lastProgress = time.process_time()
 
-                for i in range(startidx, idx+1):
+                for i in range(startidx, idx + 1):
                     now = time.process_time()
-                    #if log[idx]["_key"] >= snapshot["_key"]:
+                    # if log[idx]["_key"] >= snapshot["_key"]:
                     try:
                         self.store.applyLog(self.app.log[i])
                     except Exception as e:
-                        raise Exception("In log entry {idx}: {text}".format(idx = i, text = str(e)))
+                        raise Exception("In log entry {idx}: {text}".format(idx=i, text=str(e)))
                     storeIntermediate = i % 5000 == 0 and not self.cache.has(i)
 
                     if not storeIntermediate:
@@ -487,15 +652,18 @@ class StoreProvider:
                             storeIntermediate = didx % 1000 == 0
 
                     if storeIntermediate:
-                        self.app.showProgress ((i - startidx) / (idx+1-startidx), "Generating store {}/{} - writing to cache".format(i, idx+1), rect = self.rect)
+                        self.app.showProgress((i - startidx) / (idx + 1 - startidx),
+                                              "Generating store {}/{} - writing to cache".format(i, idx + 1),
+                                              rect=self.rect)
                         self.cache.set(i, agency.AgencyStore.copyFrom(self.store))
                     elif now - lastProgress > 0.1:
-                        self.app.showProgress ((i - startidx) / (idx+1-startidx), "Generating store {}/{}".format(i, idx+1), rect = self.rect)
+                        self.app.showProgress((i - startidx) / (idx + 1 - startidx),
+                                              "Generating store {}/{}".format(i, idx + 1), rect=self.rect)
                         lastProgress = now
 
-                self.app.showProgress (1.0, "Generating store done - writing to cache", rect = self.rect)
+                self.app.showProgress(1.0, "Generating store done - writing to cache", rect=self.rect)
                 self.cache.set(idx, agency.AgencyStore.copyFrom(self.store))
-                self.app.showProgress (1.0, "Dumping json", rect = self.rect)
+                self.app.showProgress(1.0, "Dumping json", rect=self.rect)
 
         self.lastIdx = idx
         return StoreUpdateResult.UPDATE_JSON if updateJson else \
@@ -516,7 +684,7 @@ class AgencyStoreView(LineView):
         super().__init__(app, rect)
         self.store = app.storeProvider
         self.path = []
-        self.pathHistory = []
+        self.pathHistory = History()
         self.annotations = dict()
         self.annotationCache = StoreCache(64)
         self.annotationsTrie = None
@@ -532,19 +700,19 @@ class AgencyStoreView(LineView):
     def serialize(self):
         return {
             'path': self.path,
-            'pathHistory': self.pathHistory
+            'pathHistory': self.pathHistory.history
         }
 
     def restore(self, state):
         self.path = state['path']
-        self.pathHistory = state['pathHistory']
+        self.pathHistory.history = state['pathHistory']
         self.lastIdx = None
 
     def layout(self, rect):
         self.store.rect = rect
         super().layout(rect)
 
-    def updateStore(self, updateJson = False):
+    def updateStore(self, updateJson=False):
         idx = self.app.list.getSelectedIndex()
         if idx == None:
             return
@@ -561,7 +729,6 @@ class AgencyStoreView(LineView):
             updateJson = True
         else:
             assert result == StoreUpdateResult.OK
-
 
         if updateJson:
             self.load_annotations()
@@ -580,7 +747,7 @@ class AgencyStoreView(LineView):
         if new_str is not None:
             self.annotations_format[what] = new_str
 
-    def load_annotations(self, flush = False):
+    def load_annotations(self, flush=False):
         def format_user_string(format_str, kvs):
             try:
                 return format_str.format(**kvs)
@@ -630,10 +797,11 @@ class AgencyStoreView(LineView):
 
     def input(self, c):
         if c == ord('p'):
-            pathstr = self.app.userStringLine(prompt = "> ", label = "Agency Path:", default=self.head, complete=self.completePath, history = self.pathHistory)
+            pathstr = self.app.userStringLine(prompt="> ", label="Agency Path:", default=self.head,
+                                              complete=self.completePath, history=self.pathHistory)
             self.path = agency.AgencyStore.parsePath(pathstr)
             self.pathHistory.append(pathstr)
-            self.updateStore(updateJson = True)
+            self.updateStore(updateJson=True)
         else:
             super().input(c)
 
@@ -653,7 +821,6 @@ class AgencyStoreView(LineView):
                 return i
 
         return maxlen
-
 
     def completePath(self, pathstr):
         if self.store == None:
@@ -695,6 +862,7 @@ class AgencyStoreView(LineView):
                 else:
                     return "/" + "/".join(path[:-1] + [keys[0]])
         return None
+
 
 class AgencyDiffView(PureLineView):
     def __init__(self, app, rect):
@@ -754,7 +922,8 @@ class AgencyDiffView(PureLineView):
     @staticmethod
     def computeDiff(old, new):
         def estimate(x, y):
-            return 0 #abs(len(old)-x+(len(new)-y))
+            return 0  # abs(len(old)-x+(len(new)-y))
+
         found = set()
         cred = ColorPairs.getPair(curses.COLOR_RED, curses.COLOR_BLACK)
         cgreen = ColorPairs.getPair(curses.COLOR_GREEN, curses.COLOR_BLACK)
@@ -762,24 +931,24 @@ class AgencyDiffView(PureLineView):
             queue = [(0, 0, 0, estimate(0, 0), [])]
             i = 0
             while i < 300:
-                #i += 1
+                # i += 1
                 queue.sort(key=lambda x: (x[2] + x[3], -x[0]))
                 x, y, cost, est, path = queue.pop(0)
                 if (x, y) in found:
                     continue
                 found.add((x, y))
-                #print(x, y, cost + est)
+                # print(x, y, cost + est)
                 if x == len(old) and y == len(new):
                     return path
                 if x != len(old) and y != len(new) and old[x] == new[y]:
-                    queue.append((x+1, y+1, cost, estimate(x+1, y+1), path + [" " + old[x]]))
+                    queue.append((x + 1, y + 1, cost, estimate(x + 1, y + 1), path + [" " + old[x]]))
                 else:
                     if x < len(old):
-                        new_est = estimate(x+1, y)
-                        queue.append((x+1, y, cost+1, new_est, path + [[(cred, "-" + old[x])]]))
+                        new_est = estimate(x + 1, y)
+                        queue.append((x + 1, y, cost + 1, new_est, path + [[(cred, "-" + old[x])]]))
                     if y < len(new):
-                        new_est = estimate(x, y+1)
-                        queue.append((x, y+1, cost+1, new_est, path + [[(cgreen, "+" + new[y])]]))
+                        new_est = estimate(x, y + 1)
+                        queue.append((x, y + 1, cost + 1, new_est, path + [[(cgreen, "+" + new[y])]]))
 
             raise RuntimeError(f"diff failed with {old, new=}")
 
@@ -791,25 +960,40 @@ class AgencyDiffView(PureLineView):
         return json.dumps(value, indent=4, separators=(',', ': '), sort_keys=True).splitlines()
 
 
+class NewLogEntriesEvent:
+    def __init__(self, log):
+        self.log = log
+
+
+class ExceptionInNetworkThread:
+    def __init__(self, msg):
+        self.msg = msg
+
+
 class ArangoAgencyAnalyserApp(App):
-    def __init__(self, stdscr, provider):
+    def __init__(self, stdscr, provider, args):
         super().__init__(stdscr)
         self.log = None
         self.snapshot = None
         self.firstValidLogIdx = None
+        self.args = args
 
         self.storeProvider = StoreProvider(self, Rect.zero())
-        self.list = AgencyLogList(self, Rect.zero())
+        self.list = AgencyLogList(self, Rect.zero(), args)
         self.view = AgencyStoreView(self, Rect.zero())
         self.diffView = AgencyDiffView(self, Rect.zero())
         self.logView = AgencyLogView(self, Rect.zero())
         self.switch = LayoutSwitch(Rect.zero(), [self.logView, self.view, self.diffView])
 
-        self.split = LayoutColumns(self, self.rect, [self.list, self.switch], [4,6])
+        self.split = LayoutColumns(self, self.rect, [self.list, self.switch], [4, 6])
         self.focus = self.split
 
         self.provider = provider
-        self.refresh(updateSelection = True, refreshProvider = False)
+        self.refresh(updateSelection=True, refreshProvider=False)
+
+        if args.execute:
+            for cmd in args.execute:
+                self.execCmd(cmd.split())
 
     def serialize(self):
         return {
@@ -819,17 +1003,15 @@ class ArangoAgencyAnalyserApp(App):
     def restore(self, state):
         self.split.restore(state['split'])
 
-    def refresh(self, updateSelection = False, refreshProvider = True):
+    def refresh(self, updateSelection=False, refreshProvider=True):
         if refreshProvider:
             self.provider.refresh()
             self.clearWindow()
         self.log = self.provider.log()
         self.snapshot = self.provider.snapshot()
         self.firstValidLogIdx = None
-
-        self.update()
-
-        msg = "Loaded {count} log entries, ranging from\n{first[timestamp]} ({first[_key]}) to {last[timestamp]} ({last[_key]}).".format(count = len(self.log), first = self.log[0], last = self.log[-1])
+        if self.args.live:
+            self.provider.start_live_view(int(self.log[-1]['_key']), self)
 
         if not self.snapshot == None and not self.log[0]["_key"] == ARANGO_LOG_ZERO:
             for i, e in enumerate(self.log):
@@ -840,10 +1022,6 @@ class ArangoAgencyAnalyserApp(App):
 
             if updateSelection:
                 self.list.selectClosest(self.firstValidLogIdx)
-
-            msg += "\nUsing snapshot {snapshot[_key]}.".format(snapshot = self.snapshot)
-
-        self.displayMsg(msg, curses.A_STANDOUT)
 
     def dumpJSON(self, filename):
         data = None
@@ -865,11 +1043,31 @@ class ArangoAgencyAnalyserApp(App):
         self.split.update()
         super().update()
 
+    def handleEvent(self, ev):
+        if isinstance(ev, NewLogEntriesEvent):
+            modified = []
+            for e in ev.log:
+                e2 = dict()
+                e2['request'] = e['query']
+                e2['term'] = '???'
+                e2['_key'] = str(e['index'])
+                e2['timestamp'] = '???'
+                modified.append(e2)
+
+            self.log.extend(modified)
+            self.list.filter_new_entries(modified)
+        elif isinstance(ev, ExceptionInNetworkThread):
+            self.displayMsg("Network thread: " + ev.msg, curses.A_STANDOUT)
+        else:
+            super().handleEvent(ev)
+
     def execCmd(self, argv):
-        cmd = argv[0]
+        cmd = argv[0].lower()
 
         if cmd == "quit" or cmd == "q":
             self.stop = True
+        elif cmd in ["f", "follow"]:
+            self.list.follow = True
         elif cmd == "debug":
             self.debug = True
         elif cmd == "goto":
@@ -907,7 +1105,7 @@ class ArangoAgencyAnalyserApp(App):
             dumpLogFile = argv[1] + ".log.json"
             dumpSnapshotFile = argv[1] + ".snapshot.json"
             if os.path.isfile(dumpLogFile) or os.path.isfile(dumpSnapshotFile):
-                yesNo = self.app.userStringLine(label = "Some file already exist. Continue?", prompt = "[Y/n] ")
+                yesNo = self.app.userStringLine(label="Some file already exist. Continue?", prompt="[Y/n] ")
                 if not (yesNo == "Y" or yesNo == "y" or yesNo == ""):
                     return
             self.dumpAll(dumpLogFile, dumpSnapshotFile)
@@ -925,6 +1123,12 @@ class ArangoAgencyAnalyserApp(App):
             self.view.update_format_string(what)
             self.view.load_annotations(flush=True)
             self.view.update()
+        elif cmd == "filter":
+            self.list.run_filter_prompt(argv[1])
+        elif cmd[0] == "h":
+            # highlight command
+            cmd = AgencyLogList.parse_highlight_command(cmd, argv[1:])
+            self.list.execute_highlight_command(cmd)
         else:
             super().execCmd(argv)
 
@@ -944,6 +1148,7 @@ class ArangoAgencyAnalyserApp(App):
         super().layout()
         self.split.layout(self.rect)
 
+
 class ArangoAgencyLogFileProvider:
 
     def __init__(self, logfile, snapshotFile):
@@ -956,6 +1161,9 @@ class ArangoAgencyLogFileProvider:
 
     def snapshot(self):
         return self._snapshot
+
+    def start_live_view(self, first_index, app):
+        pass
 
     def refresh(self):
         log = None
@@ -977,7 +1185,7 @@ class ArangoAgencyLogFileProvider:
 
             if not isinstance(log, list):
                 raise Exception("Expected log to be a list")
-            log.sort(key = lambda x : x["_key"])
+            log.sort(key=lambda x: x["_key"])
 
         if self.snapshotFile:
             if snapshot == None:
@@ -990,10 +1198,12 @@ class ArangoAgencyLogFileProvider:
         self._log = log
         self._snapshot = snapshot
 
+
 class ArangoAgencyLogEndpointProvider:
 
     def __init__(self, client):
         self.client = client
+        self.process = None
         self.refresh()
 
     def log(self):
@@ -1017,8 +1227,33 @@ class ArangoAgencyLogEndpointProvider:
             print("Querying for log")
             self._log = list(self.client.query("for l in log sort l._key return l"))
             print("Querying for snapshot")
-            snapshots = self.client.query("for s in compact filter s._key >= @first sort s._key limit 1 return s", first = self._log[0]["_key"])
+            snapshots = self.client.query("for s in compact filter s._key >= @first sort s._key limit 1 return s",
+                                          first=self._log[0]["_key"])
             self._snapshot = next(iter(snapshots), None)
+
+    def poll_entries(self, index, app):
+        try:
+            while True:
+                resp = self.client.agentPoll(index + 1)
+                log = resp['result']['log']
+                if isinstance(log, list) and len(log) > 0:
+                    app.queueEvent(NewLogEntriesEvent(log))
+                    index = log[-1]['index']
+        except Exception as e:
+            app.queueEvent(ExceptionInNetworkThread(str(e)))
+
+    def start_live_view(self, first_index, app):
+        if self.process is not None:
+            return
+
+        role = self.client.serverRole()
+        if role == "AGENT":
+            self.process = threading.Thread(target=self.poll_entries, args=(first_index, app))
+            self.process.start()
+
+    def stop_live_view(self):
+        pass
+
 
 class ColorPairs:
     CACHE = dict()
@@ -1032,18 +1267,19 @@ class ColorPairs:
         ColorPairs.CACHE[(fg, bg)] = cpair
         return cpair
 
-
     CP_RED_WHITE = 1
     CP_WHITE_RED = 2
 
-#1:red, 2:green, 3:yellow, 4:blue, 5:magenta, 6:cyan
+
+# 1:red, 2:green, 3:yellow, 4:blue, 5:magenta, 6:cyan
 
 class ColorFormat:
     CF_ERROR = None
 
     MARKING_ATTR_LIST = None
 
-def main(stdscr, provider):
+
+def main(stdscr, provider, args):
     stdscr.clear()
     curses.curs_set(0)
 
@@ -1053,14 +1289,20 @@ def main(stdscr, provider):
     ColorFormat.MARKING_ATTR_LIST = [
         ColorPairs.getPair(curses.COLOR_WHITE, curses.COLOR_RED),
         ColorPairs.getPair(curses.COLOR_WHITE, curses.COLOR_GREEN),
-        ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_YELLOW),
         ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_BLUE),
-        ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_MAGENTA),
+        ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_YELLOW),
         ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_CYAN),
+        ColorPairs.getPair(curses.COLOR_BLACK, curses.COLOR_MAGENTA),
     ]
 
-    app = ArangoAgencyAnalyserApp(stdscr, provider)
+    app = ArangoAgencyAnalyserApp(stdscr, provider, args)
     app.run()
+
+
+# A = ["0"]
+# B = ["A", "B", "C", "D", "A", "B", "C", "D", "A", "B", "C", "D"]
+# AgencyDiffView.computeDiff(A, B)
+# quit()
 
 if __name__ == '__main__':
     try:
@@ -1069,6 +1311,9 @@ if __name__ == '__main__':
         parser.add_argument('add', nargs='?', type=str, help="optional, snapshot file or jwt")
         parser.add_argument("-k", "--noverify", help="don't verify certs", action="store_true")
         parser.add_argument("-u", "--userpass", help="use username and password instead of jwt", action="store_true")
+        parser.add_argument("--live", help="automatically receive updates (experimental)", action="store_true")
+        parser.add_argument("--follow", help="start with follow mode on", action="store_true")
+        parser.add_argument('-e', '--execute', action='append', help="execute this command during startup")
         args = parser.parse_args()
 
         o = urlparse(args.log)
@@ -1105,6 +1350,7 @@ if __name__ == '__main__':
             provider = ArangoAgencyLogEndpointProvider(client)
 
         os.putenv("ESCDELAY", "0")  # Ugly hack to enabled escape key for direct use
-        curses.wrapper(main, provider)
+        curses.wrapper(main, provider, args)
+        os._exit(1)
     except Exception as e:
         raise e
