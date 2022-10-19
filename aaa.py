@@ -22,7 +22,7 @@ from history import History
 ARANGO_LOG_ZERO = "00000000000000000000"
 
 def format_ms_timestamp(ms):
-    dt = datetime.datetime.fromtimestamp(ms/1000.0)
+    dt = datetime.datetime.utcfromtimestamp(ms/1000.0)
     return dt.isoformat(timespec='milliseconds') + "Z"
 
 class HighlightCommand:
@@ -50,7 +50,7 @@ class AgencyLogList(Control):
         self.list = None
         self.filterType = AgencyLogList.FILTER_NONE
         self.filterHistory = History()
-        self.formatString = "[{timestamp}|{term}] {_key} {urls}"
+        self.formatString = "[{ts}|{term}] {_key} {urls}"
         self.last_predicate = None
         self.marked = dict()
         self.follow = args.follow
@@ -166,7 +166,10 @@ class AgencyLogList(Control):
                 is_selected = idx == self.getSelectedIndex()
 
                 text = " ".join(x for x in ent["request"])
-                ts = format_ms_timestamp(ent["epoch_millis"])
+                if "epoch_millis" in ent:
+                    ts = format_ms_timestamp(ent["epoch_millis"])
+                else:
+                    ts = ent["timestamp"]
                 prefix = ">" if is_selected else " "
                 msg = prefix + self.formatString.format(**ent, urls=text, i=idx, ts = ts).ljust(self.rect.width)
 
@@ -1240,7 +1243,7 @@ class ArangoAgencyLogEndpointProvider:
                     app.queueEvent(NewLogEntriesEvent(log))
                     index = log[-1]['index']
         except Exception as e:
-            app.queueEvent(ExceptionInNetworkThread(str(e)))
+            app.queueEvent(ExceptionInNetworkThread(str(e) + resp))
 
     def start_live_view(self, first_index, app):
         if self.process is not None:

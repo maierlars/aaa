@@ -554,6 +554,7 @@ class App:
             except KeyboardInterrupt:
                 pass
             except Exception as err:
+                raise
                 try:
                     self.displayMsg("Error: " + str(err))
                 except:
