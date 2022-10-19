@@ -1243,7 +1243,7 @@ class ArangoAgencyLogEndpointProvider:
                     app.queueEvent(NewLogEntriesEvent(log))
                     index = log[-1]['index']
         except Exception as e:
-            app.queueEvent(ExceptionInNetworkThread(str(e) + resp))
+            app.queueEvent(ExceptionInNetworkThread(str(e)))
 
     def start_live_view(self, first_index, app):
         if self.process is not None:
