@@ -1054,7 +1054,7 @@ class ArangoAgencyAnalyserApp(App):
                 e2['request'] = e['query']
                 e2['term'] = '???'
                 e2['_key'] = str(e['index'])
-                e2['timestamp'] = '???'
+                e2['timestamp'] = datetime.datetime.utcnow().isoformat(timespec='milliseconds') + "Z"
                 modified.append(e2)
 
             self.log.extend(modified)
