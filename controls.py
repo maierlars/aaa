@@ -722,7 +722,7 @@ class App:
                 elif c == curses.KEY_DC:
                     if not cursorIndex == len(user):
                         user = user[:cursorIndex] + user[cursorIndex + 1:]
-                elif c == curses.KEY_BACKSPACE or c == curses.ascii.DEL:
+                elif c == curses.KEY_BACKSPACE or c == curses.ascii.BS or c == curses.ascii.DEL:
                     if not cursorIndex == 0:
                         user = user[:cursorIndex - 1] + user[cursorIndex:]
                         cursorIndex -= 1
