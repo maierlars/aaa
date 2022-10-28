@@ -4,6 +4,7 @@ import json, time
 from bisect import bisect_left
 from history import History, CmdHistory
 import threading
+import platform
 import queue
 
 
@@ -415,7 +416,11 @@ class LineView(Control):
             if res is None:
                 res = [line]
             assert isinstance(annotation, str)
-            res.append((curses.A_ITALIC, " // {}".format(annotation)))
+            if platform.system() == "Darwin":
+                # For some reason, ncurses on Mac does not support A_ITALIC
+                res.append(" // {}".format(annotation))
+            else:
+                res.append((curses.A_ITALIC, " // {}".format(annotation)))
         return res
 
     def getLineAnnotation(self, line):
@@ -501,7 +506,6 @@ class App:
         self.layout()
 
     def wait_for_stdin(self):
-        import platform
         if platform.system() == "Windows":
             import win32file, win32event, win32api
             win32file.FlushFileBuffers(win32api.STD_INPUT_HANDLE)
@@ -722,7 +726,7 @@ class App:
                 elif c == curses.KEY_DC:
                     if not cursorIndex == len(user):
                         user = user[:cursorIndex] + user[cursorIndex + 1:]
-                elif c == curses.KEY_BACKSPACE or c == curses.ascii.DEL:
+                elif c == curses.KEY_BACKSPACE or c == curses.ascii.BS or c == curses.ascii.DEL:
                     if not cursorIndex == 0:
                         user = user[:cursorIndex - 1] + user[cursorIndex:]
                         cursorIndex -= 1
