@@ -416,9 +416,9 @@ class LineView(Control):
             if res is None:
                 res = [line]
             assert isinstance(annotation, str)
-            if platform.system() != "Darwin":
+            if platform.system() == "Darwin":
                 # For some reason, ncurses on Mac does not support A_ITALIC
-                res.append((" // {}".format(annotation)))
+                res.append(" // {}".format(annotation))
             else:
                 res.append((curses.A_ITALIC, " // {}".format(annotation)))
         return res
