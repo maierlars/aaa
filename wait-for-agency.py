@@ -14,7 +14,7 @@ def get_cmdline_value(cmdline, key):
 
 def wait_for_agency_endpoint():
     # get a list of all current processes
-    known = set(psutil.pids())
+    known = set()
 
     while True:
         time.sleep(0.5)
