@@ -693,8 +693,8 @@ class AgencyStoreView(LineView):
         self.annotationsTrie = None
         self.annotations_format = {
             "server": "{ShortName}, {Endpoint}, {Status}",
-            "collection": "Collection `{database}/{name}`",
-            "shard": "Shard of `{database}/{name}`"
+            "collection": "Collection `{database}/{name}`, grp={groupId}",
+            "shard": "Shard of `{database}/{name}`, grp={groupId}, sheaf={sheaf}, idx={shard_idx}"
         }
 
     def title(self):
@@ -753,7 +753,8 @@ class AgencyStoreView(LineView):
     def load_annotations(self, flush=False):
         def format_user_string(format_str, kvs):
             try:
-                return format_str.format(**kvs)
+                from collections import defaultdict
+                return format_str.format_map(defaultdict(str, **kvs))
             except Exception as ex:
                 return "<bad format string: {}>".format(repr(ex))
 
@@ -777,8 +778,27 @@ class AgencyStoreView(LineView):
                     format_dict = {"database": dbname, **data}
                     new_annotations[collection_id] = format_user_string(self.annotations_format["collection"],
                                                                         format_dict)
+
+                    shardsR2 = []
+                    if "shardsR2" in data:
+                        shardsR2 = data["shardsR2"]
+
+                    group = None
+                    if "groupId" in data:
+                        gid = data["groupId"]
+                        group = self.store._ref(["arango", "Plan", "CollectionGroups", dbname, str(gid)])
+                        assert group is not None
+                        
+
+
                     for shardId, servers in data["shards"].items():
-                        shard_format_dict = {**format_dict, "servers": servers, "shardId": shardId}
+                        idx = shardsR2.index(shardId) if shardId in shardsR2 else -1
+
+                        sheaf = -1
+                        if group is not None:
+                            sheaf = group["shardSheaves"][idx]["replicatedLog"]
+
+                        shard_format_dict = {**format_dict, "servers": servers, "shardId": shardId, "shard_idx": idx, "sheaf": sheaf}
                         new_annotations[shardId] = format_user_string(self.annotations_format["shard"],
                                                                       shard_format_dict)
 
@@ -1233,6 +1253,8 @@ class ArangoAgencyLogEndpointProvider:
             snapshots = self.client.query("for s in compact filter s._key >= @first sort s._key limit 1 return s",
                                           first=self._log[0]["_key"])
             self._snapshot = next(iter(snapshots), None)
+        else:
+            raise Exception("Unknown sever role " + role)
 
     def poll_entries(self, index, app):
         try:
