@@ -171,20 +171,26 @@ class AgencyLogList(Control):
                 else:
                     ts = ent["timestamp"]
                 prefix = ">" if is_selected else " "
-                msg = prefix + self.formatString.format(**ent, urls=text, i=idx, ts = ts).ljust(self.rect.width)
+                msg = prefix + self.formatString.format(**ent, urls=text, i=idx, ts = ts).ljust(maxlen)[0:maxlen]
 
                 attr = 0
                 if is_selected:
                     attr |= curses.A_STANDOUT | curses.A_UNDERLINE
-                add = self.__get_line_highlight(idx)
-                if add is not None:
-                    attr |= add
-
+                colors = self.__get_line_highlight(idx)
                 if not self.app.snapshot is None and not self.app.log[0]["_key"] == ARANGO_LOG_ZERO:
                     if ent["_key"] < self.app.snapshot["_key"]:
                         attr |= curses.A_DIM
+                if len(colors) == 0:
+                    self.app.stdscr.addnstr(y, x, msg, maxlen, attr)
+                else:
+                    chunk_size = len(msg)/len(colors)
+                    parts = [msg[int(chunk_size * i):int(chunk_size * i+chunk_size)] for i in range(0, len(colors))]
 
-                self.app.stdscr.addnstr(y, x, msg.ljust(maxlen), maxlen, attr)
+                    for idx, part in enumerate(parts):
+                        attr_part = attr | colors[idx]
+                        self.app.stdscr.addnstr(y, x, part, len(part), attr_part)
+                        x += len(part)
+
             elif i == 0:
                 self.app.stdscr.addnstr(y, x, "Nothing to display".ljust(maxlen), maxlen,
                                         curses.A_BOLD | ColorFormat.CF_ERROR)
@@ -193,7 +199,7 @@ class AgencyLogList(Control):
 
     def __get_line_highlight(self, idx):
         if idx in self.marked:
-            return ColorFormat.MARKING_ATTR_LIST[self.marked[idx]]
+            return [ColorFormat.MARKING_ATTR_LIST[self.marked[idx]]]
 
         ent_string = json.dumps(self.app.log[idx])
         ent_paths = " ".join(x for x in self.app.log[idx]["request"])
@@ -207,15 +213,17 @@ class AgencyLogList(Control):
             "m": ColorFormat.MARKING_ATTR_LIST[5],
         }
 
+        active = []
+
         for color in colors:
             # find the first color that matches
             if color not in self.highlight_predicate:
                 continue
             pred = self.highlight_predicate[color]
             if pred(ent_string, ent_paths):
-                return colors[color]
+                active.append(colors[color])
 
-        return None
+        return active
 
     def filter(self, predicate):
         # Make sure that the highlighted entry is the previously selected
