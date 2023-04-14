@@ -25,6 +25,19 @@ def format_ms_timestamp(ms):
     dt = datetime.datetime.utcfromtimestamp(ms/1000.0)
     return dt.isoformat(timespec='milliseconds') + "Z"
 
+def decode_rev(rev):
+    s = "-_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    n = 0
+    for j in range(0, len(rev)):
+        n = n * 64 + s.find(rev[j])
+
+    f = 1024 * 1024
+    return (n // f, n % f)
+
+def decode_rev_timestamp(ref):
+    ms, tick = decode_rev(ref)
+    return f"{format_ms_timestamp(ms)}@{tick}"
+
 class HighlightCommand:
     def __init__(self, color, clear, save, regex, expr, only_path):
         self.color = color
@@ -520,6 +533,9 @@ class AgencyLogView(LineView):
     def getLineAnnotation(self, line):
         if "epoch_millis" in line:
             return format_ms_timestamp(int(line[line.find(":")+1: -1]))
+        if "_rev" in line:
+            entry = self.app.log[self.idx]
+            return decode_rev_timestamp(entry['_rev'])
         return None
 
     def set(self, idx):
