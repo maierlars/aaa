@@ -30,6 +30,8 @@ class AgencyStore:
             if not isinstance(store, dict) or not x in store:
                 return
             store = store[x]
+        if not isinstance(store, dict):
+            return
         store.pop(path[-1], None)
 
     def push(self, path, value):
@@ -150,7 +152,7 @@ class AgencyStore:
             delta = value['step'] if 'step' in value else 1
             self.add(path, - delta)
         elif op == "delete" :
-                self.delete(path)
+            self.delete(path)
         elif op == "set":
             self.set(path, value['new'])
         elif op == "push":
@@ -215,9 +217,9 @@ class AgencyStore:
                 try:
                     self.executeOperation(path, op, value)
                 except KeyError as e:
-                    raise Exception("{path}: Missing field for operation `{op}`: {text}".format(path=normalizedPath, op=op, text=str(e)))
+                    raise Exception("{path}: Missing field for operation `{op}`: {text}".format(path=normalizedPath, op=op, text=repr(e)))
                 except Exception as e:
-                    raise Exception("{path}: Exception when executing operation `{op}`: {text}".format(path=normalizedPath, op=op, text=str(e)))
+                    raise Exception("{path}: Exception when executing operation `{op}`: {text}".format(path=normalizedPath, op=op, text=repr(e)))
 
 
 

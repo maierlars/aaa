@@ -665,10 +665,11 @@ class StoreProvider:
                 for i in range(startidx, idx + 1):
                     now = time.process_time()
                     # if log[idx]["_key"] >= snapshot["_key"]:
+                    ent = self.app.log[i]
                     try:
                         self.store.applyLog(self.app.log[i])
                     except Exception as e:
-                        raise Exception("In log entry {idx}: {text}".format(idx=i, text=str(e)))
+                        raise Exception("In log entry {idx}: {text} - {content}".format(idx=ent["_key"], text=repr(e), content=json.dumps(ent)))
                     storeIntermediate = i % 5000 == 0 and not self.cache.has(i)
 
                     if not storeIntermediate:
