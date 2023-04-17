@@ -1216,7 +1216,7 @@ class ArangoAgencyLogFileProvider:
         log = None
         snapshot = None
 
-        with open(self.logfile) as f:
+        with open(self.logfile, "r", encoding="utf-8") as f:
             print("Loading log from `{}`".format(self.logfile))
             log = json.load(f)
             if isinstance(log, dict):
@@ -1236,7 +1236,7 @@ class ArangoAgencyLogFileProvider:
 
         if self.snapshotFile:
             if snapshot == None:
-                with open(self.snapshotFile) as f:
+                with open(self.snapshotFile, "r", encoding="utf-8") as f:
                     print("Loading snapshot from `{}`".format(self.snapshotFile))
                     snapshot = json.load(f)
             else:
