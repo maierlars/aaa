@@ -140,6 +140,32 @@ class AgencyStore:
                 if entry == val:
                     ref[index] = new
 
+    def update(self, path, val, mergeObjects, keepNull):
+        ref = self.get(path)
+        if not isinstance(ref, dict):
+            ref = {}
+
+        def merge(under, over):
+            ret = copy.deepcopy(under)
+            for k, v in over.items():
+                if v is None:
+                    if keepNull:
+                        ret[k] = None
+                    elif k in ref:
+                        del ret[k]
+                elif isinstance(v, dict):
+                    if k in under and isinstance(under[k], dict) and mergeObjects:
+                        ret[k] = merge(ret[k], v)
+                    else:
+                        ret[k] = v
+                else:
+                    ret[k] = v
+            return ret
+
+        result = merge(ref, val)
+        self.set(path, result)
+
+
     def executeOperation(self, path, op, value):
         if op == "shift":
             self.shift(path)
@@ -177,6 +203,10 @@ class AgencyStore:
             self.replace(path, value['val'], value['new'])
         elif op == "unobserve" or op == "observe":
             pass
+        elif op == "update":
+            mergeObjects = value.get("mergeObjects", True)
+            keepNull = value.get("keepNull", False)
+            self.update(path, value['val'], mergeObjects, keepNull)
         else:
             raise Exception("Unknown operation")
 
