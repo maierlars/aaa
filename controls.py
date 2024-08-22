@@ -815,8 +815,9 @@ class App:
 
         donelen = int(maxlen * progress)
         string = msg.ljust(maxlen)
-
-        self.stdscr.addnstr(rect.height, rect.x, string, donelen, curses.A_STANDOUT)
-        self.stdscr.addnstr(rect.height, rect.x + donelen, string[donelen:], maxlen - donelen, 0)
+        if donelen > 0:
+          self.stdscr.addnstr(rect.height, rect.x, string, donelen, curses.A_STANDOUT)
+        if donelen < maxlen:
+          self.stdscr.addnstr(rect.height, rect.x + donelen, string[donelen:], maxlen - donelen, 0)
 
         self.stdscr.refresh()
